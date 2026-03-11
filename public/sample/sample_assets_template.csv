@@ -1,0 +1,6 @@
+name,amount,description,maxTenor,availableUnits,categoryId,image
+iPhone 15,999000,Latest iPhone model,24,20,312d0233-55bb-4193-89e3-001ddb911bcd,http://asdsas.com/image
+Samsung TV 55inch,850000,4K Smart TV,12,10,312d0233-55bb-4193-89e3-001ddb911bcd,http://asdsas.com/image
+HP Laptop,650000,Business laptop,18,15,312d0233-55bb-4193-89e3-001ddb911bcd,http://asdsas.com/image
+AirPods Pro,180000,Wireless earbuds,6,50,312d0233-55bb-4193-89e3-001ddb911bcd,http://asdsas.com/image
+Gaming Chair,120000,Ergonomic gaming chair,12,25,312d0233-55bb-4193-89e3-001ddb911bcd,http://asdsas.com/image
