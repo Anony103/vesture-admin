@@ -23,7 +23,7 @@ export class ManageAdminService extends GeneralAdminService {
       result: string;
       status: string;
       code: number;
-    }>(`${baseUrl}user/auth/admin/register`, payload, {
+    }>(`${baseUrl}api/user/auth/admin/register`, payload, {
       headers: {
         Authorization: `Bearer ${this._token}`,
       },
@@ -62,11 +62,11 @@ export class ManageAdminService extends GeneralAdminService {
 
     // Priority: date range > search term > default listing
     if (dateRange?.startDate && dateRange?.endDate) {
-      api = `${baseUrl}user/all-admins/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
+      api = `${baseUrl}api/user/all-admins/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
     } else if (searchTerm) {
-      api = `${baseUrl}user/all-admins/search/?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
+      api = `${baseUrl}api/user/all-admins/search/?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
     } else {
-      api = `${baseUrl}user/all-admins?page=${currentPage}&size=${pageSize}`;
+      api = `${baseUrl}api/user/all-admins?page=${currentPage}&size=${pageSize}`;
     }
 
     const response = await axios.get(api, {
@@ -83,7 +83,7 @@ export class ManageAdminService extends GeneralAdminService {
     isActive: boolean | undefined;
   }) {
     const response = await axios.post<ApiResponseType<string>>(
-      `${baseUrl}user/superadmin/status/update`,
+      `${baseUrl}api/user/superadmin/status/update`,
       payload,
       {
         headers: {

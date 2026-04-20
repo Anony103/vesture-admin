@@ -10,6 +10,7 @@ import {
   ViewSavingsPage,
   ChangePasswordPage,
   ForgotPasswordPage,
+  FinancePage,
 } from "./pages";
 import Admin from "./pages/admin";
 
@@ -146,6 +147,10 @@ function App() {
           ],
         },
    
+        {
+          path: "/finance",
+          element: <FinancePage />,
+        },
         {
           path: "/transactions",
           element: <Transactions />,

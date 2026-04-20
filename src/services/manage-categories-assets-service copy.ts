@@ -20,7 +20,7 @@ export class ManageAssetCategoryService extends GeneralAdminService {
       result: string;
       status: string;
       code: number;
-    }>(`${baseUrl}asset/admin/asset-category`, payload, {
+    }>(`${baseUrl}api/asset/admin/asset-category`, payload, {
       headers: {
         Authorization: `Bearer ${this._token}`,
       },
@@ -40,7 +40,7 @@ export class ManageAssetCategoryService extends GeneralAdminService {
       result: string;
       status: string;
       code: number;
-    }>(`${baseUrl}asset/admin/asset-sub-category`, payload, {
+    }>(`${baseUrl}api/asset/admin/asset-sub-category`, payload, {
       headers: {
         Authorization: `Bearer ${this._token}`,
       },
@@ -55,7 +55,7 @@ export class ManageAssetCategoryService extends GeneralAdminService {
       result: string;
       status: string;
       code: number;
-    }>(`${baseUrl}asset/admin/asset-category/delete/${id}`, {
+    }>(`${baseUrl}api/asset/admin/asset-category/delete/${id}`, {
       headers: {
         Authorization: `Bearer ${this._token}`,
       },
@@ -95,11 +95,11 @@ export class ManageAssetCategoryService extends GeneralAdminService {
 
     // Priority: date range > search term > default listing
     if (dateRange?.startDate && dateRange?.endDate) {
-      api = `${baseUrl}asset/admin/asset-category/search/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
+      api = `${baseUrl}api/asset/admin/asset-category/search/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
     } else if (searchTerm) {
-      api = `${baseUrl}asset/admin/asset-category/all/search?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
+      api = `${baseUrl}api/asset/admin/asset-category/all/search?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
     } else {
-      api = `${baseUrl}asset/admin/asset-category/all?page=${currentPage}&size=${pageSize}`;
+      api = `${baseUrl}api/asset/admin/asset-category/all?page=${currentPage}&size=${pageSize}`;
     }
 
     const response = await axios.get(api, {
@@ -113,7 +113,7 @@ export class ManageAssetCategoryService extends GeneralAdminService {
   }
   async getCategoriesDetails(id: string | undefined) {
     const response = await axios.get(
-      `${baseUrl}asset/admin/asset-category/${id}`,
+      `${baseUrl}api/asset/admin/asset-category/${id}`,
       {
         headers: {
           Authorization: `Bearer ${this._token}`,

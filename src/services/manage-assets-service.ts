@@ -25,7 +25,7 @@ export class ManageAssetService extends GeneralAdminService {
       result: string;
       status: string;
       code: number;
-    }>(`${baseUrl}asset/admin`, payload, {
+    }>(`${baseUrl}api/asset/admin`, payload, {
       headers: {
         Authorization: `Bearer ${this._token}`,
       },
@@ -53,7 +53,7 @@ export class ManageAssetService extends GeneralAdminService {
       result: string;
       status: string;
       code: number;
-    }>(`${baseUrl}asset/admin/update`, payload, {
+    }>(`${baseUrl}api/asset/admin/update`, payload, {
       headers: {
         Authorization: `Bearer ${this._token}`,
       },
@@ -69,7 +69,7 @@ export class ManageAssetService extends GeneralAdminService {
       status: string;
       code: number;
       // data : any
-    }>(`${baseUrl}asset/admin/bulk-upload`, data, {
+    }>(`${baseUrl}api/asset/admin/bulk-upload`, data, {
       headers: {
         Authorization: `Bearer ${this._token}`,
         "Content-Type": "multipart/form-data",
@@ -106,11 +106,11 @@ export class ManageAssetService extends GeneralAdminService {
 
     // Priority: date range > search term > default listing
     if (dateRange?.startDate && dateRange?.endDate) {
-      api = `${baseUrl}asset/admin/search/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
+      api = `${baseUrl}api/asset/admin/search/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
     } else if (searchTerm) {
-      api = `${baseUrl}asset/admin/all/search?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
+      api = `${baseUrl}api/asset/admin/all/search?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
     } else {
-      api = `${baseUrl}asset/admin/all?page=${currentPage}&size=${pageSize}`;
+      api = `${baseUrl}api/asset/admin/all?page=${currentPage}&size=${pageSize}`;
     }
 
     const response = await axios.get(api, {
@@ -124,7 +124,7 @@ export class ManageAssetService extends GeneralAdminService {
   }
 
   async getAssetDetails(id: string | undefined) {
-    const response = await axios.get(`${baseUrl}asset/admin/${id}`, {
+    const response = await axios.get(`${baseUrl}api/asset/admin/${id}`, {
       headers: {
         Authorization: `Bearer ${this._token}`,
       },
@@ -138,7 +138,7 @@ export class ManageAssetService extends GeneralAdminService {
       result: string;
       status: string;
       code: number;
-    }>(`${baseUrl}asset/admin/delete/${id}`, {
+    }>(`${baseUrl}api/asset/admin/delete/${id}`, {
       headers: {
         Authorization: `Bearer ${this._token}`,
       },

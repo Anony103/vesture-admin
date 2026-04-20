@@ -43,7 +43,7 @@ export class CreditEntryService extends GeneralAdminService {
       status: string;
       code: number;
       // data : any
-    }>(`${baseUrl}asset/admin/bulk-upload`, data, {
+    }>(`${baseUrl}api/asset/admin/bulk-upload`, data, {
       headers: {
         Authorization: `Bearer ${this._token}`,
         "Content-Type": "multipart/form-data",
@@ -81,11 +81,11 @@ export class CreditEntryService extends GeneralAdminService {
 
   // Priority: date range > search term > default listing
   if (dateRange?.startDate && dateRange?.endDate) {
-    api = `${baseUrl}savings/admin/credit-entry/list/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
+    api = `${baseUrl}api/savings/admin/credit-entry/list/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
   } else if (searchTerm) {
-    api = `${baseUrl}savings/admin/credit-entry/list/search/?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
+    api = `${baseUrl}api/savings/admin/credit-entry/list/search/?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
   } else {
-    api = `${baseUrl}savings/admin/credit-entry/list?page=${currentPage}&size=${pageSize}`;
+    api = `${baseUrl}api/savings/admin/credit-entry/list?page=${currentPage}&size=${pageSize}`;
   }
 
   const response = await axios.get(api, {

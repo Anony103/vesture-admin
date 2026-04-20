@@ -16,11 +16,12 @@ export const ALERT_TYPE_OPTIONS = {
   CREDIT: "CREDIT",
   DEBIT_AND_CREDIT: "CREDIT & DEBIT",
 };
-const environment = import.meta?.env?.VITE_APP_ENVIRONMENT ?? "";
-console.log(environment)
+const environment = import.meta?.env?.VITE_APP_ENVIRONMENT ?? "TEST";
+console.log("[PayRise Admin] Environment:", environment);
 const baseUrls: Record<string, string> = {
-  TEST: import.meta.env.VITE_APP_BASE_URL_TEST ?? "",
-  LIVE: import.meta.env.VITE_APP_BASE_URL_LIVE ?? "",
+  TEST: (import.meta.env.VITE_APP_BASE_URL_TEST ?? "http://localhost:8082").replace(/\/$/, "") + "/",
+  LIVE: (import.meta.env.VITE_APP_BASE_URL_LIVE ?? "https://stage-api.myvesture.co").replace(/\/$/, "") + "/",
+  development: (import.meta.env.VITE_APP_BASE_URL_STAGE ?? "https://stage-api.myvesture.co").replace(/\/$/, "") + "/",
 };
 
-export const baseUrl = baseUrls[environment];
+export const baseUrl = baseUrls[environment] || (import.meta.env.VITE_APP_BASE_URL_TEST || "http://localhost:8082").replace(/\/$/, "") + "/";

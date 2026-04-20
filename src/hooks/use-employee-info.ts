@@ -125,12 +125,16 @@ const useEmployeeInfo = () => {
   const handleFileUpload = async () => {
     setIsLoading(true);
     try {
+      // Validate file exists
+      if (!file) {
+        toast.error("Please select a file to upload");
+        setIsLoading(false);
+        return;
+      }
+
       // Create FormData for bulk upload
       const formData = new FormData();
-
-      // append the file if present
-
-      formData.append("file", file || ""); // 👈 key should match backend expectation
+      formData.append("file", file);
 
       // POST request
       const response = await employeeInfoService.createEmloyeeInfos(formData);
