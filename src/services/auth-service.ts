@@ -11,7 +11,7 @@ export class AuthService {
 
   async login(payload: { username: string; password: string }) {
     const response = await axios.post<LoginResponseType>(
-      `${baseUrl}user/auth/admin/login`,
+      `${baseUrl}api/user/auth/admin/login`,
       {
         ...payload,
       }
@@ -20,7 +20,7 @@ export class AuthService {
   }
   async changePassword(payload: { email: string }) {
     const response = await axios.post<LoginResponseType>(
-      `${baseUrl}user/auth/admin/forgot-password`,
+      `${baseUrl}api/user/auth/admin/forgot-password`,
       {
         ...payload,
       }
@@ -30,7 +30,7 @@ export class AuthService {
 
     async forgotPassword(payload: { newPassword: string; confirmPassword : string }) {
     const response = await axios.post<LoginResponseType>(
-      `${baseUrl}user/auth/admin/reset-password`,
+      `${baseUrl}api/user/auth/admin/reset-password`,
       {
         ...payload,
       }

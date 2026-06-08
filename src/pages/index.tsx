@@ -18,6 +18,7 @@ const CreateEmployeeInfoComp = lazy(() => import("./createEmployeeInfo"));
 const ViewSavings = lazy(() => import("./viewSavings"));
 const ChangePasswordComp = lazy(() => import("./changePassword"))
 const ForgotPasswordComp = lazy(() => import("./forgotPassword") )
+const FinanceComp = lazy(() => import("./finance"))
 
 
 
@@ -122,6 +123,14 @@ export const ViewSavingsPage = () => {
   return (
     <Suspense fallback={<PageLoader />}>
       <ViewSavings />
+    </Suspense>
+  );
+};
+
+export const FinancePage = () => {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <FinanceComp />
     </Suspense>
   );
 };

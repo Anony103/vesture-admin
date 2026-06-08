@@ -20,7 +20,7 @@ export class ManageRatesService extends GeneralAdminService {
       result: string;
       status: string;
       code: number;
-    }>(`${baseUrl}interest-rate/configure`, payload, {
+    }>(`${baseUrl}api/interest-rate/configure`, payload, {
       headers: {
         Authorization: `Bearer ${this._token}`,
       },
@@ -36,7 +36,7 @@ export class ManageRatesService extends GeneralAdminService {
       status: string;
       code: number;
       // data : any
-    }>(`${baseUrl}asset/admin/bulk-upload`, data, {
+    }>(`${baseUrl}api/asset/admin/bulk-upload`, data, {
       headers: {
         Authorization: `Bearer ${this._token}`,
         "Content-Type": "multipart/form-data",
@@ -52,8 +52,8 @@ export class ManageRatesService extends GeneralAdminService {
     searchTerm?: string
   ) {
     const api = searchTerm
-      ? `${baseUrl}interest-rate/search/date-range?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`
-      : `${baseUrl}interest-rate/all/paginated?page=${currentPage}&size=${pageSize}`;
+      ? `${baseUrl}api/interest-rate/search/date-range?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`
+      : `${baseUrl}api/interest-rate/all/paginated?page=${currentPage}&size=${pageSize}`;
 
     const response = await axios.get(api, {
       headers: {

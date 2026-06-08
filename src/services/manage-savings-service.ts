@@ -15,7 +15,7 @@ export class ManageSavingsService extends GeneralAdminService {
       result: string;
       status: string;
       code: number;
-    }>(`${baseUrl}user/auth/admin/register`, payload, {
+    }>(`${baseUrl}api/user/auth/admin/register`, payload, {
       headers: {
         Authorization: `Bearer ${this._token}`,
       },
@@ -63,11 +63,11 @@ export class ManageSavingsService extends GeneralAdminService {
 
     // Priority: date range > search term > default listing
     if (dateRange?.startDate && dateRange?.endDate) {
-      api = `${baseUrl}savings/admin/${typeOfSavings}/search/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
+      api = `${baseUrl}api/savings/admin/${typeOfSavings}/search/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
     } else if (searchTerm) {
-      api = `${baseUrl}savings/admin/${typeOfSavings}/search?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
+      api = `${baseUrl}api/savings/admin/${typeOfSavings}/search?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
     } else {
-      api = `${baseUrl}savings/admin/${typeOfSavings}?page=${currentPage}&size=${pageSize}`;
+      api = `${baseUrl}api/savings/admin/${typeOfSavings}?page=${currentPage}&size=${pageSize}`;
     }
 
     const response = await axios.get(api, {
@@ -83,7 +83,7 @@ export class ManageSavingsService extends GeneralAdminService {
   async getUserSavings(id ?: string) {
     // const { pageSize, currentPage, searchTerm, dateRange } = options || {};
 
-    const api = `${baseUrl}savings/admin/user-savings/${id}`;
+    const api = `${baseUrl}api/savings/admin/user-savings/${id}`;
 
     const response = await axios.get(api, {
       headers: {
@@ -92,6 +92,36 @@ export class ManageSavingsService extends GeneralAdminService {
     });
 
     console.log(response);
+    return response?.data;
+  }
+
+  async getRunningInvestments(page = 1, size = 20) {
+    const api = `${baseUrl}api/savings/admin/finance/running-investments?page=${page}&size=${size}`;
+    const response = await axios.get(api, {
+      headers: {
+        Authorization: `Bearer ${this._token}`,
+      },
+    });
+    return response?.data;
+  }
+
+  async getInterestPayments(page = 1, size = 20) {
+    const api = `${baseUrl}api/interest-rate/applications?page=${page}&size=${size}`;
+    const response = await axios.get(api, {
+      headers: {
+        Authorization: `Bearer ${this._token}`,
+      },
+    });
+    return response?.data;
+  }
+
+  async getInterestPaymentsByMonth(month: string) {
+    const api = `${baseUrl}api/interest-rate/applications/${month}`;
+    const response = await axios.get(api, {
+      headers: {
+        Authorization: `Bearer ${this._token}`,
+      },
+    });
     return response?.data;
   }
 

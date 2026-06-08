@@ -56,8 +56,8 @@ export class GeneralAdminService {
     };
 
     const api = search
-      ? `${baseUrl}user/all-users-by-status/search?keyword=${search}`
-      : `${baseUrl}user/all-users-by-status`;
+      ? `${baseUrl}api/user/all-users-by-status/search?keyword=${search}`
+      : `${baseUrl}api/user/all-users-by-status`;
 
     const response = await axios.post(
       // `${baseUrl}user/all-users-by-status/search?keyword=${search}`,
@@ -77,7 +77,7 @@ export class GeneralAdminService {
     status: string;
   }) {
     const response = await axios.post<ApiResponseType<string>>(
-      `${baseUrl}user/status/update`,
+      `${baseUrl}api/user/status/update`,
       payload,
       {
         headers: {
@@ -179,7 +179,7 @@ export class GeneralAdminService {
       status: string;
       code: number;
       message: string;
-    }>(`${baseUrl}user/admin/update-password`, payload, {
+    }>(`${baseUrl}api/user/admin/update-password`, payload, {
       headers: {
         Authorization: `Bearer ${this._token}`,
       },
@@ -196,7 +196,7 @@ export class GeneralAdminService {
       code: number;
       message: string;
       data : string
-    }>(`${baseUrl}admin/autosave/config`, payload, {
+    }>(`${baseUrl}api/admin/autosave/config`, payload, {
       headers: {
         Authorization: `Bearer ${this._token}`,
       },

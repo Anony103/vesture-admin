@@ -24,11 +24,11 @@ export class AuditLogService extends GeneralAdminService {
 
   // Priority: date range > search term > default listing
   if (dateRange?.startDate && dateRange?.endDate) {
-    api = `${baseUrl}user/audit-log/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
+    api = `${baseUrl}api/user/audit-log/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
   } else if (searchTerm) {
-    api = `${baseUrl}user/audit-log/search?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
+    api = `${baseUrl}api/user/audit-log/search?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
   } else {
-    api = `${baseUrl}user/audit-log?page=${currentPage}&size=${pageSize}`;
+    api = `${baseUrl}api/user/audit-log?page=${currentPage}&size=${pageSize}`;
   }
 
   const response = await axios.get(api, {
