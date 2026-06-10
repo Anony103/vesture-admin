@@ -20,6 +20,7 @@ const environment = import.meta?.env?.VITE_APP_ENVIRONMENT ?? "TEST";
 console.log("[PayRise Admin] Environment:", environment);
 const baseUrls: Record<string, string> = {
   TEST: (import.meta.env.VITE_APP_BASE_URL_TEST ?? "http://localhost:8082").replace(/\/$/, "") + "/",
+  STAGING: (import.meta.env.VITE_APP_BASE_URL_STAGE ?? "https://stage-api.myvesture.co").replace(/\/$/, "") + "/",
   LIVE: (import.meta.env.VITE_APP_BASE_URL_LIVE ?? "https://stage-api.myvesture.co").replace(/\/$/, "") + "/",
   development: (import.meta.env.VITE_APP_BASE_URL_STAGE ?? "https://stage-api.myvesture.co").replace(/\/$/, "") + "/",
 };
