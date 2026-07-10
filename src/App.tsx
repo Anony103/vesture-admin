@@ -11,6 +11,7 @@ import {
   ChangePasswordPage,
   ForgotPasswordPage,
   FinancePage,
+  LmsTransfersPage,
 } from "./pages";
 import Admin from "./pages/admin";
 
@@ -150,6 +151,10 @@ function App() {
         {
           path: "/finance",
           element: <FinancePage />,
+        },
+        {
+          path: "/lmsTransfers",
+          element: <LmsTransfersPage />,
         },
         {
           path: "/transactions",

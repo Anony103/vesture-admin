@@ -25,4 +25,8 @@ const baseUrls: Record<string, string> = {
   development: (import.meta.env.VITE_APP_BASE_URL_STAGE ?? "https://stage-api.myvesture.co").replace(/\/$/, "") + "/",
 };
 
-export const baseUrl = baseUrls[environment] || (import.meta.env.VITE_APP_BASE_URL_TEST || "http://localhost:8082").replace(/\/$/, "") + "/";
+const resolvedBaseUrl = baseUrls[environment] || (import.meta.env.VITE_APP_BASE_URL_TEST || "http://localhost:8082").replace(/\/$/, "") + "/";
+
+// In dev, use same-origin paths so the Vite proxy (vite.config.ts) forwards API
+// calls to the configured environment — avoids CORS on the staging server.
+export const baseUrl = import.meta.env.DEV ? "/" : resolvedBaseUrl;

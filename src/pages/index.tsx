@@ -19,6 +19,7 @@ const ViewSavings = lazy(() => import("./viewSavings"));
 const ChangePasswordComp = lazy(() => import("./changePassword"))
 const ForgotPasswordComp = lazy(() => import("./forgotPassword") )
 const FinanceComp = lazy(() => import("./finance"))
+const LmsTransfersComp = lazy(() => import("./lmsTransfers"))
 
 
 
@@ -131,6 +132,14 @@ export const FinancePage = () => {
   return (
     <Suspense fallback={<PageLoader />}>
       <FinanceComp />
+    </Suspense>
+  );
+};
+
+export const LmsTransfersPage = () => {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <LmsTransfersComp />
     </Suspense>
   );
 };

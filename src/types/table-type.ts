@@ -142,3 +142,62 @@ export type EmployeeRecord = {
   period: string; // Excel serial date
   uploadedOn: string; // ISO date
 };
+
+export type LmsRecordStatus = "PENDING" | "TREATED";
+export type LmsTransferStatus = "PENDING" | "SUCCESSFUL" | "FAILED";
+export type LmsPaymentProvider = "PROVIDUS" | "BANKONE";
+
+export interface LmsTransferInstruction {
+  id: string;
+  lmsReferenceId: string;
+  customerName: string;
+  amount: number;
+  providusBankCode: string | null;
+  bankoneBankCode: string | null;
+  bankName: string | null;
+  accountNumber: string;
+  loanAccountNumber: string | null;
+  bankOneCustomerId: string | null;
+  narration: string | null;
+  transactionReference: string | null;
+  providerUsed: LmsPaymentProvider | null;
+  status: LmsRecordStatus;
+  transferStatus: LmsTransferStatus;
+  failureReason: string | null;
+  webhookSent: boolean;
+  webhookSentAt: string | null;
+  webhookResponse: string | null;
+  treatedOn: string | null;
+  createdOn: string | null;
+  updatedOn: string | null;
+}
+
+// One row per provider; exactly one row is active at a time.
+export interface LmsTransferConfig {
+  id?: string;
+  provider: LmsPaymentProvider;
+  sourceAccount: string | null;
+  active: boolean;
+  createdOn?: string | null;
+  updatedOn?: string | null;
+}
+
+export interface LmsTransferConfigHistory {
+  id?: string;
+  provider: LmsPaymentProvider;
+  sourceAccount: string | null;
+  active: boolean;
+  changeDescription: string | null;
+  changedBy: string | null;
+  changedOn: string | null;
+}
+
+export interface LmsTransferReport {
+  from: string | null;
+  to: string | null;
+  totalTransfers: number;
+  successful: number;
+  failed: number;
+  byProvider: Record<string, number>;
+  transfers: LmsTransferInstruction[];
+}
