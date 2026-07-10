@@ -17,10 +17,9 @@ export class EmployeeInfosService extends GeneralAdminService {
       status: string;
       code: number;
       // data : any
-    }>(`${baseUrl}admin/staff-data/upload`, data, {
+    }>(`${baseUrl}api/admin/staff-data/upload`, data, {
       headers: {
         Authorization: `Bearer ${this._token}`,
-        "Content-Type": "multipart/form-data",
       },
     });
     console.log(response);
@@ -29,8 +28,8 @@ export class EmployeeInfosService extends GeneralAdminService {
   }
   // async getEmployeeInfos(pageSize: number , currentPage: number, search: string) {
   //      const api = search
-  //         ? `${baseUrl}admin/staff-data/search/?keyword=${search}&page=${currentPage}&size=${pageSize}`
-  //         : `${baseUrl}admin/staff-data/all?page=${currentPage}&size=${pageSize}`;
+  //         ? `${baseUrl}api/admin/staff-data/search/?keyword=${search}&page=${currentPage}&size=${pageSize}`
+  //         : `${baseUrl}api/admin/staff-data/all?page=${currentPage}&size=${pageSize}`;
 
   //   const response = await axios.get( api , {
   //     headers: {
@@ -54,11 +53,11 @@ export class EmployeeInfosService extends GeneralAdminService {
 
   // Priority: date range > search term > default listing
   if (dateRange?.startDate && dateRange?.endDate) {
-    api = `${baseUrl}admin/staff-data/search/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
+    api = `${baseUrl}api/admin/staff-data/search/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&page=${currentPage}&size=${pageSize}`;
   } else if (searchTerm) {
-    api = `${baseUrl}admin/staff-data/search/?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
+    api = `${baseUrl}api/admin/staff-data/search/?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`;
   } else {
-    api = `${baseUrl}admin/staff-data/all?page=${currentPage}&size=${pageSize}`;
+    api = `${baseUrl}api/admin/staff-data/all?page=${currentPage}&size=${pageSize}`;
   }
 
   const response = await axios.get(api, {

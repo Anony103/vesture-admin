@@ -101,6 +101,18 @@ export const Sidebar: React.FC<Props> = ({ open, handleToggleSidebar }) => {
       id: "9",
     },
     {
+      title: "Finance",
+      path: "/finance",
+      icon: <TransactionIcon />,
+      id: "13",
+    },
+    {
+      title: "LMS Transfers",
+      path: "/lmsTransfers",
+      icon: <TransactionIcon />,
+      id: "14",
+    },
+    {
       title: "Transaction History",
       path: "/transactions",
       icon: <TransactionIcon />,
