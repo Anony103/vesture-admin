@@ -7,7 +7,7 @@ The PayRise Admin application uses environment variables to configure the API en
 
 ### `VITE_APP_ENVIRONMENT`
 - **Type**: `string`
-- **Options**: `development`, `TEST`, `LIVE`
+- **Options**: `development`, `TEST`, `STAGING`, `LIVE`
 - **Description**: Determines which base URL to use for API requests
 - **Default**: `development`
 
@@ -21,11 +21,17 @@ The PayRise Admin application uses environment variables to configure the API en
 - **Description**: API endpoint for production environment
 - **Default**: `http://localhost:8082`
 
+### `VITE_APP_BASE_URL_STAGE`
+- **Type**: `string` (URL)
+- **Description**: API endpoint for staging environment
+- **Default**: `https://stage-api.myvesture.co`
+
 ## Files
 
 - **`.env`** - Your local environment configuration (not tracked in git)
 - **`.env.example`** - Template showing required variables (tracked in git)
 - **`.env.development`** - Development environment defaults
+- **`.env.staging`** - Staging environment defaults
 - **`.env.production`** - Production environment defaults
 
 ## Setup Instructions
@@ -58,6 +64,18 @@ npm run build
 ```
 This uses `.env.production` + `.env` overrides.
 
+**Staging Development**:
+```bash
+npm run dev:staging
+```
+This uses `.env.staging` + `.env` overrides.
+
+**Staging Build**:
+```bash
+npm run build:staging
+```
+This builds with `.env.staging` + `.env` overrides.
+
 ## How It Works
 
 1. Vite loads environment files in this order (later overwrites earlier):
@@ -71,6 +89,7 @@ This uses `.env.production` + `.env` overrides.
 
 The app determines which API URL to use based on `VITE_APP_ENVIRONMENT`:
 - Set to `TEST` or `LIVE` to match the key in the baseUrls object
+- Set to `STAGING` to use the staging API URL
 - Defaults to using TEST URL if environment doesn't match a key
 
 ## Adding New Variables
