@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
   const targets: Record<string, string> = {
     TEST: env.VITE_APP_BASE_URL_TEST ?? 'http://localhost:8082',
     STAGING: env.VITE_APP_BASE_URL_STAGE ?? 'https://stage-api.myvesture.co',
-    LIVE: env.VITE_APP_BASE_URL_LIVE ?? 'https://stage-api.myvesture.co',
+    LIVE: env.VITE_APP_BASE_URL_LIVE ?? 'https://api.myvesture.co',
     development: env.VITE_APP_BASE_URL_STAGE ?? 'https://stage-api.myvesture.co',
   };
   const target = targets[environment] ?? targets.TEST;
