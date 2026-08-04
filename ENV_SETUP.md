@@ -19,7 +19,7 @@ The PayRise Admin application uses environment variables to configure the API en
 ### `VITE_APP_BASE_URL_LIVE`
 - **Type**: `string` (URL)
 - **Description**: API endpoint for production environment
-- **Default**: `http://localhost:8082`
+- **Default**: `https://api.myvesture.co`
 
 ### `VITE_APP_BASE_URL_STAGE`
 - **Type**: `string` (URL)
@@ -47,7 +47,7 @@ Edit `.env` and set the appropriate values:
 ```env
 VITE_APP_ENVIRONMENT=development
 VITE_APP_BASE_URL_TEST=http://localhost:8082
-VITE_APP_BASE_URL_LIVE=https://api.payrise.com
+VITE_APP_BASE_URL_LIVE=https://api.myvesture.co
 ```
 
 ### 3. Running the Application

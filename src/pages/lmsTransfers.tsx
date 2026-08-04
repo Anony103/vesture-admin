@@ -150,6 +150,29 @@ const LmsTransfers = () => {
       },
     },
     {
+      accessorKey: "transferableAmount",
+      header: () => <span>Transferable Amount</span>,
+      cell: ({ row }) => {
+        const value = row.original.transferableAmount ?? row.original.amount;
+        return (
+          <span className="inline-block w-full">
+            ₦
+            {Number(value ?? 0).toLocaleString("en-NG", {
+              minimumFractionDigits: 2,
+            })}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "ippisNumber",
+      header: () => <span>IPPIS Number</span>,
+      cell: ({ getValue }) => {
+        const value = (getValue() as string) ?? "";
+        return <span className="inline-block">{value || "-"}</span>;
+      },
+    },
+    {
       accessorKey: "bankName",
       header: () => <span>Bank</span>,
     },
@@ -290,11 +313,16 @@ const LmsTransfers = () => {
     {
       accessorKey: "id",
       header: () => <span></span>,
-      cell: ({ row }) => {
+      cell: ({ row, table }) => {
         const record = row.original;
         const busy = actionLoadingId === record.id;
+        const pageRows = table.getRowModel().rows;
+        const rowPos = pageRows.findIndex((r) => r.id === row.id);
+        // The table wrapper is overflow-y-hidden, so menus on the bottom rows
+        // must open upward or they get clipped
+        const openUp = rowPos >= pageRows.length - 2;
         return (
-          <div className="dropdown dropdown-end">
+          <div className={`dropdown dropdown-end ${openUp ? "dropdown-top" : ""}`}>
             <div tabIndex={0} className="p-0 cursor-pointer">
               <ActionIcon />
             </div>
@@ -316,7 +344,7 @@ const LmsTransfers = () => {
                   {busy ? "Retrying..." : "Retry Transfer"}
                 </li>
               )}
-              {record.transferStatus === "SUCCESSFUL" && (
+              {record.status === "TREATED" && (
                 <li
                   className="py-2 pl-3 cursor-pointer hover:opacity-80"
                   onClick={() => !busy && handleResendWebhook(record.id)}
@@ -652,9 +680,28 @@ const LmsTransfers = () => {
                   value={selectedRecord.customerName}
                 />
                 <DetailRow
-                  label="Amount"
+                  label="Amount (Gross)"
                   value={`₦${Number(
                     selectedRecord.amount ?? 0
+                  ).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`}
+                />
+                <DetailRow
+                  label="Upfront Fees"
+                  value={
+                    selectedRecord.upfrontFees != null
+                      ? `₦${Number(selectedRecord.upfrontFees).toLocaleString(
+                          "en-NG",
+                          { minimumFractionDigits: 2 }
+                        )}`
+                      : "-"
+                  }
+                />
+                <DetailRow
+                  label="Transferable Amount"
+                  value={`₦${Number(
+                    selectedRecord.transferableAmount ??
+                      selectedRecord.amount ??
+                      0
                   ).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`}
                 />
                 <DetailRow label="Bank" value={selectedRecord.bankName} />
@@ -685,8 +732,20 @@ const LmsTransfers = () => {
                   value={selectedRecord.bankOneCustomerId}
                 />
                 <DetailRow
-                  label="Narration"
+                  label="IPPIS Number"
+                  value={selectedRecord.ippisNumber}
+                />
+                <DetailRow
+                  label="Narration (from LMS, not sent to bank)"
                   value={selectedRecord.narration}
+                />
+                <DetailRow
+                  label="Bank Narration (as sent)"
+                  value={
+                    selectedRecord.ippisNumber
+                      ? `${selectedRecord.ippisNumber} DOMINION LOAN Transfer ${selectedRecord.customerName}`
+                      : "-"
+                  }
                 />
                 <DetailRow
                   label="Transaction Reference"

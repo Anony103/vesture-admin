@@ -152,12 +152,15 @@ export interface LmsTransferInstruction {
   lmsReferenceId: string;
   customerName: string;
   amount: number;
+  upfrontFees: number | null;
+  transferableAmount: number | null;
   providusBankCode: string | null;
   bankoneBankCode: string | null;
   bankName: string | null;
   accountNumber: string;
   loanAccountNumber: string | null;
   bankOneCustomerId: string | null;
+  ippisNumber: string | null;
   narration: string | null;
   transactionReference: string | null;
   providerUsed: LmsPaymentProvider | null;
