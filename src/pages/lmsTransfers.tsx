@@ -199,7 +199,7 @@ const LmsTransfers = () => {
     },
     {
       accessorKey: "loanAccountNumber",
-      header: () => <span>Loan Account</span>,
+      header: () => <span>Loan Account ID</span>,
     },
     {
       accessorKey: "transactionReference",
@@ -724,7 +724,7 @@ const LmsTransfers = () => {
                   )}
                 />
                 <DetailRow
-                  label="Loan Account"
+                  label="Loan Account ID"
                   value={selectedRecord.loanAccountNumber}
                 />
                 <DetailRow
