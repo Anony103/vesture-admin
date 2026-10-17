@@ -170,11 +170,12 @@ export const Sidebar: React.FC<Props> = ({ open, handleToggleSidebar }) => {
         >
           <div className="flex justify-between items-center w-[100%]">
             <h1
-              className={`text-black origin-left font-semibold text-lg ${
+              className={`origin-left ${
                 open ? "scale-1" : "scale-0 lg:hidden"
               } duration-300`}
             >
-              PayRise
+              {/* dark lettering for the white sidebar */}
+              <img src="/vesture-logo-dark.png" alt="Vesture" className="h-7 w-auto" />
             </h1>
             <div>
               <HamburgerMenuIcon

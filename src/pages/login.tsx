@@ -74,7 +74,10 @@ const Login = () => {
      className="w-screen h-screen min-h-screen flex items-center justify-center"
     >
       <div className="text-white text-center flex flex-col gap-6 w-[100%] md:w-[26%]  rounded mx-auto py-6 ">
-        <h1 className="text-2xl font-medium">PayRise</h1>
+        <h1 className="flex justify-center">
+          {/* light lettering for the dark login background */}
+          <img src="/vesture-logo.png" alt="Vesture" className="h-10 w-auto" />
+        </h1>
         <div className="border text-white  bg-white bg-opacity-30 backdrop-blur-md px-1 py-6 rounded-lg shadow-lg h-[70%]">
           <div>
             <p className="text-lg font-semibold">Log In</p>
