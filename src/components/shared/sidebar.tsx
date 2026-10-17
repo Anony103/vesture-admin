@@ -118,12 +118,14 @@ export const Sidebar: React.FC<Props> = ({ open, handleToggleSidebar }) => {
       icon: <CustomersIcon />,
       id: "16",
     },
-    {
-      title: "Ledger",
-      path: "/ledger",
-      icon: <TransactionIcon />,
-      id: "15",
-    },
+    // Ledger is switched off for now. To bring it back, uncomment this item, the "/ledger" route and the
+    // LedgerPage import in App.tsx.
+    // {
+    //   title: "Ledger",
+    //   path: "/ledger",
+    //   icon: <TransactionIcon />,
+    //   id: "15",
+    // },
     {
       title: "Transaction History",
       path: "/transactions",

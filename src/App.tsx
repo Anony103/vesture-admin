@@ -24,7 +24,7 @@ import CreditEntry from "./pages/creditentry";
 import Transactions from "./pages/transactions";
 import AuditLogs from "./pages/auditLogs";
 import Settings from "./pages/settings";
-import LedgerPage from "./pages/ledger";
+// import LedgerPage from "./pages/ledger";   // Ledger is switched off for now
 import VeiwCategoriesPage from "./pages/viewcategories";
 import {
   MainLayout,
@@ -162,10 +162,11 @@ function App() {
           path: "/kyc",
           element: <KycPage />,
         },
-        {
-          path: "/ledger",
-          element: <LedgerPage />,
-        },
+        // Ledger is switched off for now.
+        // {
+        //   path: "/ledger",
+        //   element: <LedgerPage />,
+        // },
         {
           path: "/transactions",
           element: <Transactions />,
