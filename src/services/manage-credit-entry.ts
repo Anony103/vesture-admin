@@ -43,7 +43,7 @@ export class CreditEntryService extends GeneralAdminService {
       status: string;
       code: number;
       // data : any
-    }>(`${baseUrl}api/asset/admin/bulk-upload`, data, {
+    }>(`${baseUrl}api/savings/admin/credit-entry/upload`, data, {
       headers: {
         Authorization: `Bearer ${this._token}`,
         "Content-Type": "multipart/form-data",

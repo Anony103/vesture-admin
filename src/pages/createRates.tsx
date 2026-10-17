@@ -3,6 +3,7 @@ import Button from "../components/shared/button";
 import { Container } from "../components/shared/container";
 // import fileicon from "../assets/fileicon.svg";
 import { Input } from "@/components/ui/input";
+import { TENOR_PRODUCTS } from "@/schemas";
 import {
   Select,
   SelectContent,
@@ -129,6 +130,61 @@ const CreateRates = () => {
                     },
                   })}
                 /> */}
+
+                {/* Tenor: only Smart Lock and Target Savings have one */}
+                {TENOR_PRODUCTS.includes(watch("savingsType")) && (
+                  <div className="flex flex-col gap-1 md:col-span-2">
+                    <label className="text-xs font-semibold">Applies to</label>
+                    <Select
+                      onValueChange={(val) => setValue("tenorMode", val as "ANY" | "BAND")}
+                      defaultValue={watch("tenorMode")}
+                    >
+                      <SelectTrigger className="h-[40px] text-xs">
+                        <SelectValue placeholder="Select tenor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ANY">Any tenor (used when no range below fits the plan)</SelectItem>
+                        <SelectItem value="BAND">A range of days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.tenorMode && (
+                      <p className="text-red-500 text-xs">{errors.tenorMode.message}</p>
+                    )}
+                    {watch("tenorMode") === "BAND" && (
+                      <>
+                        <div className="grid grid-cols-2 gap-x-6 mt-2">
+                          <Input
+                            label="From (days)"
+                            placeholder="e.g., 85"
+                            type="number"
+                            min={1}
+                            className="text-xs h-[40px]"
+                            error={errors?.minTenorDays?.message}
+                            {...register("minTenorDays", {
+                              setValueAs: (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+                            })}
+                          />
+                          <Input
+                            label="To (days)"
+                            placeholder="e.g., 95"
+                            type="number"
+                            min={1}
+                            className="text-xs h-[40px]"
+                            error={errors?.maxTenorDays?.message}
+                            {...register("maxTenorDays", {
+                              setValueAs: (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+                            })}
+                          />
+                        </div>
+                        <p className="text-[11px] text-gray-500 mt-1">
+                          A plan gets this rate when its length in days is inside the range (both ends included). A plan of
+                          3 months is about 90 days (89-92), 6 months about 180, 9 months about 270 and 12 months about
+                          365, so give a little room, for example 85 to 95. Ranges of one product must not overlap.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
 
                 {/* Active Status */}
                 <div className="flex flex-col gap-1">

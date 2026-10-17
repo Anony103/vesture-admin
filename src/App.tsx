@@ -12,6 +12,7 @@ import {
   ForgotPasswordPage,
   FinancePage,
   LmsTransfersPage,
+  KycPage,
 } from "./pages";
 import Admin from "./pages/admin";
 
@@ -23,6 +24,7 @@ import CreditEntry from "./pages/creditentry";
 import Transactions from "./pages/transactions";
 import AuditLogs from "./pages/auditLogs";
 import Settings from "./pages/settings";
+import LedgerPage from "./pages/ledger";
 import VeiwCategoriesPage from "./pages/viewcategories";
 import {
   MainLayout,
@@ -155,6 +157,14 @@ function App() {
         {
           path: "/lmsTransfers",
           element: <LmsTransfersPage />,
+        },
+        {
+          path: "/kyc",
+          element: <KycPage />,
+        },
+        {
+          path: "/ledger",
+          element: <LedgerPage />,
         },
         {
           path: "/transactions",

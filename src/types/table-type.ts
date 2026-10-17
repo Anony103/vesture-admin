@@ -27,6 +27,10 @@ export interface AssetType {
 export interface RateType {
   id: string;
   savingsType: string;
+  // 0 = any tenor; a rate with a band stores the band's top end here; older rates: the exact tenor in days.
+  durationDays?: number | null;
+  minTenorDays?: number | null;
+  maxTenorDays?: number | null;
   annualRate: number;
   createdBy: string;
   createdOn: string;

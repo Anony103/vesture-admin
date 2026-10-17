@@ -55,6 +55,9 @@ const Customers = () => {
     selectedUser,
     setPageSize,
     pageSize,
+    bvnVerificationLoading,
+    bvnVerificationResult,
+    bvnVerificationError,
   } = useMangeCustomer();
 
   type CustomerType = "all" | "ACTIVE" | "deactivated" | "pending";
@@ -202,6 +205,18 @@ const Customers = () => {
               ) : (
                 ""
               )}
+              {row?.original.bvn ? (
+                <li
+                  onClick={() =>
+                    handleToggleModal(MODAL_TYPE.VERIFY_BVN, row?.original)
+                  }
+                  className="border-t-[1px] cursor-pointer border-t-white py-2 pl-3"
+                >
+                  <a>Verify BVN</a>
+                </li>
+              ) : (
+                ""
+              )}
             </ul>
           </div>
         );
@@ -314,10 +329,51 @@ const Customers = () => {
         >
           <Box sx={style}>
             <h1 className="font-bold text-lg">
-              {modalState === MODAL_TYPE.ACTIVATE_CUSTOMER
+              {modalState === MODAL_TYPE.VERIFY_BVN
+                ? "Verify BVN"
+                : modalState === MODAL_TYPE.ACTIVATE_CUSTOMER
                 ? "Activate"
                 : "Deactivate"}
             </h1>
+            {modalState === MODAL_TYPE.VERIFY_BVN && (
+              <div className="flex flex-col gap-4 mt-3">
+                <p className="text-xs text-gray-500">
+                  BVN: <span className="font-semibold">{selectedUser?.bvn}</span>
+                </p>
+                {bvnVerificationLoading ? (
+                  <div className="flex justify-center py-6">
+                    <ClipLoader color="#7C2EBF" size={24} />
+                  </div>
+                ) : bvnVerificationError ? (
+                  <p className="text-xs text-red-500">{bvnVerificationError}</p>
+                ) : bvnVerificationResult ? (
+                  <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
+                    {Object.entries(bvnVerificationResult).map(([key, value]) => (
+                      <div
+                        key={key}
+                        className="flex justify-between gap-3 text-xs border-b pb-1"
+                      >
+                        <span className="text-gray-500 capitalize">{key}</span>
+                        <span className="font-medium text-right break-words">
+                          {value === null || value === undefined
+                            ? "-"
+                            : typeof value === "object"
+                            ? JSON.stringify(value)
+                            : String(value)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+                <button
+                  onClick={handleClose}
+                  className="text-xs bg-gray-300 py-3 px-4 text-gray-700 rounded-md hover:opacity-80"
+                >
+                  Close
+                </button>
+              </div>
+            )}
+            {modalState !== MODAL_TYPE.VERIFY_BVN && (
             <div className="flex flex-col gap-5 mt-3">
               <form
                 className="flex flex-col gap-5"
@@ -392,6 +448,7 @@ const Customers = () => {
                 </div>
               </form>
             </div>
+            )}
           </Box>
         </Modal>
       </article>

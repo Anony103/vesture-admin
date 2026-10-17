@@ -13,6 +13,9 @@ export class ManageRatesService extends GeneralAdminService {
     id: string;
     savingsType: string;
     annualRate: number;
+    // Both or neither. Neither = the rate applies whatever the plan's length (in days).
+    minTenorDays?: number;
+    maxTenorDays?: number;
     active: boolean;
   }) {
     const response = await axios.post<{

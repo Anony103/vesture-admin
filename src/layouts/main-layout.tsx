@@ -99,6 +99,7 @@ export const MainLayout = () => {
                 {location.pathname === "/creditEntry" && <h1>Public Sector Credit Entry</h1>}
                 {location.pathname === "/transactions" && <h1>Transactions History</h1>}
                 {location.pathname === "/auditLog" && <h1>Audit Logs</h1>}
+                {location.pathname === "/ledger" && <h1>Ledger</h1>}
                 {location.pathname === "/interestRates" && (
                   <h1>Interest Rates</h1>
                 )}

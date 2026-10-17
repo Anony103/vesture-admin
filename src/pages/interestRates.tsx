@@ -46,6 +46,20 @@ const InterestRates = () => {
       },
     },
     {
+      id: "tenor",
+      header: () => <span>Tenor</span>,
+      cell: ({ row }) => {
+        const r = row.original;
+        const text =
+          r.minTenorDays != null && r.maxTenorDays != null
+            ? `${r.minTenorDays} to ${r.maxTenorDays} days`
+            : r.durationDays
+              ? `Exactly ${r.durationDays} days`
+              : "Any tenor";
+        return <span className="inline-block w-full">{text}</span>;
+      },
+    },
+    {
       accessorKey: "annualRate",
       header: () => <span>Annual Rate</span>,
       cell: ({ getValue }) => {

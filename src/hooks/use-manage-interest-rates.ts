@@ -106,6 +106,10 @@ const useMangeInterestRates = () => {
         id: uuidv4(),
         savingsType: values?.savingsType,
         annualRate: values.annualRate,
+        // Only a "tenor range" rate sends its days; leaving them out means any tenor.
+        ...(values.tenorMode === "BAND"
+          ? { minTenorDays: values.minTenorDays, maxTenorDays: values.maxTenorDays }
+          : {}),
         active: values.active,
       });
 
@@ -184,6 +188,7 @@ const useMangeInterestRates = () => {
       id: "",
       savingsType: "",
       annualRate: 0,
+      tenorMode: "ANY",
       active: true,
     },
   });
