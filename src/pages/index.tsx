@@ -20,6 +20,7 @@ const ChangePasswordComp = lazy(() => import("./changePassword"))
 const ForgotPasswordComp = lazy(() => import("./forgotPassword") )
 const FinanceComp = lazy(() => import("./finance"))
 const LmsTransfersComp = lazy(() => import("./lmsTransfers"))
+const KycComp = lazy(() => import("./kyc"))
 
 
 
@@ -140,6 +141,14 @@ export const LmsTransfersPage = () => {
   return (
     <Suspense fallback={<PageLoader />}>
       <LmsTransfersComp />
+    </Suspense>
+  );
+};
+
+export const KycPage = () => {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <KycComp />
     </Suspense>
   );
 };

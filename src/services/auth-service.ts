@@ -73,14 +73,6 @@ export class AuthService {
   //   return response.data;
   // }
 
-  async logoutUser(token: string) {
-    await axios.get(`${baseUrl}/user/auth/logout`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  }
-
   // async changePassword(payload: {
   //   userId: string;
   //   oldPassword: string;

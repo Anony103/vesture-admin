@@ -9,7 +9,6 @@ import {
   SESSION_IDENTIFIER,
 } from "../constants";
 
-import { AuthService } from "../services";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { QueryClient } from "@tanstack/react-query";
@@ -20,13 +19,13 @@ export const useLogout = () => {
 
   const handleLogout = useCallback(async () => {
     try {
-      const authService = new AuthService();
       const token = sessionStorage.getItem(SESSION_STORAGE_KEY) as string;
       if (!token) {
         return;
       }
+      // The backend has no logout route (tokens simply expire after 24h), so signing out only
+      // clears this browser's session.
       try {
-        await authService.logoutUser(token);
         sessionStorage.removeItem(SESSION_STORAGE_KEY);
       } catch (err) {
         console.log({ err });

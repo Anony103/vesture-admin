@@ -17,7 +17,7 @@ export const ALERT_TYPE_OPTIONS = {
   DEBIT_AND_CREDIT: "CREDIT & DEBIT",
 };
 const environment = import.meta?.env?.VITE_APP_ENVIRONMENT ?? "TEST";
-console.log("[PayRise Admin] Environment:", environment);
+console.log("[Vesture Admin] Environment:", environment);
 const baseUrls: Record<string, string> = {
   TEST: (import.meta.env.VITE_APP_BASE_URL_TEST ?? "http://localhost:8082").replace(/\/$/, "") + "/",
   STAGING: (import.meta.env.VITE_APP_BASE_URL_STAGE ?? "https://stage-api.myvesture.co").replace(/\/$/, "") + "/",

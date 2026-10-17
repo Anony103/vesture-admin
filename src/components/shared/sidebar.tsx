@@ -113,6 +113,20 @@ export const Sidebar: React.FC<Props> = ({ open, handleToggleSidebar }) => {
       id: "14",
     },
     {
+      title: "KYC",
+      path: "/kyc",
+      icon: <CustomersIcon />,
+      id: "16",
+    },
+    // Ledger is switched off for now. To bring it back, uncomment this item, the "/ledger" route and the
+    // LedgerPage import in App.tsx.
+    // {
+    //   title: "Ledger",
+    //   path: "/ledger",
+    //   icon: <TransactionIcon />,
+    //   id: "15",
+    // },
+    {
       title: "Transaction History",
       path: "/transactions",
       icon: <TransactionIcon />,
@@ -156,11 +170,12 @@ export const Sidebar: React.FC<Props> = ({ open, handleToggleSidebar }) => {
         >
           <div className="flex justify-between items-center w-[100%]">
             <h1
-              className={`text-black origin-left font-semibold text-lg ${
+              className={`origin-left ${
                 open ? "scale-1" : "scale-0 lg:hidden"
               } duration-300`}
             >
-              PayRise
+              {/* dark lettering for the white sidebar */}
+              <img src="/vesture-logo-dark.png" alt="Vesture" className="h-7 w-auto" />
             </h1>
             <div>
               <HamburgerMenuIcon

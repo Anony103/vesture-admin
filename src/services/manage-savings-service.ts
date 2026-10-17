@@ -115,16 +115,6 @@ export class ManageSavingsService extends GeneralAdminService {
     return response?.data;
   }
 
-  async getInterestPaymentsByMonth(month: string) {
-    const api = `${baseUrl}api/interest-rate/applications/${month}`;
-    const response = await axios.get(api, {
-      headers: {
-        Authorization: `Bearer ${this._token}`,
-      },
-    });
-    return response?.data;
-  }
-
   // async authorizeSingleTransfer(payload: {
   //   userCode: string;
   //   token: string;

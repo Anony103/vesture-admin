@@ -29,16 +29,6 @@ export class GeneralAdminService {
   //   };
   //   return formattedData;
   // }
-  async verifyWalletId(payload: { walletId: string }) {
-    const response = await axios.post(`${baseUrl}`, payload, {
-      headers: {
-        Authorization: `Bearer ${this._token}`,
-      },
-    });
-
-    return response.data;
-  }
-
   async getAllUsers(
     currentPage: number,
     pageSize: number,
@@ -102,10 +92,10 @@ export class GeneralAdminService {
   //   //   endDate: endDate,
   //   //   // status : "all"
   //   // };
-  //   // const api = `${baseUrl}savings/admin/transactions/search/date-range?keyword=${search}`
+  //   // const api = `${baseUrl}api/savings/admin/transactions/search/date-range?keyword=${search}`
 
   //   const response = await axios.get(
-  //     `${baseUrl}savings/admin/transactions?page=${currentPage}&size=${pageSize}`
+  //     `${baseUrl}api/savings/admin/transactions?page=${currentPage}&size=${pageSize}`
   //     // api
   //     ,
   //     // payload,
@@ -143,7 +133,7 @@ export class GeneralAdminService {
       }
 
       const response = await axios.post(
-        `${baseUrl}savings/admin/transactions/search/date-range`,
+        `${baseUrl}api/savings/admin/transactions/search/date-range`,
         payload,
         {
           headers: {
@@ -157,8 +147,8 @@ export class GeneralAdminService {
 
     // Search or default listing uses GET
     const api = searchTerm
-      ? `${baseUrl}savings/admin/transactions/search?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`
-      : `${baseUrl}savings/admin/transactions?page=${currentPage}&size=${pageSize}`;
+      ? `${baseUrl}api/savings/admin/transactions/search?keyword=${searchTerm}&page=${currentPage}&size=${pageSize}`
+      : `${baseUrl}api/savings/admin/transactions?page=${currentPage}&size=${pageSize}`;
 
     const response = await axios.get(api, {
       headers: {

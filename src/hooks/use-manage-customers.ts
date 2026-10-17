@@ -13,12 +13,15 @@ import { SubmitHandler } from "react-hook-form";
 import { User } from "@/types";
 import { GET_ALL_USERS } from "@/constants/query-keys";
 import { GeneralAdminService } from "@/services/general-admin-service";
+import { PremblyService } from "@/services/prembly-service";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAppContext } from "@/context/AppContext";
+import { AxiosError } from "axios";
 
 const MODAL_TYPE = {
   ACTIVATE_CUSTOMER: "ACTIVATE_CUSTOMER",
   DEACTIVATE_CUSTOMER: "DEACTIVATE_CUSTOMER",
+  VERIFY_BVN: "VERIFY_BVN",
 };
 const useMangeCustomer = () => {
   const token = sessionStorage.getItem(SESSION_STORAGE_KEY) ?? "";
@@ -26,7 +29,16 @@ const useMangeCustomer = () => {
   const [modalState, setModalState] = useState<string>("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const generalAdmin = new GeneralAdminService(token);
+  const premblyService = new PremblyService(token);
   const queryClient = useQueryClient();
+  const [bvnVerificationLoading, setBvnVerificationLoading] = useState(false);
+  const [bvnVerificationResult, setBvnVerificationResult] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
+  const [bvnVerificationError, setBvnVerificationError] = useState<
+    string | null
+  >(null);
   const handleClose = () => setOpen(false);
   const [visibility, setVisibility] = useState(false);
   const [customerType, setCustomerType] = useState("all");
@@ -68,6 +80,30 @@ const useMangeCustomer = () => {
     }
   };
 
+  const handleVerifyBvn = async (bvn: string) => {
+    setBvnVerificationLoading(true);
+    setBvnVerificationResult(null);
+    setBvnVerificationError(null);
+    try {
+      const response = await premblyService.getBvnDetails(bvn);
+      if (response?.code === 200) {
+        setBvnVerificationResult(response.data ?? {});
+      } else {
+        setBvnVerificationError(response?.message || "BVN verification failed");
+      }
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        setBvnVerificationError(
+          error.response?.data?.message || "BVN verification failed"
+        );
+      } else {
+        setBvnVerificationError("An unexpected error occurred");
+      }
+    } finally {
+      setBvnVerificationLoading(false);
+    }
+  };
+
   const handleToggleModal = (modalState: string, data: User | null) => {
     if (modalState?.length === 0) {
       setOpen(false);
@@ -77,6 +113,9 @@ const useMangeCustomer = () => {
     setSelectedUser(data);
     setModalState(modalState);
     setOpen(true);
+    if (modalState === MODAL_TYPE.VERIFY_BVN && data?.bvn) {
+      handleVerifyBvn(data.bvn);
+    }
   };
 
   const {
@@ -189,6 +228,10 @@ const useMangeCustomer = () => {
     users,
     usersLoading,
     usersError,
+    bvnVerificationLoading,
+    bvnVerificationResult,
+    bvnVerificationError,
+    handleVerifyBvn,
   };
 };
 
