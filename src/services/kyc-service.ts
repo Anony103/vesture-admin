@@ -52,10 +52,16 @@ export class KycService extends GeneralAdminService {
   }
 
   /** Approve or reject a step that is waiting for a person. The reason is required; on a rejection the customer is shown it. */
-  async review(userId: string, step: KycStepName, decision: "APPROVE" | "REJECT", reason: string) {
+  async review(
+    userId: string,
+    step: KycStepName,
+    decision: "APPROVE" | "REJECT",
+    reason: string,
+    addressOnBill?: string
+  ) {
     const response = await axios.post<KycApiResponse<{ step: string; status: string; passed: boolean }>>(
       `${baseUrl}api/kyc/admin/${userId}/review`,
-      { step, decision, reason },
+      { step, decision, reason, addressOnBill },
       { headers: this.headers }
     );
     return response?.data;
