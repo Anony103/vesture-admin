@@ -14,15 +14,19 @@ import useKyc from "@/hooks/use-kyc";
 import { KycService } from "@/services/kyc-service";
 import {
   KycAttempt,
+  KycBvnInfo,
+  KycDetail,
   KycDocumentMeta,
   KycFilter,
   KycListItem,
+  KycReviewAction,
   KycStepName,
   KycStepStatus,
 } from "@/types/kyc-type";
 
 const TABS: { label: string; value: KycFilter }[] = [
   { label: "All", value: "ALL" },
+  { label: "Under review", value: "UNDER_REVIEW" },
   { label: "Needs attention", value: "NEEDS_ATTENTION" },
   { label: "Address pending", value: "ADDRESS_PENDING" },
   { label: "BankOne pending", value: "BANKONE_PENDING" },
@@ -44,6 +48,9 @@ const TONE: Record<string, string> = {
   FAILED: "bg-red-100 text-red-700",
   ERROR: "bg-red-100 text-red-700",
   RESET: "bg-amber-100 text-amber-700",
+  UNDER_REVIEW: "bg-amber-100 text-amber-800",
+  REJECTED: "bg-red-100 text-red-700",
+  APPROVED: "bg-green-100 text-green-700",
   NOT_STARTED: "bg-gray-100 text-gray-500",
 };
 
@@ -139,6 +146,11 @@ const AttemptRow = ({ a }: { a: KycAttempt }) => {
         {a.jobId && <p>Job {a.jobId}</p>}
         {a.providerReference && <p className="text-gray-400">Ref {a.providerReference}</p>}
         {a.autoRetries ? <p className="text-gray-400">Retried {a.autoRetries}×</p> : null}
+        {a.reviewedBy && (
+          <p className="text-gray-600">
+            Reviewed by {a.reviewedBy} on {when(a.reviewedOn)}{a.reviewReason ? `: ${a.reviewReason}` : ""}
+          </p>
+        )}
         {details.length > 0 && (
           <p className="text-gray-400">{details.map(([k, v]) => `${k}: ${String(v)}`).join(" · ")}</p>
         )}
@@ -147,6 +159,327 @@ const AttemptRow = ({ a }: { a: KycAttempt }) => {
     </tr>
   );
 };
+
+const shortTitle = (step: string) => STEPS.find((x) => x.step === step)?.label ?? step;
+
+// What the reviewer decides with: the reason is required and kept with their name; on a rejection it is also what the customer is told.
+const ReviewForm = ({
+  step,
+  busy,
+  onApprove,
+  onReject,
+}: {
+  step: KycStepName;
+  busy: boolean;
+  onApprove: (reason: string) => Promise<boolean>;
+  onReject: (reason: string) => Promise<boolean>;
+}) => {
+  const [reason, setReason] = useState("");
+  const ready = reason.trim().length >= 10;
+  const submit = async (fn: (r: string) => Promise<boolean>) => {
+    if (await fn(reason.trim())) setReason("");
+  };
+  return (
+    <div className="border border-amber-200 bg-amber-50 rounded-md p-3 space-y-2">
+      <p className="text-xs font-semibold text-amber-900">Your decision: {shortTitle(step)}</p>
+      <textarea
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        rows={3}
+        maxLength={1000}
+        placeholder="Why? (required, at least 10 characters). It is recorded with your name. If you reject, the customer is shown this reason and can upload again."
+        className="w-full border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+      />
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => submit(onApprove)}
+          disabled={!ready || busy}
+          className="text-xs bg-green-600 text-white rounded-md px-3 py-1.5 disabled:opacity-40"
+        >
+          {busy ? "Saving..." : "Approve - mark as verified"}
+        </button>
+        <button
+          onClick={() => submit(onReject)}
+          disabled={!ready || busy}
+          className="text-xs bg-red-600 text-white rounded-md px-3 py-1.5 disabled:opacity-40"
+        >
+          {busy ? "Saving..." : "Reject - customer uploads again"}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// A step that ran out of attempts before manual review existed: clearing it needs a reason too.
+const ResetForm = ({ busy, onReset }: { busy: boolean; onReset: (reason: string) => Promise<boolean> }) => {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} className="text-xs text-[#7C2EBF] font-semibold">
+        Reset attempts
+      </button>
+    );
+  }
+  return (
+    <div className="border rounded-md p-3 space-y-2">
+      <textarea
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        rows={2}
+        maxLength={1000}
+        placeholder="Why are you resetting this? (required, at least 10 characters)"
+        className="w-full border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+      />
+      <div className="flex gap-2">
+        <button
+          onClick={async () => {
+            if (await onReset(reason.trim())) {
+              setOpen(false);
+              setReason("");
+            }
+          }}
+          disabled={reason.trim().length < 10 || busy}
+          className="text-xs bg-[#7C2EBF] text-white rounded-md px-3 py-1.5 disabled:opacity-40"
+        >
+          {busy ? "Resetting..." : "Reset attempts"}
+        </button>
+        <button onClick={() => setOpen(false)} className="text-xs text-gray-500">
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+};
+
+type Fact = { label: string; onRecord: string; onAccount?: string; bad?: boolean };
+
+// What the provider read next to what the customer's account says, so a reviewer can see at a glance what did not line up.
+const factsFor = (step: KycStepName, s: Record<string, unknown>, detail: KycDetail): Fact[] => {
+  const str = (v: unknown) => (v === undefined || v === null || v === "" ? "" : String(v));
+  const accountName = [detail.customer.firstName, detail.customer.middleName, detail.customer.lastName].filter(Boolean).join(" ") || detail.customer.name;
+  const facts: Fact[] = [];
+  if (step === "DOCUMENT") {
+    facts.push({ label: "Name", onRecord: str(s.nameOnDocument), onAccount: accountName, bad: s.nameMatchesAccount === false || s.nameReadFromDocument === false });
+    facts.push({ label: "Date of birth", onRecord: str(s.dateOfBirthOnDocument), onAccount: str(detail.customer.dateOfBirth) });
+    facts.push({ label: "Expiry date", onRecord: str(s.expirationDate) });
+    facts.push({ label: "Face matches selfie", onRecord: s.faceMatch === undefined ? "" : s.faceMatch ? "Yes" : "No", bad: s.faceMatch === false });
+  } else if (step === "NIN") {
+    facts.push({ label: "Name", onRecord: str(s.nameOnNin), onAccount: accountName, bad: s.nameMatchesBvn === false || s.nameReadFromNin === false });
+    facts.push({ label: "Date of birth", onRecord: str(s.dateOfBirthOnNin), onAccount: str(detail.customer.dateOfBirth), bad: s.dateOfBirthMatches === false });
+    facts.push({ label: "Face matches selfie", onRecord: s.faceMatch === undefined ? "" : s.faceMatch ? "Yes" : "No", bad: s.faceMatch === false });
+  } else if (step === "ADDRESS") {
+    facts.push({ label: "Address typed", onRecord: str(s.address), onAccount: str(detail.customer.address) });
+    facts.push({ label: "Field check", onRecord: str(s.addressStatus) });
+  } else {
+    facts.push({ label: "Actions asked", onRecord: str(s.actions) });
+    facts.push({ label: "Took (ms)", onRecord: str(s.durationMs) });
+  }
+  return facts;
+};
+
+const StepDetail = ({ step, detail, k }: { step: KycStepName; detail: KycDetail; k: ReturnType<typeof useKyc> }) => {
+  const attempt = [...detail.attempts].reverse().find((a) => a.step === step);
+  if (!attempt) return <p className="text-xs text-gray-500 p-3">Nothing submitted for this step yet.</p>;
+  const summary = parseSummary(attempt.summary);
+  const facts = factsFor(step, summary, detail);
+  const doc: KycDocumentMeta | undefined = detail.documents.find((d) => d.id === attempt.documentId);
+  const selfie = [...detail.documents].reverse().find((d) => d.type === "LIVENESS_SELFIE");
+  const reviews = detail.reviews.filter((r) => r.step === step);
+  const waiting = attempt.status === "UNDER_REVIEW" || (attempt.status === "FAILED" && step !== "LIVENESS");
+  const stepState = detail.steps.find((s) => s.step === step);
+  const busy = k.actionLoading === `review-${step}`;
+  const unread = facts.some((f) => f.label === "Name" && !f.onRecord);
+  return (
+    <div className="bg-gray-50 border-t p-3 space-y-4">
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <Chip status={attempt.status} />
+          <span className="text-[11px] text-gray-500">Attempt {attempt.attempt ?? "-"} · {when(attempt.updatedOn)}</span>
+        </div>
+        {attempt.failureReason && (
+          <p className="text-xs text-red-700">Automatic check: {attempt.failureReason}</p>
+        )}
+        {unread && (
+          <p className="text-xs text-amber-800">
+            The provider returned no name for this {step === "NIN" ? "NIN" : "document"}. That is why it could not be matched automatically, so the name has to be
+            checked by eye against the image below.
+          </p>
+        )}
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs">
+          <thead>
+            <tr className="text-[11px] uppercase text-gray-400">
+              <th className="pb-1 pr-3">Detail</th>
+              <th className="pb-1 pr-3">Read by the provider</th>
+              <th className="pb-1">On the customer&apos;s account</th>
+            </tr>
+          </thead>
+          <tbody>
+            {facts.map((f) => (
+              <tr key={f.label} className="border-t">
+                <td className="py-1.5 pr-3 text-gray-500">{f.label}</td>
+                <td className={`py-1.5 pr-3 ${f.bad || !f.onRecord ? "text-red-600 font-medium" : "text-gray-800"}`}>{f.onRecord || "not returned"}</td>
+                <td className="py-1.5 text-gray-800">{f.onAccount ?? "-"}</td>
+              </tr>
+            ))}
+            {attempt.confidence != null && (
+              <tr className="border-t">
+                <td className="py-1.5 pr-3 text-gray-500">Face confidence</td>
+                <td className="py-1.5 pr-3 text-gray-800">{Math.round(attempt.confidence * 10) / 10}</td>
+                <td />
+              </tr>
+            )}
+            {attempt.idNumber && (
+              <tr className="border-t">
+                <td className="py-1.5 pr-3 text-gray-500">NIN</td>
+                <td className="py-1.5 pr-3 text-gray-800">{attempt.idNumber}</td>
+                <td />
+              </tr>
+            )}
+            {typeof summary.fieldsReturned === "string" && (
+              <tr className="border-t">
+                <td className="py-1.5 pr-3 text-gray-500">Fields the provider sent</td>
+                <td className="py-1.5 pr-3 text-gray-600" colSpan={2}>{summary.fieldsReturned || "none"}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {(doc || selfie) && (
+        <div className="grid sm:grid-cols-2 gap-3">
+          {doc && <KycImage service={k.service} doc={doc} />}
+          {selfie && selfie.id !== doc?.id && step !== "LIVENESS" && <KycImage service={k.service} doc={selfie} />}
+        </div>
+      )}
+
+      {reviews.length > 0 && (
+        <div className="space-y-1">
+          <p className="text-[11px] uppercase tracking-wide text-gray-400">Decisions on this step</p>
+          {reviews.map((r) => (
+            <p key={r.id} className="text-xs text-gray-700">
+              <Chip status={r.decision} /> {r.adminName || r.adminEmail} ({r.adminRole?.replace("ROLE_", "").toLowerCase()}) · {when(r.createdOn)} - {r.reason}
+            </p>
+          ))}
+        </div>
+      )}
+
+      {waiting && step !== "LIVENESS" && (
+        <ReviewForm
+          step={step}
+          busy={busy}
+          onApprove={(reason) => k.review(step, "APPROVE", reason)}
+          onReject={(reason) => k.review(step, "REJECT", reason)}
+        />
+      )}
+      {!waiting && stepState && stepState.attemptsLeft < 5 && stepState.status !== "VERIFIED" && stepState.status !== "UNDER_REVIEW" && (
+        <ResetForm busy={k.actionLoading === `reset-${step}`} onReset={(reason) => k.resetAttempts(step, reason)} />
+      )}
+    </div>
+  );
+};
+
+const BvnCard = ({ bvn, k }: { bvn: KycBvnInfo; k: ReturnType<typeof useKyc> }) => {
+  const [shown, setShown] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  // A new customer must never inherit the previous customer's revealed number.
+  useEffect(() => setShown(null), [k.selectedId]);
+  if (!bvn.present) {
+    return <p className="text-xs text-gray-500">No BVN on this customer&apos;s account.</p>;
+  }
+  const reveal = async () => {
+    setLoading(true);
+    setShown(await k.revealBvn());
+    setLoading(false);
+  };
+  return (
+    <div className="border rounded-md p-3 space-y-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-sm font-mono">{shown ?? bvn.masked}</span>
+        {shown ? (
+          <button onClick={() => setShown(null)} className="text-xs text-[#7C2EBF] font-semibold">Hide</button>
+        ) : (
+          <button onClick={reveal} disabled={loading} className="text-xs text-[#7C2EBF] font-semibold disabled:opacity-50">
+            {loading ? "Loading..." : "Reveal"}
+          </button>
+        )}
+        {bvn.sandbox && <Chip status="RESET" text="Sandbox record" />}
+        <span className="text-[11px] text-gray-400">Revealing the full number is recorded in the audit log.</span>
+      </div>
+      {bvn.recorded ? (
+        <div className="grid md:grid-cols-2 gap-x-6 gap-y-3">
+          <DetailRow label="Name on BVN" value={bvn.name} />
+          <DetailRow label="Name on account" value={bvn.accountName} />
+          <DetailRow
+            label="Name match"
+            value={<Chip status={(bvn.nameMatchPercent ?? 0) >= 80 ? "VERIFIED" : "FAILED"} text={`${bvn.nameMatchPercent ?? 0}%`} />}
+          />
+          <DetailRow label="Date of birth on BVN" value={<>{bvn.dateOfBirth ?? "-"} {bvn.dateOfBirthMatches === false && <Chip status="FAILED" text="differs" />}</>} />
+          <DetailRow label="Phone on BVN" value={bvn.phone} />
+          <DetailRow label="Gender" value={bvn.gender} />
+          <DetailRow label="Checked" value={when(bvn.verifiedAt)} />
+          <DetailRow label="Times looked up" value={bvn.lookupCount} />
+        </div>
+      ) : (
+        <p className="text-xs text-gray-500">No saved BVN lookup for this number (the customer signed up before BVN records were kept).</p>
+      )}
+      {bvn.lookups && bvn.lookups.length > 0 && (
+        <div className="overflow-x-auto">
+          <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1">Lookups</p>
+          <table className="w-full text-left text-xs">
+            <tbody>
+              {bvn.lookups.map((l, i) => (
+                <tr key={i} className="border-t">
+                  <td className="py-1 pr-3 whitespace-nowrap text-gray-500">{when(l.createdAt)}</td>
+                  <td className="py-1 pr-3">{l.source}</td>
+                  <td className="py-1 pr-3">{l.sector ?? "-"}</td>
+                  <td className="py-1 text-gray-400">{l.detail ?? ""}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ReviewHistory = ({ reviews }: { reviews: KycReviewAction[] }) =>
+  reviews.length === 0 ? (
+    <p className="text-xs text-gray-500">No manual decisions yet.</p>
+  ) : (
+    <div className="overflow-x-auto">
+      <table className="w-full text-left text-xs">
+        <thead>
+          <tr className="text-[11px] uppercase text-gray-400">
+            <th className="pb-1 pr-3">When</th>
+            <th className="pb-1 pr-3">Step</th>
+            <th className="pb-1 pr-3">Decision</th>
+            <th className="pb-1 pr-3">Reason</th>
+            <th className="pb-1">By</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[...reviews].reverse().map((r) => (
+            <tr key={r.id} className="border-t align-top">
+              <td className="py-1.5 pr-3 whitespace-nowrap text-gray-500">{when(r.createdOn)}</td>
+              <td className="py-1.5 pr-3 whitespace-nowrap">{shortTitle(r.step)}{r.attempt ? ` #${r.attempt}` : ""}</td>
+              <td className="py-1.5 pr-3"><Chip status={r.decision} /></td>
+              <td className="py-1.5 pr-3 text-gray-800">{r.reason}</td>
+              <td className="py-1.5 text-gray-600">
+                {r.adminName || r.adminEmail}
+                <br />
+                <span className="text-[11px] text-gray-400">{r.adminEmail} · {r.adminRole?.replace("ROLE_", "").toLowerCase()} · {r.ipAddress ?? "-"}</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 
 const Kyc = () => {
   const k = useKyc();
@@ -202,6 +535,16 @@ const Kyc = () => {
           <span className="text-xs text-gray-400">-</span>
         ),
     },
+    {
+      header: "Waiting for review",
+      id: "waiting",
+      cell: ({ row }) =>
+        row.original.reviewWaitingSince ? (
+          <span className="text-xs font-semibold text-amber-700">since {when(row.original.reviewWaitingSince)}</span>
+        ) : (
+          <span className="text-xs text-gray-400">-</span>
+        ),
+    },
     { header: "Last activity", accessorKey: "lastActivity", cell: ({ row }) => <span className="text-xs">{when(row.original.lastActivity)}</span> },
     {
       header: "",
@@ -214,7 +557,9 @@ const Kyc = () => {
     },
   ];
 
-  const canReset = (status: KycStepStatus, attemptsLeft: number) => attemptsLeft < 5 || status === "FAILED" || status === "ERROR";
+  const [openStep, setOpenStep] = useState<KycStepName | null>(null);
+  // Opening another customer starts with every step closed.
+  useEffect(() => setOpenStep(null), [k.selectedId]);
 
   return (
     <Container>
@@ -267,36 +612,41 @@ const Kyc = () => {
                   <DetailRow label="Phone" value={detail.customer.phone} />
                   <DetailRow label="BankOne account" value={detail.customer.bankOneAccountNumber} />
                   <DetailRow label="Account tier" value={<Chip status={detail.tier === 3 ? "VERIFIED" : detail.tier === 2 ? "PENDING" : "NOT_STARTED"} text={`Tier ${detail.tier}`} />} />
+                  <DetailRow label="Date of birth" value={detail.customer.dateOfBirth} />
+                  <DetailRow label="Sector" value={[detail.customer.sector, detail.customer.ippisNo].filter(Boolean).join(" · ")} />
                   <DetailRow label="NIN" value={detail.ninMasked} />
                   <DetailRow label="Next step" value={detail.nextStep ?? "All steps done"} />
                 </div>
 
                 <section>
                   <h3 className="text-sm font-semibold mb-2">Steps</h3>
+                  <p className="text-[11px] text-gray-400 mb-2">Click a step to see exactly what was read and decide it.</p>
                   <div className="border rounded-md divide-y">
                     {detail.steps.map((s) => (
-                      <div key={s.step} className="flex items-center justify-between gap-3 p-3">
-                        <div>
-                          <p className="text-sm font-medium">{STEPS.find((x) => x.step === s.step)?.label}</p>
-                          <p className="text-[11px] text-gray-500">
-                            {s.message ?? "Not started"} · {s.attemptsLeft} attempt{s.attemptsLeft === 1 ? "" : "s"} left
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Chip status={s.status} />
-                          {canReset(s.status, s.attemptsLeft) && (
-                            <button
-                              onClick={() => k.resetAttempts(s.step)}
-                              disabled={k.actionLoading !== null}
-                              className="text-xs text-[#7C2EBF] font-semibold disabled:opacity-50"
-                            >
-                              {k.actionLoading === `reset-${s.step}` ? "Resetting..." : "Reset attempts"}
-                            </button>
-                          )}
-                        </div>
+                      <div key={s.step}>
+                        <button
+                          onClick={() => setOpenStep(openStep === s.step ? null : s.step)}
+                          className="w-full flex items-center justify-between gap-3 p-3 text-left hover:bg-gray-50"
+                          aria-expanded={openStep === s.step}
+                        >
+                          <div>
+                            <p className="text-sm font-medium">{STEPS.find((x) => x.step === s.step)?.label}</p>
+                            <p className="text-[11px] text-gray-500">{s.message ?? "Not started"}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Chip status={s.status} />
+                            <span className="text-xs text-gray-400">{openStep === s.step ? "Hide" : "Details"}</span>
+                          </div>
+                        </button>
+                        {openStep === s.step && <StepDetail step={s.step} detail={detail} k={k} />}
                       </div>
                     ))}
                   </div>
+                </section>
+
+                <section>
+                  <h3 className="text-sm font-semibold mb-2">BVN</h3>
+                  <BvnCard bvn={detail.bvn} k={k} />
                 </section>
 
                 <section>
@@ -343,6 +693,11 @@ const Kyc = () => {
                     </div>
                   )}
                   <p className="text-[11px] text-gray-400 mt-2">Each time an image is opened it is recorded in the audit log.</p>
+                </section>
+
+                <section>
+                  <h3 className="text-sm font-semibold mb-2">Review decisions</h3>
+                  <ReviewHistory reviews={detail.reviews} />
                 </section>
 
                 <section>

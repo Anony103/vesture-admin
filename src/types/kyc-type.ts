@@ -6,10 +6,13 @@ export type KycStepStatus =
   | "VERIFIED"
   | "FAILED"
   | "ERROR"
-  | "RESET";
+  | "RESET"
+  | "UNDER_REVIEW"
+  | "REJECTED";
 
 export type KycFilter =
   | "ALL"
+  | "UNDER_REVIEW"
   | "NEEDS_ATTENTION"
   | "ADDRESS_PENDING"
   | "BANKONE_PENDING"
@@ -22,6 +25,15 @@ export type KycCustomer = {
   email: string;
   phone: string | null;
   bankOneAccountNumber: string | null;
+  // only in the detail view
+  firstName?: string | null;
+  middleName?: string | null;
+  lastName?: string | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
+  address?: string | null;
+  sector?: string | null;
+  ippisNo?: string | null;
 };
 
 export type KycListItem = KycCustomer & {
@@ -31,6 +43,7 @@ export type KycListItem = KycCustomer & {
   bankOne: { tier2: KycStepStatus; tier3: KycStepStatus };
   attention: string[];
   lastActivity: string | null;
+  reviewWaitingSince: string | null;
 };
 
 export type KycListResponse = {
@@ -54,8 +67,56 @@ export type KycAttempt = {
   failureReason: string | null;
   summary: string | null; // JSON text of what the provider said that is safe to keep
   autoRetries: number | null;
+  reviewedBy: string | null;
+  reviewedOn: string | null;
+  reviewReason: string | null;
   createdOn: string;
   updatedOn: string;
+};
+
+export type KycReviewDecision = "APPROVED" | "REJECTED" | "RESET";
+
+export type KycReviewAction = {
+  id: string;
+  userId: string;
+  verificationId: string | null;
+  step: KycStepName;
+  attempt: number | null;
+  decision: KycReviewDecision;
+  reason: string;
+  statusBefore: string | null;
+  adminId: string | null;
+  adminEmail: string | null;
+  adminName: string | null;
+  adminRole: string | null;
+  ipAddress: string | null;
+  createdOn: string;
+};
+
+export type KycBvnLookup = {
+  source: string | null;
+  sector: string | null;
+  detail: string | null;
+  ipAddress: string | null;
+  createdAt: string;
+};
+
+export type KycBvnInfo = {
+  present: boolean;
+  masked?: string;
+  accountName?: string;
+  recorded?: boolean;
+  name?: string;
+  dateOfBirth?: string | null;
+  phone?: string | null;
+  gender?: string | null;
+  sandbox?: boolean;
+  premblyReference?: string | null;
+  verifiedAt?: string | null;
+  lookupCount?: number;
+  nameMatchPercent?: number;
+  dateOfBirthMatches?: boolean;
+  lookups?: KycBvnLookup[];
 };
 
 export type KycDocumentMeta = {
@@ -86,6 +147,8 @@ export type KycDetail = {
   ninMasked?: string;
   attempts: KycAttempt[];
   documents: KycDocumentMeta[];
+  bvn: KycBvnInfo;
+  reviews: KycReviewAction[];
 };
 
 export type KycApiResponse<T> = {
