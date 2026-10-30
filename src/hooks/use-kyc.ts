@@ -68,17 +68,48 @@ const useKyc = () => {
     if (selectedId) refetchDetail();
   };
 
-  const resetAttempts = async (step: KycStepName) => {
-    if (!selectedId) return;
+  /** Returns true when the server accepted it, so the form can close. */
+  const resetAttempts = async (step: KycStepName, reason: string) => {
+    if (!selectedId) return false;
     setActionLoading(`reset-${step}`);
     try {
-      const response = await service.resetAttempts(selectedId, step);
+      const response = await service.resetAttempts(selectedId, step, reason);
       toast.success(response?.message || "Attempts cleared");
       refreshAll();
+      return true;
     } catch (error) {
       handleError(error);
+      return false;
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const review = async (step: KycStepName, decision: "APPROVE" | "REJECT", reason: string) => {
+    if (!selectedId) return false;
+    setActionLoading(`review-${step}`);
+    try {
+      const response = await service.review(selectedId, step, decision, reason);
+      toast.success(response?.message || (decision === "APPROVE" ? "Approved" : "Rejected"));
+      refreshAll();
+      return true;
+    } catch (error) {
+      handleError(error);
+      return false;
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  /** The full BVN, or null when it could not be fetched. The server records who asked. */
+  const revealBvn = async () => {
+    if (!selectedId) return null;
+    try {
+      const response = await service.revealBvn(selectedId);
+      return response?.data?.bvn ?? null;
+    } catch (error) {
+      handleError(error);
+      return null;
     }
   };
 
@@ -118,6 +149,8 @@ const useKyc = () => {
     detailLoading,
     actionLoading,
     resetAttempts,
+    review,
+    revealBvn,
     retryBankOne,
   };
 };

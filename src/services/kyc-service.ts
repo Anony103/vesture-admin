@@ -42,10 +42,29 @@ export class KycService extends GeneralAdminService {
   }
 
   /** Lets the customer try a step again; the failed attempts stay on record. */
-  async resetAttempts(userId: string, step: KycStepName) {
+  async resetAttempts(userId: string, step: KycStepName, reason: string) {
     const response = await axios.post<KycApiResponse<number>>(
       `${baseUrl}api/kyc/admin/${userId}/reset?step=${step}`,
-      {},
+      { reason },
+      { headers: this.headers }
+    );
+    return response?.data;
+  }
+
+  /** Approve or reject a step that is waiting for a person. The reason is required; on a rejection the customer is shown it. */
+  async review(userId: string, step: KycStepName, decision: "APPROVE" | "REJECT", reason: string) {
+    const response = await axios.post<KycApiResponse<{ step: string; status: string; passed: boolean }>>(
+      `${baseUrl}api/kyc/admin/${userId}/review`,
+      { step, decision, reason },
+      { headers: this.headers }
+    );
+    return response?.data;
+  }
+
+  /** The full BVN. Every call is recorded on the audit log with who asked. */
+  async revealBvn(userId: string) {
+    const response = await axios.get<KycApiResponse<{ bvn: string }>>(
+      `${baseUrl}api/kyc/admin/${userId}/bvn`,
       { headers: this.headers }
     );
     return response?.data;

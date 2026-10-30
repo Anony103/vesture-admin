@@ -105,7 +105,7 @@ const Customers = () => {
       accessorKey: "email",
       header: "Email",
       cell: ({ row }) => {
-        return <span>{row.getValue("username") || "N/A"}</span>;
+        return <span>{row.original.email || row.original.username || "N/A"}</span>;
       },
     },
     {
