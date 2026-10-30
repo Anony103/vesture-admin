@@ -107,7 +107,7 @@ const KycImage = ({ service, doc }: { service: KycService; doc: KycDocumentMeta 
     <div className="border rounded-md p-3 flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-semibold">
-          {doc.type === "LIVENESS_SELFIE" ? "Live selfie" : "ID document"}
+          {doc.type === "LIVENESS_SELFIE" ? "Live selfie" : doc.type === "UTILITY_BILL" ? "Utility bill" : "ID document"}
         </span>
         <span className="text-[11px] text-gray-400">{when(doc.createdOn)}</span>
       </div>
@@ -166,18 +166,29 @@ const shortTitle = (step: string) => STEPS.find((x) => x.step === step)?.label ?
 const ReviewForm = ({
   step,
   busy,
+  hasBill = false,
   onApprove,
   onReject,
 }: {
   step: KycStepName;
   busy: boolean;
-  onApprove: (reason: string) => Promise<boolean>;
+  // An address that came with a utility bill is approved only with the address the reviewer read on it.
+  hasBill?: boolean;
+  onApprove: (reason: string, addressOnBill?: string) => Promise<boolean>;
   onReject: (reason: string) => Promise<boolean>;
 }) => {
   const [reason, setReason] = useState("");
+  const [addressOnBill, setAddressOnBill] = useState("");
   const ready = reason.trim().length >= 10;
-  const submit = async (fn: (r: string) => Promise<boolean>) => {
-    if (await fn(reason.trim())) setReason("");
+  const billReady = !hasBill || addressOnBill.trim().length >= 5;
+  const approve = async () => {
+    if (await onApprove(reason.trim(), hasBill ? addressOnBill.trim() : undefined)) {
+      setReason("");
+      setAddressOnBill("");
+    }
+  };
+  const reject = async () => {
+    if (await onReject(reason.trim())) setReason("");
   };
   return (
     <div className="border border-amber-200 bg-amber-50 rounded-md p-3 space-y-2">
@@ -190,16 +201,36 @@ const ReviewForm = ({
         placeholder="Why? (required, at least 10 characters). It is recorded with your name. If you reject, the customer is shown this reason and can upload again."
         className="w-full border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
       />
+      {hasBill && (
+        <p className="text-[11px] text-amber-900">
+          Check on the bill: it carries the customer&apos;s name, the address matches the typed one, and its date is within the last {BILL_MAX_AGE_DAYS} days.
+        </p>
+      )}
+      {hasBill && (
+        <div className="space-y-1">
+          <label className="text-[11px] font-semibold text-amber-900" htmlFor="address-on-bill">
+            Address as printed on the utility bill (needed to approve)
+          </label>
+          <input
+            id="address-on-bill"
+            value={addressOnBill}
+            onChange={(e) => setAddressOnBill(e.target.value)}
+            maxLength={500}
+            placeholder="Copy the address from the bill that you compared with the typed one"
+            className="w-full border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+          />
+        </div>
+      )}
       <div className="flex flex-wrap gap-2">
         <button
-          onClick={() => submit(onApprove)}
-          disabled={!ready || busy}
+          onClick={approve}
+          disabled={!ready || !billReady || busy}
           className="text-xs bg-green-600 text-white rounded-md px-3 py-1.5 disabled:opacity-40"
         >
           {busy ? "Saving..." : "Approve - mark as verified"}
         </button>
         <button
-          onClick={() => submit(onReject)}
+          onClick={reject}
           disabled={!ready || busy}
           className="text-xs bg-red-600 text-white rounded-md px-3 py-1.5 disabled:opacity-40"
         >
@@ -254,6 +285,14 @@ const ResetForm = ({ busy, onReset }: { busy: boolean; onReset: (reason: string)
 
 type Fact = { label: string; onRecord: string; onAccount?: string; bad?: boolean };
 
+// A bill may be no older than this (the server enforces it; this only highlights it for the reviewer).
+const BILL_MAX_AGE_DAYS = 90;
+const billAgeDays = (isoDate: string): number | null => {
+  const d = new Date(`${isoDate}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return null;
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+};
+
 // What the provider read next to what the customer's account says, so a reviewer can see at a glance what did not line up.
 const factsFor = (step: KycStepName, s: Record<string, unknown>, detail: KycDetail): Fact[] => {
   const str = (v: unknown) => (v === undefined || v === null || v === "" ? "" : String(v));
@@ -271,6 +310,25 @@ const factsFor = (step: KycStepName, s: Record<string, unknown>, detail: KycDeta
   } else if (step === "ADDRESS") {
     facts.push({ label: "Address typed", onRecord: str(s.address), onAccount: str(detail.customer.address) });
     facts.push({ label: "Field check", onRecord: str(s.addressStatus) });
+    if (typeof s.utilityBillDocumentId !== "string") {
+      facts.push({ label: "Utility bill", onRecord: "none was sent with this attempt" });
+    } else {
+      const age = billAgeDays(str(s.billDate));
+      facts.push({ label: "Utility bill type", onRecord: str(s.billType).replace("_", " ").toLowerCase() });
+      if (str(s.billDate)) {
+        // sent by an older app version; the current forms do not ask for it
+        facts.push({
+          label: "Bill date (typed by the customer)",
+          onRecord: age === null ? str(s.billDate) : `${str(s.billDate)} (${age} day${age === 1 ? "" : "s"} old)`,
+          bad: age === null || age > BILL_MAX_AGE_DAYS || age < 0,
+        });
+      } else {
+        facts.push({ label: "Bill date", onRecord: `not asked: read the date on the bill, it must be within the last ${BILL_MAX_AGE_DAYS} days` });
+      }
+      if (typeof s.addressOnBill === "string") {
+        facts.push({ label: "Address on the bill (as read by the reviewer)", onRecord: str(s.addressOnBill) });
+      }
+    }
   } else {
     facts.push({ label: "Actions asked", onRecord: str(s.actions) });
     facts.push({ label: "Took (ms)", onRecord: str(s.durationMs) });
@@ -349,10 +407,10 @@ const StepDetail = ({ step, detail, k }: { step: KycStepName; detail: KycDetail;
         </table>
       </div>
 
-      {(doc || selfie) && (
+      {(doc || (selfie && (step === "NIN" || step === "DOCUMENT" || step === "LIVENESS"))) && (
         <div className="grid sm:grid-cols-2 gap-3">
           {doc && <KycImage service={k.service} doc={doc} />}
-          {selfie && selfie.id !== doc?.id && step !== "LIVENESS" && <KycImage service={k.service} doc={selfie} />}
+          {selfie && selfie.id !== doc?.id && (step === "NIN" || step === "DOCUMENT") && <KycImage service={k.service} doc={selfie} />}
         </div>
       )}
 
@@ -362,6 +420,7 @@ const StepDetail = ({ step, detail, k }: { step: KycStepName; detail: KycDetail;
           {reviews.map((r) => (
             <p key={r.id} className="text-xs text-gray-700">
               <Chip status={r.decision} /> {r.adminName || r.adminEmail} ({r.adminRole?.replace("ROLE_", "").toLowerCase()}) · {when(r.createdOn)} - {r.reason}
+              {r.addressOnBill ? ` (address on the bill: ${r.addressOnBill})` : ""}
             </p>
           ))}
         </div>
@@ -371,7 +430,8 @@ const StepDetail = ({ step, detail, k }: { step: KycStepName; detail: KycDetail;
         <ReviewForm
           step={step}
           busy={busy}
-          onApprove={(reason) => k.review(step, "APPROVE", reason)}
+          hasBill={step === "ADDRESS" && typeof summary.utilityBillDocumentId === "string"}
+          onApprove={(reason, addressOnBill) => k.review(step, "APPROVE", reason, addressOnBill)}
           onReject={(reason) => k.review(step, "REJECT", reason)}
         />
       )}
@@ -468,7 +528,10 @@ const ReviewHistory = ({ reviews }: { reviews: KycReviewAction[] }) =>
               <td className="py-1.5 pr-3 whitespace-nowrap text-gray-500">{when(r.createdOn)}</td>
               <td className="py-1.5 pr-3 whitespace-nowrap">{shortTitle(r.step)}{r.attempt ? ` #${r.attempt}` : ""}</td>
               <td className="py-1.5 pr-3"><Chip status={r.decision} /></td>
-              <td className="py-1.5 pr-3 text-gray-800">{r.reason}</td>
+              <td className="py-1.5 pr-3 text-gray-800">
+                {r.reason}
+                {r.addressOnBill && <span className="block text-[11px] text-gray-500">Address on the bill: {r.addressOnBill}</span>}
+              </td>
               <td className="py-1.5 text-gray-600">
                 {r.adminName || r.adminEmail}
                 <br />
@@ -540,7 +603,10 @@ const Kyc = () => {
       id: "waiting",
       cell: ({ row }) =>
         row.original.reviewWaitingSince ? (
-          <span className="text-xs font-semibold text-amber-700">since {when(row.original.reviewWaitingSince)}</span>
+          <span className="text-xs font-semibold text-amber-700">
+            since {when(row.original.reviewWaitingSince)}
+            {row.original.addressBillUploaded && <span className="ml-1 rounded-full bg-[#F6EBFE] px-1.5 py-0.5 text-[10px] text-[#7C2EBF]">utility bill</span>}
+          </span>
         ) : (
           <span className="text-xs text-gray-400">-</span>
         ),

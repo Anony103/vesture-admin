@@ -85,11 +85,11 @@ const useKyc = () => {
     }
   };
 
-  const review = async (step: KycStepName, decision: "APPROVE" | "REJECT", reason: string) => {
+  const review = async (step: KycStepName, decision: "APPROVE" | "REJECT", reason: string, addressOnBill?: string) => {
     if (!selectedId) return false;
     setActionLoading(`review-${step}`);
     try {
-      const response = await service.review(selectedId, step, decision, reason);
+      const response = await service.review(selectedId, step, decision, reason, addressOnBill);
       toast.success(response?.message || (decision === "APPROVE" ? "Approved" : "Rejected"));
       refreshAll();
       return true;

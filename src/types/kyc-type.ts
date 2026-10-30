@@ -44,6 +44,7 @@ export type KycListItem = KycCustomer & {
   attention: string[];
   lastActivity: string | null;
   reviewWaitingSince: string | null;
+  addressBillUploaded?: boolean;
 };
 
 export type KycListResponse = {
@@ -84,6 +85,7 @@ export type KycReviewAction = {
   attempt: number | null;
   decision: KycReviewDecision;
   reason: string;
+  addressOnBill?: string | null;
   statusBefore: string | null;
   adminId: string | null;
   adminEmail: string | null;
@@ -121,7 +123,7 @@ export type KycBvnInfo = {
 
 export type KycDocumentMeta = {
   id: string;
-  type: "LIVENESS_SELFIE" | "ID_DOCUMENT";
+  type: "LIVENESS_SELFIE" | "ID_DOCUMENT" | "UTILITY_BILL";
   contentType: string;
   sizeBytes: number;
   sha256: string | null;
