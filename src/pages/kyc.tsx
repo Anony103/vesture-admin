@@ -442,6 +442,78 @@ const StepDetail = ({ step, detail, k }: { step: KycStepName; detail: KycDetail;
   );
 };
 
+// Deactivating a customer: they cannot sign in (an open login stops at once); their money and plans are not touched and the reason is emailed to them.
+const AccountStatusCard = ({ detail, k }: { detail: KycDetail; k: ReturnType<typeof useKyc> }) => {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const deactivated = detail.customer.status === "deactivated" || detail.customer.isActive === false;
+  const busy = k.actionLoading === "customer-status";
+  const ready = reason.trim().length >= 10;
+  // a different customer starts with the form closed and empty
+  useEffect(() => {
+    setOpen(false);
+    setReason("");
+  }, [detail.customer.id]);
+  const submit = async () => {
+    if (await k.changeCustomerStatus(deactivated, reason.trim())) {
+      setOpen(false);
+      setReason("");
+    }
+  };
+  return (
+    <div className="border rounded-md p-3 space-y-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <Chip status={deactivated ? "FAILED" : "VERIFIED"} text={deactivated ? "Deactivated" : "Active"} />
+        <span className="text-[11px] text-gray-500">
+          {deactivated
+            ? "Cannot sign in. Money and plans are untouched; money sent to them still arrives."
+            : "Can sign in and use the app."}
+        </span>
+        {!open && (
+          <button onClick={() => setOpen(true)} className="text-xs text-[#7C2EBF] font-semibold">
+            {deactivated ? "Reactivate" : "Deactivate"}
+          </button>
+        )}
+      </div>
+      {open && (
+        <div className="space-y-2">
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={2}
+            maxLength={1000}
+            placeholder={deactivated ? "Why is this customer being reactivated? (at least 10 characters)" : "Why is this customer being deactivated? (at least 10 characters). The customer is emailed this."}
+            className="w-full border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={submit}
+              disabled={!ready || busy}
+              className={`text-xs text-white rounded-md px-3 py-1.5 disabled:opacity-40 ${deactivated ? "bg-green-600" : "bg-red-600"}`}
+            >
+              {busy ? "Saving..." : deactivated ? "Reactivate customer" : "Deactivate customer"}
+            </button>
+            <button onClick={() => setOpen(false)} className="text-xs text-gray-500">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      {k.statusHistory.length > 0 && (
+        <div className="space-y-1">
+          <p className="text-[11px] uppercase tracking-wide text-gray-400">Status history</p>
+          {k.statusHistory.slice(0, 5).map((h) => (
+            <p key={h.id} className="text-xs text-gray-700">
+              <Chip status={h.action === "DEACTIVATED" ? "FAILED" : "VERIFIED"} text={h.action === "DEACTIVATED" ? "Deactivated" : "Reactivated"} /> {h.adminName || h.adminEmail}{" "}
+              · {when(h.createdOn)} - {h.reason}
+            </p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const BvnCard = ({ bvn, k }: { bvn: KycBvnInfo; k: ReturnType<typeof useKyc> }) => {
   const [shown, setShown] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -683,6 +755,11 @@ const Kyc = () => {
                   <DetailRow label="NIN" value={detail.ninMasked} />
                   <DetailRow label="Next step" value={detail.nextStep ?? "All steps done"} />
                 </div>
+
+                <section>
+                  <h3 className="text-sm font-semibold mb-2">Account status</h3>
+                  <AccountStatusCard detail={detail} k={k} />
+                </section>
 
                 <section>
                   <h3 className="text-sm font-semibold mb-2">Steps</h3>

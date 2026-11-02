@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { SESSION_STORAGE_KEY } from "@/constants";
 import { GET_KYC_DETAIL, GET_KYC_LIST } from "@/constants/query-keys";
+import { CustomerStatusChange } from "@/types/general-type";
 import { KycService } from "@/services/kyc-service";
 import { KycFilter, KycStepName } from "@/types/kyc-type";
 
@@ -55,6 +56,22 @@ const useKyc = () => {
     refetchOnWindowFocus: false,
   });
 
+  const [statusHistory, setStatusHistory] = useState<CustomerStatusChange[]>([]);
+  // deactivation and reactivation history of the customer being looked at
+  const loadStatusHistory = async (userId: string) => {
+    try {
+      const response = await service.getCustomerStatusHistory(userId);
+      setStatusHistory(response?.data ?? []);
+    } catch {
+      setStatusHistory([]);
+    }
+  };
+  useEffect(() => {
+    setStatusHistory([]);
+    if (selectedId) void loadStatusHistory(selectedId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
+
   const handleError = (error: unknown) => {
     if (error instanceof AxiosError) {
       toast.error(error.response?.data?.message || "An error occurred");
@@ -92,6 +109,26 @@ const useKyc = () => {
       const response = await service.review(selectedId, step, decision, reason, addressOnBill);
       toast.success(response?.message || (decision === "APPROVE" ? "Approved" : "Rejected"));
       refreshAll();
+      return true;
+    } catch (error) {
+      handleError(error);
+      return false;
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  /** Deactivate or reactivate the customer being looked at. Returns true when the server accepted it, so the form can close. */
+  const changeCustomerStatus = async (activate: boolean, reason: string) => {
+    if (!selectedId) return false;
+    setActionLoading("customer-status");
+    try {
+      const response = activate
+        ? await service.reactivateCustomer(selectedId, reason)
+        : await service.deactivateCustomer(selectedId, reason);
+      toast.success(response?.message || (activate ? "Customer reactivated" : "Customer deactivated"));
+      refreshAll();
+      void loadStatusHistory(selectedId);
       return true;
     } catch (error) {
       handleError(error);
@@ -151,6 +188,8 @@ const useKyc = () => {
     resetAttempts,
     review,
     revealBvn,
+    changeCustomerStatus,
+    statusHistory,
     retryBankOne,
   };
 };

@@ -1,6 +1,6 @@
 import { baseUrl } from "@/constants";
 import axios from "axios";
-import { ApiResponseType } from "@/types/general-type";
+import { ApiResponseType, CustomerStatusChange } from "@/types/general-type";
 
 export class GeneralAdminService {
   protected _token: string | null = null;
@@ -62,6 +62,34 @@ export class GeneralAdminService {
     console.log(response);
     return response?.data;
   }
+  /** Switches a customer off: they cannot sign in and an open login stops. Money and plans are untouched. The reason is required and is emailed to the customer. */
+  async deactivateCustomer(userId: string, reason: string) {
+    const response = await axios.post<ApiResponseType<{ status: string; action: string }>>(
+      `${baseUrl}api/user/customer/${userId}/deactivate`,
+      { reason },
+      { headers: { Authorization: `Bearer ${this._token}` } }
+    );
+    return response?.data;
+  }
+
+  async reactivateCustomer(userId: string, reason: string) {
+    const response = await axios.post<ApiResponseType<{ status: string; action: string }>>(
+      `${baseUrl}api/user/customer/${userId}/reactivate`,
+      { reason },
+      { headers: { Authorization: `Bearer ${this._token}` } }
+    );
+    return response?.data;
+  }
+
+  /** Every deactivation and reactivation of one customer, newest first: who, why and when. */
+  async getCustomerStatusHistory(userId: string) {
+    const response = await axios.get<{ data: CustomerStatusChange[] }>(
+      `${baseUrl}api/user/customer/${userId}/status-history`,
+      { headers: { Authorization: `Bearer ${this._token}` } }
+    );
+    return response?.data;
+  }
+
   async updateCustomer(payload: {
     userId: string | undefined;
     status: string;
