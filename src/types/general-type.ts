@@ -122,3 +122,17 @@ export interface AdminUser {
   hasBankOneAccount: boolean | null;
 }
 // Example usage:
+
+/** One deactivation or reactivation of a customer. */
+export type CustomerStatusChange = {
+  id: string;
+  userId: string;
+  fromStatus: string | null;
+  toStatus: string | null;
+  action: "DEACTIVATED" | "REACTIVATED";
+  reason: string;
+  adminName: string | null;
+  adminEmail: string | null;
+  adminRole: string | null;
+  createdOn: string;
+};

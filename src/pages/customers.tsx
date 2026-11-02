@@ -39,6 +39,8 @@ const Customers = () => {
     // visibility,
     handleClose,
     handleToggleModal,
+    statusReason,
+    setStatusReason,
     modalState,
     MODAL_TYPE,
     // setValue,
@@ -162,7 +164,7 @@ const Customers = () => {
               className="dropdown-content text-left bg-[#4F4F4F] gap-y-2 cursor-pointer  rounded-md text-sm text-white z-[100] w-52 shadow"
             >
               {row?.original.status === "deactivated" ||
-              row?.original.status === null ? (
+              row?.original.status === "pending" ? (
                 <li
                   onClick={() =>
                     handleToggleModal(
@@ -178,8 +180,7 @@ const Customers = () => {
                 ""
               )}
 
-              {row?.original.status === "ACTIVE" ||
-              row?.original.status === null ? (
+              {row?.original.status !== "deactivated" ? (
                 <li
                   onClick={() =>
                     handleToggleModal(
@@ -418,6 +419,27 @@ const Customers = () => {
                         </span>
                         ?
                       </p>
+                      <p className="text-[11px] text-gray-500">
+                        {modalState === MODAL_TYPE.ACTIVATE_CUSTOMER
+                          ? "They will be able to sign in again, and their money and investments are exactly as they left them. They are emailed."
+                          : "They will not be able to sign in, and a login that is open stops at once. Their money, plans and bank deposits are not touched, money sent to them still arrives, and auto-save is paused. They are emailed the reason."}
+                      </p>
+                      <label className="text-xs font-semibold mt-1" htmlFor="status-reason">
+                        Reason (required, at least 10 characters)
+                      </label>
+                      <textarea
+                        id="status-reason"
+                        value={statusReason}
+                        onChange={(e) => setStatusReason(e.target.value)}
+                        rows={3}
+                        maxLength={1000}
+                        placeholder={
+                          modalState === MODAL_TYPE.ACTIVATE_CUSTOMER
+                            ? "Why is this customer being reactivated?"
+                            : "Why is this customer being deactivated? The customer is shown this."
+                        }
+                        className="w-full border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+                      />
                     </div>
                   </>
                 )}
@@ -427,7 +449,8 @@ const Customers = () => {
                 <div className="flex flex-row gap-4">
                   <button
                     type="submit"
-                    className="text-xs flex bg-[#7C2EBF] py-3 px-4 w-[50%] text-center item-center justify-center text-white rounded-md hover:opacity-80"
+                    disabled={isLoading || statusReason.trim().length < 10}
+                    className="text-xs flex bg-[#7C2EBF] py-3 px-4 w-[50%] text-center item-center justify-center text-white rounded-md hover:opacity-80 disabled:opacity-40"
                   >
                     {/* {isLoading ? (
                       <ClipLoader color="white" size="20" />

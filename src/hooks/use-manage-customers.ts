@@ -42,6 +42,8 @@ const useMangeCustomer = () => {
   const handleClose = () => setOpen(false);
   const [visibility, setVisibility] = useState(false);
   const [customerType, setCustomerType] = useState("all");
+  // why a customer is being deactivated or reactivated (required; the customer is emailed it)
+  const [statusReason, setStatusReason] = useState("");
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,29 +56,32 @@ const useMangeCustomer = () => {
   type FormFields = z.infer<typeof updateUserSchema>;
 
   const onSubmit: SubmitHandler<FormFields> = async () => {
+    if (!selectedUser?.id) return;
+    if (statusReason.trim().length < 10) {
+      toast.error("Please give a reason (at least 10 characters).");
+      return;
+    }
     setIsLoading(true);
     try {
-      // Assuming you have an updateAdmin method and need different parameters
-      const data = await generalAdmin.updateCustomer({
-        userId: selectedUser?.id, // You might need to add this to your FormFields
-        status:
-          modalState === MODAL_TYPE.ACTIVATE_CUSTOMER
-            ? "ACTIVE"
-            : "deactivated",
-      });
-
-      console.log(data);
+      const data =
+        modalState === MODAL_TYPE.ACTIVATE_CUSTOMER
+          ? await generalAdmin.reactivateCustomer(selectedUser.id, statusReason.trim())
+          : await generalAdmin.deactivateCustomer(selectedUser.id, statusReason.trim());
       if (data?.code === 200) {
         toast.success(data?.message);
         setOpen(false);
+        setStatusReason("");
         queryClient.invalidateQueries({ queryKey: [GET_ALL_USERS] });
       }
-      setIsLoading(false);
       return data;
     } catch (error) {
-      console.log(error);
+      toast.error(
+        error instanceof AxiosError
+          ? error.response?.data?.message || "Could not change the customer's status"
+          : "Could not change the customer's status"
+      );
+    } finally {
       setIsLoading(false);
-      // toast.error(error?.response?.data?.message);
     }
   };
 
@@ -110,6 +115,7 @@ const useMangeCustomer = () => {
       return;
     }
     sessionStorage.setItem("selectedAccount", JSON.stringify(data));
+    setStatusReason("");
     setSelectedUser(data);
     setModalState(modalState);
     setOpen(true);
@@ -198,6 +204,8 @@ const useMangeCustomer = () => {
 
     register,
     onSubmit,
+    statusReason,
+    setStatusReason,
     errors,
     customerType,
     setCustomerType,

@@ -25,6 +25,8 @@ export type KycCustomer = {
   email: string;
   phone: string | null;
   bankOneAccountNumber: string | null;
+  status?: string | null;
+  isActive?: boolean;
   // only in the detail view
   firstName?: string | null;
   middleName?: string | null;
