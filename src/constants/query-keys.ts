@@ -18,6 +18,7 @@ export const GET_ALL_ASSETS = "GET_ALL_ASSETS";
 export const GET_ASSET_DETAILS = "GET_ASSET_DETAILS";
 
 export const GET_ALL_RATES = "GET_ALL_RATES";
+export const GET_RATE_HISTORY = "GET_RATE_HISTORY";
 
 export const GET_CREDIT_ENTRY = "GET_CREDIT_ENTRY";
 export const GET_EMPLOYEE_INFOS = "";

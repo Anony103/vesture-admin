@@ -38,6 +38,24 @@ export interface RateType {
   active: boolean;
 }
 
+/** One change to an interest rate: who made it, when, and the rate and status before and after. */
+export interface RateHistoryType {
+  id: string;
+  rateId: string;
+  savingsType: string;
+  tenorLabel: string;
+  previousTenorLabel: string | null;
+  action: "CREATED" | "RATE_CHANGED" | "ACTIVATED" | "DEACTIVATED" | "UPDATED";
+  oldRate: number | null;
+  newRate: number | null;
+  oldActive: boolean | null;
+  newActive: boolean | null;
+  changedByName: string | null;
+  changedByEmail: string | null;
+  changedByRole: string | null;
+  changedOn: string;
+}
+
 export interface AssetCategory {
   id: string;
   name: string;

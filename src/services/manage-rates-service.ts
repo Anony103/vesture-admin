@@ -67,6 +67,16 @@ export class ManageRatesService extends GeneralAdminService {
     return response?.data;
   }
 
+  /** Every change to every rate, newest first (one product when savingsType is given). */
+  async getRateHistory(pageSize: number, currentPage: number, savingsType?: string) {
+    const params = new URLSearchParams({ page: String(currentPage), size: String(pageSize) });
+    if (savingsType) params.append("savingsType", savingsType);
+    const response = await axios.get(`${baseUrl}api/interest-rate/history?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${this._token}` },
+    });
+    return response?.data;
+  }
+
   // async authorizeSingleTransfer(payload: {
   //   userCode: string;
   //   token: string;
