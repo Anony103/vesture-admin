@@ -38,6 +38,52 @@ export interface RateType {
   active: boolean;
 }
 
+/** One rate in a requested set: a range of days (or neither day for "any tenor") and its rate. */
+export interface RateRequestItem {
+  minTenorDays: number | null;
+  maxTenorDays: number | null;
+  annualRate: number;
+}
+
+/** A new rate set for one product, waiting for approval (or already decided). Nothing in it is live until it is approved. */
+export interface RateRequestType {
+  id: string;
+  savingsType: string;
+  mode: "ANY" | "RANGES";
+  status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
+  items: RateRequestItem[];
+  requestedById: string | null;
+  requestedByName: string | null;
+  requestedByEmail: string | null;
+  requestedByRole: string | null;
+  requestedOn: string;
+  decidedByName: string | null;
+  decidedByEmail: string | null;
+  decidedByRole: string | null;
+  decidedOn: string | null;
+  decisionReason: string | null;
+}
+
+/** One change to an interest rate: who made it, when, and the rate and status before and after. */
+export interface RateHistoryType {
+  id: string;
+  rateId: string;
+  savingsType: string;
+  tenorLabel: string;
+  previousTenorLabel: string | null;
+  action: "CREATED" | "RATE_CHANGED" | "ACTIVATED" | "DEACTIVATED" | "UPDATED";
+  oldRate: number | null;
+  newRate: number | null;
+  oldActive: boolean | null;
+  newActive: boolean | null;
+  changedByName: string | null;
+  changedByEmail: string | null;
+  changedByRole: string | null;
+  // set when the change came from an approved request: changedBy is then the approver
+  requestedByName?: string | null;
+  changedOn: string;
+}
+
 export interface AssetCategory {
   id: string;
   name: string;

@@ -67,6 +67,64 @@ export class ManageRatesService extends GeneralAdminService {
     return response?.data;
   }
 
+  /** Every rate, live or not (not paged): used to prefill the form and to spot a product that has both kinds active. */
+  async getAllRatesList() {
+    const response = await axios.get(`${baseUrl}api/interest-rate/all`, {
+      headers: { Authorization: `Bearer ${this._token}` },
+    });
+    return response?.data;
+  }
+
+  /** A whole new rate set for one product. It is pending until someone else approves it; nothing customers use changes before that. */
+  async submitRequest(payload: {
+    savingsType: string;
+    mode: "ANY" | "RANGES";
+    items: { minTenorDays?: number; maxTenorDays?: number; annualRate: number }[];
+  }) {
+    const response = await axios.post(`${baseUrl}api/interest-rate/requests`, payload, {
+      headers: { Authorization: `Bearer ${this._token}` },
+    });
+    return response?.data;
+  }
+
+  async getRequests(status: string, currentPage: number, pageSize: number) {
+    const params = new URLSearchParams({ page: String(currentPage), size: String(pageSize) });
+    if (status) params.append("status", status);
+    const response = await axios.get(`${baseUrl}api/interest-rate/requests?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${this._token}` },
+    });
+    return response?.data;
+  }
+
+  async decideRequest(id: string, action: "approve" | "reject" | "cancel", reason?: string) {
+    const response = await axios.post(
+      `${baseUrl}api/interest-rate/requests/${id}/${action}`,
+      { reason },
+      { headers: { Authorization: `Bearer ${this._token}` } }
+    );
+    return response?.data;
+  }
+
+  /** Emergency stop of one live rate: Super Admin only, immediate, reason required. */
+  async switchOffRate(id: string, reason: string) {
+    const response = await axios.post(
+      `${baseUrl}api/interest-rate/rates/${id}/switch-off`,
+      { reason },
+      { headers: { Authorization: `Bearer ${this._token}` } }
+    );
+    return response?.data;
+  }
+
+  /** Every change to every rate, newest first (one product when savingsType is given). */
+  async getRateHistory(pageSize: number, currentPage: number, savingsType?: string) {
+    const params = new URLSearchParams({ page: String(currentPage), size: String(pageSize) });
+    if (savingsType) params.append("savingsType", savingsType);
+    const response = await axios.get(`${baseUrl}api/interest-rate/history?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${this._token}` },
+    });
+    return response?.data;
+  }
+
   // async authorizeSingleTransfer(payload: {
   //   userCode: string;
   //   token: string;
