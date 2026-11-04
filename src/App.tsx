@@ -23,6 +23,7 @@ import Assets from "./pages/assets";
 import CreditEntry from "./pages/creditentry";
 import Transactions from "./pages/transactions";
 import AuditLogs from "./pages/auditLogs";
+import WebhookLogs from "./pages/webhookLogs";
 import Settings from "./pages/settings";
 // import LedgerPage from "./pages/ledger";   // Ledger is switched off for now
 import VeiwCategoriesPage from "./pages/viewcategories";
@@ -174,6 +175,10 @@ function App() {
         {
           path: "/auditLog",
           element: <AuditLogs />,
+        },
+        {
+          path: "/webhookLogs",
+          element: <WebhookLogs />,
         },
         {
           path: "/settings",

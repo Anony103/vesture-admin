@@ -133,6 +133,12 @@ export const Sidebar: React.FC<Props> = ({ open, handleToggleSidebar }) => {
       id: "10",
     },
     {
+      title: "Webhook Log",
+      path: "/webhookLogs",
+      icon: <TransactionIcon />,
+      id: "17",
+    },
+    {
       title: "Audit Log",
       path: "/auditLog",
       icon: <AuditLogsIcon />,
