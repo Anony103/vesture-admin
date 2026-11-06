@@ -112,6 +112,15 @@ export type Transaction = {
   transactionType: string;
   transactionReason: string;
   transactionDate: string;
+  productType?: string | null;
+
+  // who the money came from and who it went to (credit: sender -> customer, debit: customer -> beneficiary)
+  senderName?: string | null;
+  senderBank?: string | null;
+  senderAccountNumber?: string | null;
+  receiverName?: string | null;
+  receiverBank?: string | null;
+  receiverAccountNumber?: string | null;
 
   created_on: string;
   updated_on: string;
