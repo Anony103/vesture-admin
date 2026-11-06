@@ -6,10 +6,52 @@ import { Transaction } from "../types/table-type";
 // import { users } from "../data/Datafortable";
 import { ActionIcon } from "../components/svg-icons/action-icon";
 import useMangeTransactions from "@/hooks/use-manage-transactions";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+const formatNaira = (value: number) =>
+  `₦${value.toLocaleString("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
+// name, bank and account number of one side of a transaction, one per line; "-" when none is known
+const Party = ({
+  name,
+  bank,
+  account,
+}: {
+  name?: string | null;
+  bank?: string | null;
+  account?: string | null;
+}) => {
+  if (!name && !bank && !account) return <span>-</span>;
+  return (
+    <div className="flex flex-col leading-tight min-w-[150px]">
+      {name && <span className="font-medium">{name}</span>}
+      {bank && <span className="text-xs text-[#6D6C6C]">{bank}</span>}
+      {account && <span className="text-xs text-[#6D6C6C]">{account}</span>}
+    </div>
+  );
+};
+
+const DetailRow = ({ label, value }: { label: string; value?: React.ReactNode }) => (
+  <div className="flex flex-col gap-1 border-b pb-2">
+    <span className="text-[11px] uppercase tracking-wide text-gray-400">{label}</span>
+    <span className="text-sm text-gray-800 break-words">{value || "-"}</span>
+  </div>
+);
+
+const statusTone = (status?: string | null) =>
+  status === "success"
+    ? "bg-green-100 text-green-700"
+    : status === "failed"
+    ? "bg-red-100 text-red-700"
+    : "bg-amber-100 text-amber-800";
 
 const Transactions = () => {
   // useRoleAccess("manager");
+  const [selected, setSelected] = useState<Transaction | null>(null);
   const {
     allTransactions,
     allTransactionsLoading,
@@ -41,29 +83,34 @@ const Transactions = () => {
       header: () => <span>Amount</span>,
       cell: ({ getValue }) => {
         const value = (getValue() as number) ?? 0;
-        return <span className="inline-block w-full">${value.toFixed(2)}</span>;
+        return <span className="inline-block w-full">{formatNaira(value)}</span>;
       },
-    },
-
-    {
-      accessorKey: "bankName",
-      header: () => <span>Bank Name</span>,
-    },
-    {
-      accessorKey: "accountNumber",
-      header: () => <span>Account Number</span>,
     },
     {
       accessorKey: "userFullName",
       header: () => <span>User Full Name</span>,
     },
     {
-      accessorKey: "beneficiaryName",
-      header: () => <span>Beneficiary Name</span>,
+      id: "from",
+      header: () => <span>From</span>,
+      cell: ({ row }) => (
+        <Party
+          name={row.original.senderName}
+          bank={row.original.senderBank}
+          account={row.original.senderAccountNumber}
+        />
+      ),
     },
     {
-      accessorKey: "beneficiaryAccountNumber",
-      header: () => <span>Beneficiary Account Number</span>,
+      id: "to",
+      header: () => <span>To</span>,
+      cell: ({ row }) => (
+        <Party
+          name={row.original.receiverName}
+          bank={row.original.receiverBank}
+          account={row.original.receiverAccountNumber}
+        />
+      ),
     },
     {
       accessorKey: "transactionReference",
@@ -130,7 +177,7 @@ const Transactions = () => {
      {
           accessorKey: "id",
           header: () => <span></span>,
-          cell: () => {
+          cell: ({ row }) => {
             return (
               <div className="dropdown dropdown-end">
                 <div tabIndex={0} className="p-0 cursor-pointer">
@@ -140,8 +187,15 @@ const Transactions = () => {
                   tabIndex={0}
                   className="dropdown-content text-left bg-[#4F4F4F] rounded-md text-sm text-white z-[1] w-52 shadow"
                 >
-                  <li className="py-2 pl-3 cursor-pointer">
-                    <Link to="details">View Details</Link>
+                  <li
+                    className="py-2 pl-3 cursor-pointer"
+                    onClick={() => {
+                      // close the dropdown, then show this row's details
+                      (document.activeElement as HTMLElement | null)?.blur();
+                      setSelected(row.original);
+                    }}
+                  >
+                    View Details
                   </li>
                 
                 </ul>
@@ -265,6 +319,61 @@ const Transactions = () => {
           />
         </div>
         <div></div>
+
+        <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
+          <DialogContent className="bg-white max-w-3xl max-h-[88vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Transaction details</DialogTitle>
+            </DialogHeader>
+            {selected && (
+              <div className="space-y-5">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-2xl font-semibold text-gray-900">
+                    {formatNaira(selected.amount ?? 0)}
+                  </span>
+                  <span
+                    className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${statusTone(selected.transactionStatus)}`}
+                  >
+                    {selected.transactionStatus || "-"}
+                  </span>
+                  <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold capitalize text-gray-600">
+                    {selected.transactionType || "-"}
+                  </span>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="rounded-md bg-gray-50 p-3">
+                    <span className="text-[11px] uppercase tracking-wide text-gray-400 block mb-1">From</span>
+                    <Party
+                      name={selected.senderName}
+                      bank={selected.senderBank}
+                      account={selected.senderAccountNumber}
+                    />
+                  </div>
+                  <div className="rounded-md bg-gray-50 p-3">
+                    <span className="text-[11px] uppercase tracking-wide text-gray-400 block mb-1">To</span>
+                    <Party
+                      name={selected.receiverName}
+                      bank={selected.receiverBank}
+                      account={selected.receiverAccountNumber}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-x-6 gap-y-3">
+                  <DetailRow label="Customer" value={selected.userFullName} />
+                  <DetailRow label="Reason" value={selected.transactionReason} />
+                  <DetailRow label="Transaction reference" value={selected.transactionReference} />
+                  <DetailRow label="Product" value={selected.productType} />
+                  <DetailRow label="Transaction date" value={selected.transactionDate} />
+                  <DetailRow label="Created on" value={selected.created_on} />
+                  <DetailRow label="Updated on" value={selected.updated_on} />
+                  <DetailRow label="Transaction id" value={selected.id} />
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </article>
     </Container>
   );
