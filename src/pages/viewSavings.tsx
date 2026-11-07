@@ -11,6 +11,7 @@ import { SavingsType } from "../types/table-type";
 import { useParams } from "react-router-dom";
 // import { ClipLoader } from "react-spinners";
 import useMangeSavings from "@/hooks/use-manage-savings";
+import { productLabel } from "@/utils/productLabel";
 // const style = {
 //   position: "absolute" as const,
 //   top: "50%",
@@ -45,13 +46,13 @@ function ViewSavings(): ReactElement {
      },
      {
        accessorKey: "name",
-       header: () => <span>Savings Name</span>,
+       header: () => <span>Investment Name</span>,
      },
      {
        accessorKey: "product.productName",
        header: () => <span>Product Name</span>,
        cell: ({ getValue }) => {
-         const value = (getValue() as string) ?? "";
+         const value = productLabel(getValue() as string);
          return <span className="inline-block w-full">{value}</span>;
        },
      },
@@ -64,7 +65,7 @@ function ViewSavings(): ReactElement {
        header: () => <span>Amount</span>,
        cell: ({ getValue }) => {
          const value = (getValue() as number) ?? 0;
-         return <span className="inline-block w-full">${value.toFixed(2)}</span>;
+         return <span className="inline-block w-full">₦{value.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>;
        },
      },
      {

@@ -20,7 +20,7 @@ const TABS: { label: string; value: WebhookFilter }[] = [
 const MEANING: Record<string, string> = {
   CREDITED: "Money was added to the customer's wallet or plan.",
   DUPLICATE: "Flutterwave sent a transfer we had already credited, so nothing moved.",
-  IGNORED: "Not a bank transfer into a customer's account (a card payment, a failed charge, a payout event), so nothing to credit.",
+  IGNORED: "Not money for a Vesture customer (a card payment, a failed charge, a payout event, or another app's payment on the shared Flutterwave account), so nothing to credit.",
   REFUSED: "Rejected and not credited: wrong secret hash, no such transaction at Flutterwave, details that differ, or no customer with that email.",
   RETRY: "We could not confirm it with Flutterwave right now, so we answered with an error and Flutterwave will send it again.",
   ERROR: "Something failed inside our server while handling it.",
@@ -50,6 +50,18 @@ const HASH_TEXT: Record<string, string> = {
   MISMATCH: "Did not match",
   SERVER_HASH_UNSET: "Not set on our server",
   NOT_APPLICABLE: "-",
+};
+
+const SOURCE_SHORT: Record<string, string> = {
+  WEBHOOK: "Webhook",
+  CATCH_UP: "Catch-up job",
+  STAGING_TEST: "Staging test",
+};
+
+const SOURCE_LONG: Record<string, string> = {
+  WEBHOOK: "Flutterwave called our webhook",
+  CATCH_UP: "Catch-up job (found by asking Flutterwave)",
+  STAGING_TEST: "Staging test funding (a super admin simulated this transfer; no real money moved)",
 };
 
 const when = (value: string | null | undefined) =>
@@ -89,7 +101,7 @@ const WebhookLogs = () => {
       header: "Source",
       accessorKey: "source",
       cell: ({ row }) => (
-        <span className="text-xs">{row.original.source === "CATCH_UP" ? "Catch-up job" : "Webhook"}</span>
+        <span className="text-xs">{SOURCE_SHORT[row.original.source] ?? row.original.source}</span>
       ),
     },
     { header: "Event", accessorKey: "event", cell: ({ row }) => <span className="text-xs">{row.original.event ?? "-"}</span> },
@@ -185,7 +197,7 @@ const WebhookLogs = () => {
                 </div>
                 <div className="grid md:grid-cols-2 gap-x-6 gap-y-3">
                   <Row label="Received" value={when(detail.createdOn)} />
-                  <Row label="Source" value={detail.source === "CATCH_UP" ? "Catch-up job (found by asking Flutterwave)" : "Flutterwave called our webhook"} />
+                  <Row label="Source" value={SOURCE_LONG[detail.source] ?? detail.source} />
                   <Row label="Event" value={detail.event} />
                   <Row label="Amount" value={money(detail.amount, detail.currency)} />
                   <Row label="Flutterwave status" value={detail.providerStatus} />

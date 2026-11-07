@@ -91,7 +91,7 @@ export const MainLayout = () => {
                 {location.pathname === "/dashboard" && <h1></h1>}
                 {location.pathname === "/customers" && <h1>Customers</h1>}
                 {location.pathname === "/manageAdmins" && <h1>Admin</h1>}
-                {location.pathname === "/savings" && <h1>Savings</h1>}
+                {location.pathname === "/savings" && <h1>Investment</h1>}
                 {location.pathname === "/assetsCategories" && (
                   <h1>Categories</h1>
                 )}
@@ -100,6 +100,7 @@ export const MainLayout = () => {
                 {location.pathname === "/transactions" && <h1>Transactions History</h1>}
                 {location.pathname === "/auditLog" && <h1>Audit Logs</h1>}
                 {location.pathname === "/webhookLogs" && <h1>Webhook Log</h1>}
+                {location.pathname === "/stagingFunding" && <h1>Test Funding</h1>}
                 {location.pathname === "/ledger" && <h1>Ledger</h1>}
                 {location.pathname === "/interestRates" && (
                   <h1>Interest Rates</h1>

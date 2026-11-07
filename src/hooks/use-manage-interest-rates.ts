@@ -41,9 +41,9 @@ const useMangeInterestRates = () => {
 
   const [savingTypes] = useState([
     { id: "1", name: "Smart Lock", value: "SmartLock" },
-    { id: "2", name: "Save Small Small", value: "SSS" },
+    { id: "2", name: "SmallVest", value: "SSS" },
     { id: "3", name: "Buy Now Pay Later", value: "BNPL" },
-    { id: "4", name: "Target Savings", value: "TargetSavings" },
+    { id: "4", name: "Target Lock", value: "TargetSavings" },
   ]);
 
   const handleToggleModal = (modalState: string, data: User | null) => {

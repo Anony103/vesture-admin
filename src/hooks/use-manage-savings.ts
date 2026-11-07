@@ -15,6 +15,7 @@ import { User } from "@/types";
 import { GET_ALL_SAVINGS } from "@/constants/query-keys";
 import { useAppContext } from "@/context/AppContext";
 import * as XLSX from "xlsx";
+import { productLabel } from "@/utils/productLabel";
 
 const MODAL_TYPE = {
   CREATE_ADMIN: "CREATE_ADMIN",
@@ -174,8 +175,8 @@ const useMangeSavings = (id ?: string) => {
 
     const formattedData = allSavings.map((item: SavingsType) => ({
       "Customer Name": item.user,
-      "Savings Name": item.name,
-      "Product Name": item.product?.productName,
+      "Investment Name": item.name,
+      "Product Name": productLabel(item.product?.productName),
       "Product Code": item.product?.productCode,
       Amount: item.amount,
       Status: item.status,
@@ -184,9 +185,9 @@ const useMangeSavings = (id ?: string) => {
     const worksheet = XLSX.utils.json_to_sheet(formattedData);
     const workbook = XLSX.utils.book_new();
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Savings");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Investments");
 
-    XLSX.writeFile(workbook, "savings-data.xlsx");
+    XLSX.writeFile(workbook, "investments-data.xlsx");
   };
 
   return {

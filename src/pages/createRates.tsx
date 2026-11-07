@@ -9,29 +9,29 @@ import { ManageRatesService } from "@/services/manage-rates-service";
 
 const PRODUCTS = [
   { value: "SmartLock", label: "Smart Lock", tenors: true },
-  { value: "TargetSavings", label: "Target Savings", tenors: true },
-  { value: "SSS", label: "Save Small Small", tenors: false },
+  { value: "TargetSavings", label: "Target Lock", tenors: true },
+  { value: "SSS", label: "SmallVest", tenors: false },
   { value: "BNPL", label: "Buy Now Pay Later", tenors: false },
 ];
 
-// The durations a customer can pick (3, 6, 9 or 12 months) in days. A month is 28 to 31 days, so each is a few days wide.
+// The durations a customer can pick on the web (3, 6, 9 or 12 months), which are exactly 90, 180, 270 and 365 days.
 const DURATIONS = [
-  { label: "3 months", from: 89, to: 92 },
-  { label: "6 months", from: 181, to: 184 },
-  { label: "9 months", from: 273, to: 276 },
-  { label: "12 months", from: 365, to: 366 },
+  { label: "3 months", from: 90, to: 90 },
+  { label: "6 months", from: 180, to: 180 },
+  { label: "9 months", from: 270, to: 270 },
+  { label: "12 months", from: 365, to: 365 },
 ];
 
 type Row = { label?: string; min: string; max: string; rate: string };
 const emptyRow = (): Row => ({ min: "", max: "", rate: "" });
 
-// The four lengths customers can pick, as ranges of days with no gaps between them, so any length from day 1 to 5 years gets a rate (the web offers 3, 6, 9 and
-// 12 months, but the phone app lets a customer pick any date up to 5 years ahead). Only the rate is left to type.
+// The four lengths customers can pick, as ranges of days with no gaps between them: 1-90 days is the 3-month rate, 91-180 the 6-month rate, 181-270 the
+// 9-month rate and 271-365 the 12-month rate. A length outside every range has no rate and cannot be bought. Only the rate is left to type.
 const DEFAULT_RANGES = [
-  { label: "3 months", min: "1", max: "135" },
-  { label: "6 months", min: "136", max: "228" },
-  { label: "9 months", min: "229", max: "320" },
-  { label: "12 months", min: "321", max: "1825" },
+  { label: "3 months", min: "1", max: "90" },
+  { label: "6 months", min: "91", max: "180" },
+  { label: "9 months", min: "181", max: "270" },
+  { label: "12 months", min: "271", max: "365" },
 ];
 const defaultRows = (): Row[] => DEFAULT_RANGES.map((d) => ({ ...d, rate: "" }));
 
@@ -142,7 +142,7 @@ const CreateRates = () => {
 
           <div className="grid md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold" htmlFor="rate-product">Savings Type</label>
+              <label className="text-xs font-semibold" htmlFor="rate-product">Investment Type</label>
               <select id="rate-product" value={savingsType} onChange={(e) => setSavingsType(e.target.value)} className={input}>
                 {PRODUCTS.map((p) => (
                   <option key={p.value} value={p.value}>{p.label}</option>
@@ -194,8 +194,11 @@ const CreateRates = () => {
                 + Add another range
               </button>
               <p className="text-[11px] text-gray-500">
-                A plan gets the rate of the range its length in days falls in (both ends included). 3 months is about 89 to 92 days, 6 months 181 to 184, 9 months 273 to 276 and
-                12 months 365 to 366, so leave a little room. Ranges must not overlap.
+                A plan gets the rate of the range its length in days falls in (both ends included). The web offers 90, 180, 270 and 365 days: 1 to 90 days is the 3-month
+                rate, 91 to 180 the 6-month rate, 181 to 270 the 9-month rate and 271 to 365 the 12-month rate. Ranges must not overlap.
+              </p>
+              <p className="rounded-md border border-amber-200 bg-amber-50 p-2 text-xs font-semibold text-amber-900">
+                Note: payout can only happen at 90, 180, 270 and 365 days.
               </p>
 
               <div className="border rounded-md p-3 space-y-1">
