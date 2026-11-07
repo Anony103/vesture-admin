@@ -24,6 +24,7 @@ import CreditEntry from "./pages/creditentry";
 import Transactions from "./pages/transactions";
 import AuditLogs from "./pages/auditLogs";
 import WebhookLogs from "./pages/webhookLogs";
+import StagingFunding from "./pages/stagingFunding";
 import Settings from "./pages/settings";
 // import LedgerPage from "./pages/ledger";   // Ledger is switched off for now
 import VeiwCategoriesPage from "./pages/viewcategories";
@@ -179,6 +180,10 @@ function App() {
         {
           path: "/webhookLogs",
           element: <WebhookLogs />,
+        },
+        {
+          path: "/stagingFunding",
+          element: <StagingFunding />,
         },
         {
           path: "/settings",

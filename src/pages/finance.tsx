@@ -146,7 +146,7 @@ const interestPaymentColumns: ColumnDef<InterestPayment>[] = [
   },
   {
     accessorKey: "savingsType",
-    header: () => <span>Savings Type</span>,
+    header: () => <span>Investment Type</span>,
     cell: ({ getValue }) => {
       const value = (getValue() as string) ?? "";
       return <span className="inline-block capitalize">{value}</span>;
@@ -154,7 +154,7 @@ const interestPaymentColumns: ColumnDef<InterestPayment>[] = [
   },
   {
     accessorKey: "savingsId",
-    header: () => <span>Savings ID</span>,
+    header: () => <span>Investment ID</span>,
     cell: ({ getValue }) => {
       const value = (getValue() as string) ?? "";
       return (

@@ -63,10 +63,10 @@ const Dashboard = () => {
   //   { id: 2, name: "Group C", value: 100 },
   // ];
   const chartData: GroupData[] = [
-    { id: 0, name: "SSS", value: savingsPercentage?.sssPercentage },
+    { id: 0, name: "SmallVest", value: savingsPercentage?.sssPercentage },
     {
       id: 1,
-      name: "Target Savings",
+      name: "Target Lock",
       value: savingsPercentage?.targetSavingsPercentage,
     },
     {
@@ -206,7 +206,7 @@ const Dashboard = () => {
         <div className=" grid grid-cols-1 md:grid-cols-4 gap-4">
           {" "}
           <DashboardCard
-            title="Savings"
+            title="Investment"
             amount={stats?.totalSavings}
             icon={Savings}
             loading={statsLoading}
@@ -233,7 +233,7 @@ const Dashboard = () => {
         <div className="grid gap-8 grid-cols-1 md:grid-cols-3  mt-4 ">
           <div className=" bg-white rounded p-4 h-[300px] ">
             <div className="flex justify-between items-center">
-              <p className="text-xs font-semibold">Savings</p>
+              <p className="text-xs font-semibold">Investment</p>
               <div className="flex">
                 <p className="text-[10px] text-[#7C2EBF] bg-[#F6EBFE] rounded-lg px-2 py-1">
                   {displayTime}
@@ -300,17 +300,17 @@ const Dashboard = () => {
 
             <ul className="flex flex-row mt-0 gap-2 justify-between items-center mx-auto">
               <li className="flex items-center text-xs">
-                <span className="text-[#7C2EBF] text-xl mr-2">•</span> bnpl
+                <span className="text-[#7C2EBF] text-xl mr-2">•</span> Buy Now Pay Later
               </li>
               <li className="flex items-center text-xs">
-                <span className="text-[#C87DFE] text-xl mr-2">•</span> smartLock
+                <span className="text-[#C87DFE] text-xl mr-2">•</span> Smart Lock
               </li>
               <li className="flex items-center text-xs whitespace-nowrap">
-                <span className="text-[#DDAEFE] text-xl mr-2">•</span> sss
+                <span className="text-[#DDAEFE] text-xl mr-2">•</span> SmallVest
               </li>
               <li className="flex items-center text-xs whitespace-nowrap">
                 <span className="text-[#A97DFE] text-xl mr-2">•</span>{" "}
-                targetSavings
+                Target Lock
               </li>
             </ul>
           </div>

@@ -93,7 +93,7 @@ export const createRateSchema = z
     id: z.string().optional(),
     savingsType: z
       .string()
-      .min(1, { message: "Savings type is required" })
+      .min(1, { message: "Investment type is required" })
       .trim(),
 
     annualRate: z
@@ -117,7 +117,7 @@ export const createRateSchema = z
   .superRefine((value, ctx) => {
     if (value.tenorMode !== "BAND") return;
     if (!TENOR_PRODUCTS.includes(value.savingsType)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["tenorMode"], message: "Only Smart Lock and Target Savings have tenors" });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["tenorMode"], message: "Only Smart Lock and Target Lock have tenors" });
       return;
     }
     if (value.minTenorDays === undefined) {

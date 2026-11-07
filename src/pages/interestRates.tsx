@@ -21,9 +21,9 @@ import useMangeInterestRates from "@/hooks/use-manage-interest-rates";
 
 const PRODUCT_NAMES: Record<string, string> = {
   SmartLock: "Smart Lock",
-  SSS: "Save Small Small",
+  SSS: "SmallVest",
   BNPL: "Buy Now Pay Later",
-  TargetSavings: "Target Savings",
+  TargetSavings: "Target Lock",
 };
 
 // An active rate is the one new plans are given; an inactive one is kept on record but not used. The two must not look alike.

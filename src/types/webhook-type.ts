@@ -5,8 +5,8 @@ export type WebhookLogItem = {
   id: string;
   createdOn: string;
   provider: string;
-  /** WEBHOOK: the provider called us. CATCH_UP: we found the transfer by asking the provider. */
-  source: "WEBHOOK" | "CATCH_UP";
+  /** WEBHOOK: the provider called us. CATCH_UP: we found the transfer by asking the provider. STAGING_TEST: a super admin simulated it on staging. */
+  source: "WEBHOOK" | "CATCH_UP" | "STAGING_TEST";
   event: string | null;
   flwRef: string | null;
   txRef: string | null;

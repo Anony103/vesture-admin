@@ -5,6 +5,12 @@ import { IoEyeOffOutline } from "react-icons/io5";
 import Button from "../components/shared/button";
 import { Input } from "@/components/ui/input";
 import useUpdatePassword from "@/hooks/use-update-password";
+import useProviderSettings from "@/hooks/use-provider-settings";
+import ProviderSettingsPanel from "@/components/provider-settings-panel";
+import useAppAccess from "@/hooks/use-app-access";
+import AppAccessPanel from "@/components/app-access-panel";
+import useProductAvailability from "@/hooks/use-product-availability";
+import ProductAvailabilityPanel from "@/components/product-availability-panel";
 
 // interface Props {
 //     title:string
@@ -12,6 +18,10 @@ import useUpdatePassword from "@/hooks/use-update-password";
 
 function Settings(): ReactElement {
   const [showPassword, setShowPassword] = useState(false);
+  // only a super admin is told the Providers tab exists
+  const providerSettings = useProviderSettings();
+  const appAccess = useAppAccess();
+  const productAvailability = useProductAvailability();
   const {
     register,
     handleSubmit,
@@ -42,7 +52,7 @@ function Settings(): ReactElement {
               </ul> */}
 
               <ul className="flex flex-col gap-x-4 gap-y-8 text-sm">
-                {["Security", "Auto Save"].map((item) => {
+                {["Security", "Auto Save", ...(providerSettings.allowed ? ["Providers"] : []), ...(appAccess.allowed ? ["App Access"] : []), ...(productAvailability.allowed ? ["Products"] : [])].map((item) => {
                   return (
                     <li
                       className={`${
@@ -161,6 +171,9 @@ function Settings(): ReactElement {
               ) : (
                 ""
               )}
+              {settingOptions === "Providers" ? <ProviderSettingsPanel /> : null}
+              {settingOptions === "App Access" ? <AppAccessPanel /> : null}
+              {settingOptions === "Products" ? <ProductAvailabilityPanel /> : null}
               {settingOptions === "Auto Save" ? (
                 <div>
                   <h1 className="text-lg font-bold mb-6"></h1>

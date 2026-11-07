@@ -24,6 +24,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { NavLink } from "react-router-dom";
+import { useStagingFundingStatus } from "@/hooks/use-staging-funding";
 
 // import { NOTIFY_TOKEN_SESSION_STORAGE_KEY } from "@/constants";
 // import { toast } from "react-toastify";
@@ -35,6 +36,8 @@ type Props = {
 };
 export const Sidebar: React.FC<Props> = ({ open, handleToggleSidebar }) => {
   const navigate = useNavigate();
+  // only staging, and only a super admin, is told this exists
+  const stagingFunding = useStagingFundingStatus();
   // const { user } = useUser();
 
   const onLinkClick = () => {
@@ -65,7 +68,7 @@ export const Sidebar: React.FC<Props> = ({ open, handleToggleSidebar }) => {
       id: "3",
     },
     {
-      title: "Savings",
+      title: "Investment",
       path: "/savings/all",
       icon: <SavingsIcon />,
       id: "4",
@@ -144,6 +147,16 @@ export const Sidebar: React.FC<Props> = ({ open, handleToggleSidebar }) => {
       icon: <AuditLogsIcon />,
       id: "11",
     },
+    ...(stagingFunding.enabled
+      ? [
+          {
+            title: "Test Funding",
+            path: "/stagingFunding",
+            icon: <TransactionIcon />,
+            id: "18",
+          },
+        ]
+      : []),
     {
       title: "Settings",
       path: "/settings",
