@@ -24,6 +24,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { NavLink } from "react-router-dom";
+import { EnvironmentBadge } from "@/components/shared/environment-badge";
 import { useStagingFundingStatus } from "@/hooks/use-staging-funding";
 
 // import { NOTIFY_TOKEN_SESSION_STORAGE_KEY } from "@/constants";
@@ -195,6 +196,7 @@ export const Sidebar: React.FC<Props> = ({ open, handleToggleSidebar }) => {
             >
               {/* dark lettering for the white sidebar */}
               <img src="/vesture-logo-dark.png" alt="Vesture" className="h-7 w-auto" />
+              <EnvironmentBadge className="mt-1" />
             </h1>
             <div>
               <HamburgerMenuIcon
