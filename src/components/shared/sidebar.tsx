@@ -195,8 +195,10 @@ export const Sidebar: React.FC<Props> = ({ open, handleToggleSidebar }) => {
               } duration-300`}
             >
               {/* dark lettering for the white sidebar */}
-              <img src="/vesture-logo-dark.png" alt="Vesture" className="h-7 w-auto" />
-              <EnvironmentBadge className="mt-1" />
+              <span className="flex items-center gap-2">
+                <img src="/vesture-logo-dark.png" alt="Vesture" className="h-7 w-auto" />
+                <EnvironmentBadge />
+              </span>
             </h1>
             <div>
               <HamburgerMenuIcon
