@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sidebar } from "../components/shared/sidebar";
 import { Container } from "../components/shared/container";
 import { Outlet } from "react-router-dom";
@@ -15,12 +15,19 @@ import { useIdleTimer } from "react-idle-timer";
 import { toast } from "react-toastify";
 import { FaUserCircle } from "react-icons/fa";
 import { useAppContext } from "@/context/AppContext";
+import { EnvironmentBadge } from "@/components/shared/environment-badge";
+import { ENVIRONMENT } from "@/constants/environment";
 
 export const MainLayout = () => {
   const { isAuthLoading, user } = useUser();
   const { searchTerm, handleSearchChange } = useAppContext();
 
   const location = useLocation();
+  // the tab says which backend it is on, so several tabs can be told apart
+  useEffect(() => {
+    const base = document.title.replace(/^\[[^\]]*\]\s*/, "");
+    document.title = `[${ENVIRONMENT.label}] ${base}`;
+  }, []);
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(window.innerWidth > 768);
   const navigate = useNavigate();
@@ -113,6 +120,7 @@ export const MainLayout = () => {
               </div>
 
               <div className="flex flex-row gap-2 justify-center items-center ">
+                <EnvironmentBadge className="mr-2" />
                 {/* <div>
                   <img src={profile} alt="" />
                 </div> */}
