@@ -11,6 +11,8 @@ import useAppAccess from "@/hooks/use-app-access";
 import AppAccessPanel from "@/components/app-access-panel";
 import useProductAvailability from "@/hooks/use-product-availability";
 import ProductAvailabilityPanel from "@/components/product-availability-panel";
+import useDepositFunding from "@/hooks/use-deposit-funding";
+import DepositFundingPanel from "@/components/deposit-funding-panel";
 
 // interface Props {
 //     title:string
@@ -22,6 +24,7 @@ function Settings(): ReactElement {
   const providerSettings = useProviderSettings();
   const appAccess = useAppAccess();
   const productAvailability = useProductAvailability();
+  const depositFunding = useDepositFunding();
   const {
     register,
     handleSubmit,
@@ -52,7 +55,7 @@ function Settings(): ReactElement {
               </ul> */}
 
               <ul className="flex flex-col gap-x-4 gap-y-8 text-sm">
-                {["Security", "Auto Save", ...(providerSettings.allowed ? ["Providers"] : []), ...(appAccess.allowed ? ["App Access"] : []), ...(productAvailability.allowed ? ["Products"] : [])].map((item) => {
+                {["Security", "Auto Save", ...(providerSettings.allowed ? ["Providers"] : []), ...(appAccess.allowed ? ["App Access"] : []), ...(productAvailability.allowed ? ["Products"] : []), ...(depositFunding.allowed ? ["Deposit Funding"] : [])].map((item) => {
                   return (
                     <li
                       className={`${
@@ -174,6 +177,7 @@ function Settings(): ReactElement {
               {settingOptions === "Providers" ? <ProviderSettingsPanel /> : null}
               {settingOptions === "App Access" ? <AppAccessPanel /> : null}
               {settingOptions === "Products" ? <ProductAvailabilityPanel /> : null}
+              {settingOptions === "Deposit Funding" ? <DepositFundingPanel /> : null}
               {settingOptions === "Auto Save" ? (
                 <div>
                   <h1 className="text-lg font-bold mb-6"></h1>
