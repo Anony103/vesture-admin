@@ -1,3 +1,4 @@
+import { Tabs } from "@/components/shared/tabs";
 import { Container } from "../components/shared/container";
 // import { useRoleAccess } from "@/hooks";
 import { DataTable } from "../components/shared/data-table";
@@ -224,29 +225,14 @@ const Savings = () => {
             </button>
           </div>
 
-          <nav className="flex flex-row gap-4 sm:gap-8 text-xs sm:text-sm text-gray-500 pt-6 px-4 sm:px-6 bg-white border-b border-gray-200">
-            <div></div>
-            {SavingstabItems.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={customerType === tab.id}
-                onClick={() => setCustomerType(tab.id)}
-                className={`
-            relative mx-2 pb-4 font-medium
-            hover:text-purple-600 focus:outline-none 
-            ${
-              customerType === tab.id
-                ? "text-purple-600 font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-purple-600"
-                : "text-gray-500 hover:after:absolute hover:after:bottom-0 hover:after:left-0 hover:after:right-0 hover:after:h-0.5 hover:after:bg-purple-300"
-            }
-          `}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
+          <div className="px-4 pt-4 sm:px-6">
+            <Tabs
+              tabs={SavingstabItems.map((tab) => ({ value: tab.id, label: tab.label }))}
+              value={customerType}
+              onChange={setCustomerType}
+              label="Investment type"
+            />
+          </div>
 
           <div>
             <DataTable

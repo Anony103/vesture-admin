@@ -1,3 +1,4 @@
+import { StatCard } from "@/components/shared/stat-card";
 import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 import { Container } from "../components/shared/container";
@@ -10,11 +11,7 @@ const naira = (n: number | null | undefined) => `₦${Number(n ?? 0).toLocaleStr
 const day = (v: string) => new Date(`${v}T00:00:00`).toLocaleDateString("en-NG", { dateStyle: "medium" });
 
 const Tile = ({ label, value, note, strong }: { label: string; value: string; note: string; strong?: boolean }) => (
-  <div className={`rounded-md border p-4 ${strong ? "border-[#7C2EBF] bg-[#F6EBFE]" : "border-gray-200"}`}>
-    <p className="text-[11px] uppercase tracking-wide text-gray-500">{label}</p>
-    <p className="mt-1 text-xl font-bold text-gray-900">{value}</p>
-    <p className="mt-1 text-[11px] leading-4 text-gray-500">{note}</p>
-  </div>
+  <StatCard label={label} value={value} hint={note} tone={strong ? "brand" : "neutral"} />
 );
 
 /** The report as a CSV the finance team can open in a spreadsheet: one row a day, then the total. */

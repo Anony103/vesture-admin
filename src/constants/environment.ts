@@ -29,8 +29,8 @@ export const ENVIRONMENT = {
 };
 
 export const ENVIRONMENT_STYLES: Record<EnvironmentKind, string> = {
-  TEST: "bg-gray-200 text-gray-700",
-  DEVELOPMENT: "bg-blue-100 text-blue-800",
-  STAGING: "bg-amber-100 text-amber-800 border border-amber-300",
-  LIVE: "bg-red-600 text-white",
+  TEST: "bg-panel-hi text-fg2 border border-line",
+  DEVELOPMENT: "bg-blue-500/15 text-blue-600 dark:text-blue-300 border border-blue-500/30",
+  STAGING: "bg-gold/15 text-gold border border-gold/35",
+  LIVE: "bg-danger text-white shadow-[0_0_14px_rgb(var(--danger-rgb)/0.55)]",
 };

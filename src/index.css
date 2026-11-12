@@ -2,47 +2,700 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: "Poppins";
-  src: url("../../pay-rise/src/assets/Poppins/Poppins-Regular.ttf")
-    format("woff");
-}
-/* *{
-  border: 1px solid red
-} */
-html,body {
-  margin: 0;
-  height: auto;
-  font-family: "Poppins", sans-serif;
-  background-color: #EEEEEE;
- 
+/* ==========================================================================
+   Vesture Admin theme
+   Dark is the default; the light theme is switched on with data-theme="light" (see lib/theme.ts and index.html).
+   Colours that Tailwind needs to apply an opacity to are stored as "r g b" triplets (--brand-rgb and friends);
+   the rest are ready-made colours.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  --ink: #0a0714; /* page */
+  --deck: #110c1f; /* sidebar, popovers */
+  --surface: #15102a; /* solid card, for things that must not show what is behind them */
+  --panel: rgba(255, 255, 255, 0.045); /* glass card */
+  --panel-hi: rgba(255, 255, 255, 0.075);
+  --field: rgba(255, 255, 255, 0.05);
+  --line: rgba(255, 255, 255, 0.09);
+  --line-hi: rgba(255, 255, 255, 0.16);
+  --topbar: rgba(10, 7, 20, 0.72);
+  --head-tint: rgba(255, 255, 255, 0.035);
+
+  --fg-rgb: 243 239 251;
+  --fg2-rgb: 180 171 201;
+  --fg3-rgb: 125 115 150;
+  --brand-rgb: 164 92 255;
+  --mint-rgb: 53 224 194;
+  --gold-rgb: 255 181 71;
+  --danger-rgb: 255 92 122;
+  --sky-rgb: 96 165 250;
+
+  --fg: rgb(var(--fg-rgb));
+  --fg-2: rgb(var(--fg2-rgb));
+  --fg-3: rgb(var(--fg3-rgb));
+  --brand: rgb(var(--brand-rgb));
+  --mint: rgb(var(--mint-rgb));
+  --gold: rgb(var(--gold-rgb));
+  --danger: rgb(var(--danger-rgb));
+
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 40px -22px rgba(0, 0, 0, 0.7);
+  --glow-brand: 0 0 0 1px rgba(var(--brand-rgb) / 0.5), 0 8px 28px -8px rgba(var(--brand-rgb) / 0.55);
+
+  --aurora:
+    radial-gradient(900px 520px at 88% -8%, rgba(164, 92, 255, 0.22), transparent 62%),
+    radial-gradient(720px 520px at -6% 18%, rgba(53, 224, 194, 0.09), transparent 62%),
+    radial-gradient(820px 620px at 55% 118%, rgba(164, 92, 255, 0.12), transparent 62%);
+
+  /* shadcn tokens (HSL triplets) so Card, Input, Select, Dialog and the rest follow the theme */
+  --background: 254 48% 6%;
+  --foreground: 258 56% 96%;
+  --card: 256 44% 9%;
+  --card-foreground: 258 56% 96%;
+  --popover: 256 44% 10%;
+  --popover-foreground: 258 56% 96%;
+  --primary: 266 100% 68%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 256 30% 14%;
+  --secondary-foreground: 258 56% 96%;
+  --muted: 256 30% 14%;
+  --muted-foreground: 258 22% 73%;
+  --accent: 256 30% 15%;
+  --accent-foreground: 258 56% 96%;
+  --destructive: 347 100% 68%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 256 20% 17%;
+  --input: 256 20% 20%;
+  --ring: 266 100% 68%;
+  --chart-1: 266 100% 68%;
+  --chart-2: 170 74% 55%;
+  --chart-3: 36 100% 64%;
+  --chart-4: 347 100% 68%;
+  --chart-5: 210 100% 70%;
+  --radius: 0.75rem;
 }
 
-/* Add this to your main CSS file */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --ink: #f4f1fa;
+  --deck: #ffffff;
+  --surface: #ffffff;
+  --panel: rgba(255, 255, 255, 0.78);
+  --panel-hi: #ffffff;
+  --field: #ffffff;
+  --line: rgba(27, 18, 48, 0.1);
+  --line-hi: rgba(27, 18, 48, 0.2);
+  --topbar: rgba(244, 241, 250, 0.82);
+  --head-tint: rgba(27, 18, 48, 0.04);
+
+  --fg-rgb: 27 18 48;
+  --fg2-rgb: 91 82 115;
+  --fg3-rgb: 138 130 160;
+  --brand-rgb: 124 46 191;
+  --mint-rgb: 15 157 134;
+  --gold-rgb: 184 116 0;
+  --danger-rgb: 212 41 77;
+  --sky-rgb: 37 99 235;
+
+  --shadow-card: 0 1px 2px rgba(27, 18, 48, 0.05), 0 14px 32px -22px rgba(60, 30, 110, 0.35);
+  --glow-brand: 0 0 0 1px rgba(var(--brand-rgb) / 0.4), 0 8px 24px -10px rgba(var(--brand-rgb) / 0.5);
+
+  --aurora:
+    radial-gradient(900px 520px at 88% -8%, rgba(124, 46, 191, 0.12), transparent 62%),
+    radial-gradient(720px 520px at -6% 18%, rgba(15, 157, 134, 0.07), transparent 62%);
+
+  --background: 260 47% 96%;
+  --foreground: 258 45% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 258 45% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 258 45% 14%;
+  --primary: 272 61% 47%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 258 40% 95%;
+  --secondary-foreground: 258 45% 14%;
+  --muted: 258 40% 95%;
+  --muted-foreground: 256 14% 47%;
+  --accent: 258 40% 95%;
+  --accent-foreground: 258 45% 14%;
+  --destructive: 347 70% 48%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 256 24% 90%;
+  --input: 256 24% 86%;
+  --ring: 272 61% 47%;
+}
+
+/* ---------- base ---------- */
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background-color: var(--ink);
+  color: var(--fg);
+  font-family: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* the aurora sits behind everything and never takes a click */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--aurora);
+}
+
+::selection {
+  background: rgba(var(--brand-rgb) / 0.35);
+}
+
+:focus-visible {
+  outline: 2px solid rgba(var(--brand-rgb) / 0.7);
+  outline-offset: 2px;
+}
+
+/* Scrollbars wear the brand purple and only show while something is scrolling (lib/scroll-hint.ts marks the element with
+   data-scrolling for a moment after each scroll). Moving the pointer onto the bar's own spot reveals it too, so it can still be dragged. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  background-color: transparent;
+}
+[data-scrolling]::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--brand-rgb) / 0.55);
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--brand-rgb) / 0.85);
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+/* daisyUI sets scrollbar-color on everything, and Chrome then ignores the ::-webkit-scrollbar rules above; hand control back */
+*,
+*:hover {
+  scrollbar-color: auto;
+}
+/* tables: a slimmer bar with a faint track (kept outside @layer so it ranks with the rules above) */
+.v-table-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.v-table-scroll[data-scrolling]::-webkit-scrollbar-track {
+  background: rgb(var(--brand-rgb) / 0.06);
+}
+/* Firefox has no ::-webkit-scrollbar, so it gets the standard properties */
+@supports not selector(::-webkit-scrollbar) {
+  *,
+  *:hover {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  [data-scrolling],
+  [data-scrolling]:hover {
+    scrollbar-color: rgb(var(--brand-rgb) / 0.6) transparent;
+  }
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
+    letter-spacing: -0.015em;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    background-color: var(--field);
+    color: var(--fg);
+    border-color: var(--line-hi);
+  }
+  ::placeholder {
+    color: var(--fg-3);
+    opacity: 1;
+  }
+  /* the number steppers are switched off in Input; keep other browsers' date pickers readable in dark */
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: var(--picker-filter, invert(0.85));
+  }
+}
+
+:root[data-theme="light"] {
+  --picker-filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- reusable pieces (also used by the shared components) ---------- */
+
+@layer components {
+  .glass {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-card);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+  }
+
+  .v-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+  }
+
+  .v-mono {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* buttons */
+  .v-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.625rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  }
+  .v-btn:active {
+    transform: translateY(1px);
+  }
+  .v-btn:disabled {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .v-btn-primary {
+    color: #fff;
+    background: linear-gradient(135deg, rgb(var(--brand-rgb)), rgb(var(--brand-rgb) / 0.78));
+    box-shadow: var(--glow-brand);
+  }
+  .v-btn-primary:hover {
+    filter: brightness(1.08);
+  }
+  .v-btn-soft {
+    color: var(--brand);
+    background: rgba(var(--brand-rgb) / 0.14);
+    border: 1px solid rgba(var(--brand-rgb) / 0.28);
+  }
+  .v-btn-soft:hover {
+    background: rgba(var(--brand-rgb) / 0.22);
+  }
+  .v-btn-ghost {
+    color: var(--fg-2);
+    background: var(--panel);
+    border: 1px solid var(--line);
+  }
+  .v-btn-ghost:hover {
+    color: var(--fg);
+    background: var(--panel-hi);
+    border-color: var(--line-hi);
+  }
+
+  /* status chips */
+  .v-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 999px;
+    padding: 0.1875rem 0.625rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--fg-2);
+    background: var(--panel-hi);
+    border: 1px solid var(--line);
+  }
+  .v-chip-ok {
+    color: var(--mint);
+    background: rgba(var(--mint-rgb) / 0.12);
+    border-color: rgba(var(--mint-rgb) / 0.28);
+  }
+  .v-chip-warn {
+    color: var(--gold);
+    background: rgba(var(--gold-rgb) / 0.12);
+    border-color: rgba(var(--gold-rgb) / 0.3);
+  }
+  .v-chip-bad {
+    color: var(--danger);
+    background: rgba(var(--danger-rgb) / 0.12);
+    border-color: rgba(var(--danger-rgb) / 0.3);
+  }
+  .v-chip-brand {
+    color: var(--brand);
+    background: rgba(var(--brand-rgb) / 0.14);
+    border-color: rgba(var(--brand-rgb) / 0.3);
+  }
+
+  /* data tables (DataTable uses these) */
+  /* a table that runs edge to edge inside a page card: only a hairline above it */
+  .v-table-wrap {
+    border-top: 1px solid var(--line);
+    overflow: hidden;
+  }
+  /* a table that is a card of its own (used where the table sits inside padding) */
+  .v-table-boxed {
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    background: var(--panel);
+    overflow: hidden;
+  }
+  .v-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+  }
+  /* the table scrolls inside its own box; the header row stays pinned */
+  .v-table-scroll {
+    overflow: auto;
+    max-height: 70vh;
+  }
+  .v-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 0.875rem 0.75rem;
+    text-align: left;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+    /* solid, so rows scroll behind it without showing through */
+    background-color: var(--surface);
+    background-image: linear-gradient(var(--head-tint), var(--head-tint));
+    /* an inset line, because a normal border would scroll away from a pinned cell */
+    box-shadow: inset 0 -1px 0 var(--line);
+  }
+  .v-table tbody td {
+    padding: 0.875rem 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--fg);
+    border-bottom: 1px solid var(--line);
+  }
+  .v-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+  .v-table tbody tr {
+    transition: background-color 0.15s ease;
+  }
+  .v-table tbody tr:hover {
+    background: rgba(var(--brand-rgb) / 0.07);
+  }
+}
+
+/* ---------- dashboard widgets ---------- */
+
+@keyframes v-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes v-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* fade-up on arrival; stagger with style={{ animationDelay: "80ms" }} */
+.v-rise {
+  animation: v-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.v-skeleton {
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, var(--panel) 25%, var(--panel-hi) 50%, var(--panel) 75%);
+  background-size: 200% 100%;
+  animation: v-shimmer 1.4s linear infinite;
+}
+
+/* KPI card: set --accent to an "r g b" triplet */
+.v-kpi {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.v-kpi::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -55%;
+  right: -25%;
+  width: 75%;
+  height: 170%;
+  background: radial-gradient(closest-side, rgb(var(--accent) / 0.2), transparent);
+  opacity: 0.9;
+  transition: opacity 0.3s ease, transform 0.4s ease;
+}
+.v-kpi::after {
+  content: "";
+  position: absolute;
+  left: 1.25rem;
+  right: 1.25rem;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(var(--accent) / 0.8), transparent);
+}
+.v-kpi:hover {
+  transform: translateY(-3px);
+  border-color: rgb(var(--accent) / 0.4);
+  box-shadow: var(--shadow-card), 0 18px 40px -22px rgb(var(--accent) / 0.55);
+}
+.v-kpi:hover::before {
+  transform: scale(1.15);
+}
+
+/* segmented control */
+.v-seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 0.75rem;
+  background: var(--field);
+  border: 1px solid var(--line);
+}
+.v-seg button {
+  border-radius: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--fg-3);
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.v-seg button:hover {
+  color: var(--fg);
+}
+.v-seg button[aria-pressed="true"] {
+  color: var(--fg);
+  background: rgb(var(--brand-rgb) / 0.2);
+  box-shadow: inset 0 0 0 1px rgb(var(--brand-rgb) / 0.35);
+}
+
+/* ---------- tabs ---------- */
+
+.v-tabs {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 0.875rem;
+  background: var(--field);
+  border: 1px solid var(--line);
+}
+.v-tabs-mark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 0.625rem;
+  background: rgb(var(--brand-rgb) / 0.2);
+  box-shadow: inset 0 0 0 1px rgb(var(--brand-rgb) / 0.38), 0 6px 18px -8px rgb(var(--brand-rgb) / 0.6);
+  transition: transform 0.35s cubic-bezier(0.3, 0.8, 0.3, 1), width 0.35s cubic-bezier(0.3, 0.8, 0.3, 1),
+    height 0.2s ease;
+  pointer-events: none;
+}
+.v-tabs button[role="tab"] {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.625rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--fg-3);
+  transition: color 0.2s ease;
+}
+.v-tabs button[role="tab"]:hover {
+  color: var(--fg);
+}
+.v-tabs button[role="tab"][aria-selected="true"] {
+  color: var(--fg);
+}
+.v-tab-count {
+  min-width: 1.25rem;
+  border-radius: 999px;
+  padding: 0.0625rem 0.375rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-align: center;
+  color: var(--fg-2);
+  background: var(--panel-hi);
+}
+.v-tab-count-hot {
+  color: var(--gold);
+  background: rgb(var(--gold-rgb) / 0.16);
+}
+
+/* ---------- summary figures ---------- */
+
+.v-stat {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0.875rem;
+  background: linear-gradient(160deg, rgb(var(--accent) / 0.12), rgb(var(--accent) / 0.03) 60%), var(--panel);
+  padding: 0.875rem 1rem 1rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.v-stat::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.75rem;
+  bottom: 0.75rem;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: rgb(var(--accent));
+  box-shadow: 0 0 14px rgb(var(--accent) / 0.7);
+}
+.v-stat:hover {
+  transform: translateY(-2px);
+  border-color: rgb(var(--accent) / 0.4);
+}
+.v-stat .v-mono {
+  color: var(--fg);
+}
+
+/* ---------- shared looks for the page containers every screen already has ---------- */
+
+/* The white block that holds a page's table or form becomes a bordered, softly shadowed card in both themes. */
+:is(div, section, article).bg-white:is(.rounded, .rounded-md, .rounded-lg, .rounded-xl) {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-card);
+}
+
+/* form fields that carry the old fixed styling */
+:is(input, select, textarea):is(.rounded-md, .rounded-sm) {
+  border-radius: 0.625rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+:is(input, select, textarea).border-gray-300:focus {
+  border-color: rgb(var(--brand-rgb) / 0.6);
+}
+
+/* solid purple action buttons */
+:is(button, a).bg-\[\#7C2EBF\]:not(.rounded-full) {
+  background-image: linear-gradient(135deg, #9a4df0, #7c2ebf);
+  border-radius: 0.625rem;
+  font-weight: 600;
+  box-shadow: 0 8px 22px -10px rgba(124, 46, 191, 0.8);
+  transition: filter 0.2s ease, transform 0.15s ease;
+}
+:is(button, a).bg-\[\#7C2EBF\]:not(.rounded-full):hover {
+  filter: brightness(1.1);
+}
+:is(button, a).bg-\[\#7C2EBF\]:not(.rounded-full):active {
+  transform: translateY(1px);
+}
+:is(button, a).bg-\[\#7C2EBF\]:disabled {
+  opacity: 0.55;
+}
+
+/* range sliders (the track is drawn by the element's own background) */
+input[type="range"].appearance-none::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 3px solid var(--brand);
+  box-shadow: 0 0 0 4px rgb(var(--brand-rgb) / 0.2), 0 4px 10px rgba(0, 0, 0, 0.3);
+  cursor: grab;
+}
+input[type="range"].appearance-none::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 3px solid var(--brand);
+  box-shadow: 0 0 0 4px rgb(var(--brand-rgb) / 0.2);
+  cursor: grab;
+}
+
+/* ---------- toasts ---------- */
+
 .Toastify__toast {
-  font-family: 'Inter', sans-serif;
-  border-radius: 8px !important;
+  font-family: "DM Sans", system-ui, sans-serif;
+  border-radius: 12px !important;
   padding: 12px 16px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  background: var(--surface) !important;
+  color: var(--fg) !important;
+  border: 1px solid var(--line-hi);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.6) !important;
   min-height: 50px !important;
 }
 
 .Toastify__toast--success {
-  background: #f0fdf4 !important;
-  color: #166534 !important;
-  border-left: 4px solid #22c55e !important;
+  border-left: 4px solid var(--mint) !important;
 }
 
 .Toastify__toast--error {
-  background: #fef2f2 !important;
-  color: #991b1b !important;
-  border-left: 4px solid #ef4444 !important;
+  border-left: 4px solid var(--danger) !important;
 }
 
 .Toastify__toast--warning {
-  background: #7C2EBF !important;
-  color: white !important;
-  border-left: 4px solid #7C2EBF !important;
+  border-left: 4px solid var(--gold) !important;
+}
+
+.Toastify__toast--info {
+  border-left: 4px solid var(--brand) !important;
 }
 
 .Toastify__toast-icon {
@@ -51,7 +704,7 @@ html,body {
 }
 
 .Toastify__close-button {
-  color: inherit !important;
+  color: var(--fg-2) !important;
   opacity: 0.7 !important;
   align-self: center !important;
 }
@@ -61,82 +714,220 @@ html,body {
 }
 
 .Toastify__progress-bar--success {
-  background: #22c55e !important;
+  background: var(--mint) !important;
 }
 
 .Toastify__progress-bar--error {
-  background: #ef4444 !important;
+  background: var(--danger) !important;
 }
 
 .Toastify__progress-bar--warning {
-  background: #eab308 !important;
+  background: var(--gold) !important;
 }
 
-
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-  }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
+.Toastify__progress-bar--info {
+  background: var(--brand) !important;
 }
 
+/* ==========================================================================
+   Dark-theme bridge for pages that still use fixed light colours.
+   The pages written before the redesign use bg-white, text-gray-500, #7C2EBF and so on. In the dark theme those are
+   re-mapped here so every page stays readable until it is converted to the theme colours. Nothing here applies in light.
+   ========================================================================== */
 
+  /* surfaces */
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+:root:not([data-theme="light"]) .bg-white,
+:root:not([data-theme="light"]) .hover\:bg-white:hover {
+    background-color: var(--surface);
+}
+
+:root:not([data-theme="light"]) .bg-gray-50,
+:root:not([data-theme="light"]) .bg-gray-100,
+:root:not([data-theme="light"]) .hover\:bg-gray-50:hover,
+:root:not([data-theme="light"]) .hover\:bg-gray-100:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+:root:not([data-theme="light"]) .bg-gray-200,
+:root:not([data-theme="light"]) .hover\:bg-gray-200:hover {
+    background-color: rgba(255, 255, 255, 0.09);
+}
+
+:root:not([data-theme="light"]) .bg-gray-300 {
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+:root:not([data-theme="light"]) .bg-\[\#4F4F4F\],
+:root:not([data-theme="light"]) .bg-\[\#434343\] {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+:root:not([data-theme="light"]) .bg-\[\#EEEEEE\] {
+    background-color: var(--ink);
+}
+
+  /* text */
+
+:root:not([data-theme="light"]) .text-black,
+:root:not([data-theme="light"]) .text-gray-100,
+:root:not([data-theme="light"]) .text-gray-800,
+:root:not([data-theme="light"]) .text-gray-900,
+:root:not([data-theme="light"]) .text-gray-700,
+:root:not([data-theme="light"]) .text-\[\#434343\] {
+    color: var(--fg);
+}
+
+:root:not([data-theme="light"]) .text-gray-600,
+:root:not([data-theme="light"]) .text-gray-500,
+:root:not([data-theme="light"]) .text-\[\#595959\] {
+    color: var(--fg-2);
+}
+
+:root:not([data-theme="light"]) .text-gray-400,
+:root:not([data-theme="light"]) .text-\[\#6D6C6C\],
+:root:not([data-theme="light"]) .text-\[\#8D8D8D\],
+:root:not([data-theme="light"]) .text-\[\#8C8C8C\],
+:root:not([data-theme="light"]) .text-\[\#A8A8A8\],
+:root:not([data-theme="light"]) .text-\[\#E4E4E4\] {
+    color: var(--fg-3);
+}
+
+:root:not([data-theme="light"]) .placeholder-gray-400::placeholder {
+    color: var(--fg-3);
+}
+
+  /* borders */
+
+:root:not([data-theme="light"]) .border-gray-100,
+:root:not([data-theme="light"]) .border-gray-200,
+:root:not([data-theme="light"]) .border-gray-300,
+:root:not([data-theme="light"]) .border-gray-400,
+:root:not([data-theme="light"]) .border-\[\#A8A8A8\],
+:root:not([data-theme="light"]) .border-black {
+    border-color: var(--line-hi);
+}
+
+:root:not([data-theme="light"]) .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--line);
+}
+
+  /* brand purple: lighter so it reads on dark */
+
+:root:not([data-theme="light"]) .text-\[\#7C2EBF\],
+:root:not([data-theme="light"]) .text-purple-600,
+:root:not([data-theme="light"]) .text-purple-700 {
+    color: var(--brand);
+}
+
+:root:not([data-theme="light"]) .border-\[\#7C2EBF\] {
+    border-color: var(--brand);
+}
+
+:root:not([data-theme="light"]) .bg-\[\#F6EBFE\],
+:root:not([data-theme="light"]) .bg-purple-50,
+:root:not([data-theme="light"]) .bg-purple-100 {
+    background-color: rgba(var(--brand-rgb) / 0.14);
+}
+
+:root:not([data-theme="light"]) .bg-\[\#E2CEF3\],
+:root:not([data-theme="light"]) .bg-purple-300 {
+    background-color: rgba(var(--brand-rgb) / 0.24);
+}
+
+:root:not([data-theme="light"]) .text-\[\#DDAEFE\],
+:root:not([data-theme="light"]) .text-\[\#CEADEB\],
+:root:not([data-theme="light"]) .text-\[\#C87DFE\],
+:root:not([data-theme="light"]) .text-\[\#A97DFE\] {
+    color: var(--brand);
+}
+
+  /* status colours: tinted glass with a bright label */
+
+:root:not([data-theme="light"]) .bg-green-50,
+:root:not([data-theme="light"]) .bg-green-100 {
+    background-color: rgba(var(--mint-rgb) / 0.13);
+}
+
+:root:not([data-theme="light"]) .text-green-500,
+:root:not([data-theme="light"]) .text-green-600,
+:root:not([data-theme="light"]) .text-green-700,
+:root:not([data-theme="light"]) .text-green-800,
+:root:not([data-theme="light"]) .text-\[\#2C9720\] {
+    color: var(--mint);
+}
+
+:root:not([data-theme="light"]) .border-green-200 {
+    border-color: rgba(var(--mint-rgb) / 0.3);
+}
+
+:root:not([data-theme="light"]) .bg-red-50,
+:root:not([data-theme="light"]) .bg-red-100 {
+    background-color: rgba(var(--danger-rgb) / 0.13);
+}
+
+:root:not([data-theme="light"]) .text-red-400,
+:root:not([data-theme="light"]) .text-red-500,
+:root:not([data-theme="light"]) .text-red-600,
+:root:not([data-theme="light"]) .text-red-700,
+:root:not([data-theme="light"]) .text-red-800,
+:root:not([data-theme="light"]) .text-\[\#E70E02\] {
+    color: var(--danger);
+}
+
+:root:not([data-theme="light"]) .border-red-200 {
+    border-color: rgba(var(--danger-rgb) / 0.3);
+}
+
+:root:not([data-theme="light"]) .bg-amber-50,
+:root:not([data-theme="light"]) .bg-amber-100,
+:root:not([data-theme="light"]) .bg-orange-50,
+:root:not([data-theme="light"]) .bg-yellow-50 {
+    background-color: rgba(var(--gold-rgb) / 0.13);
+}
+
+:root:not([data-theme="light"]) .text-amber-600,
+:root:not([data-theme="light"]) .text-amber-700,
+:root:not([data-theme="light"]) .text-amber-800,
+:root:not([data-theme="light"]) .text-amber-900,
+:root:not([data-theme="light"]) .text-orange-700,
+:root:not([data-theme="light"]) .text-yellow-500,
+:root:not([data-theme="light"]) .text-\[\#B58A00\] {
+    color: var(--gold);
+}
+
+:root:not([data-theme="light"]) .border-amber-200,
+:root:not([data-theme="light"]) .border-amber-300 {
+    border-color: rgba(var(--gold-rgb) / 0.32);
+}
+
+:root:not([data-theme="light"]) .bg-blue-50,
+:root:not([data-theme="light"]) .bg-blue-100 {
+    background-color: rgba(96, 165, 250, 0.15);
+}
+
+:root:not([data-theme="light"]) .text-blue-600,
+:root:not([data-theme="light"]) .text-blue-700,
+:root:not([data-theme="light"]) .text-blue-800 {
+    color: #8ab8ff;
+}
+
+  /* leave solid coloured buttons and the strong red "LIVE" badge as they are; only the glare is trimmed */
+
+:root:not([data-theme="light"]) .bg-red-600,
+:root:not([data-theme="light"]) .bg-red-500 {
+    background-color: rgb(var(--danger-rgb));
+}
+
+:root:not([data-theme="light"]) .bg-green-600,
+:root:not([data-theme="light"]) .bg-green-500 {
+    background-color: rgb(var(--mint-rgb));
+    color: #05221d;
+}
+
+  /* the dialog and popover shadows are already dark; make the dim layer behind them a little deeper */
+
+:root:not([data-theme="light"]) .bg-black\/80,
+:root:not([data-theme="light"]) .bg-black\/40 {
+    background-color: rgba(6, 3, 14, 0.72);
 }

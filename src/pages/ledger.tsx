@@ -1,3 +1,4 @@
+import { Tabs } from "@/components/shared/tabs";
 import { useState } from "react";
 import { Container } from "../components/shared/container";
 import { Overview } from "../components/ledger/overview";
@@ -23,16 +24,8 @@ const LedgerPage = () => {
   return (
     <Container>
       <article className="mt-6 min-h-screen">
-        <div className="flex flex-wrap gap-6 text-xs text-[#6D6C6C] bg-white rounded-md px-4 pt-4 mb-4">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`pb-3 ${tab === t.id ? "border-b-2 border-[#7C2EBF] text-[#7C2EBF] font-semibold" : ""}`}
-            >
-              {t.label}
-            </button>
-          ))}
+        <div className="mb-4">
+          <Tabs tabs={TABS.map((t) => ({ value: t.id, label: t.label }))} value={tab} onChange={setTab} label="Ledger sections" />
         </div>
         {current.view}
       </article>

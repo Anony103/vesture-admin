@@ -8,10 +8,10 @@ export default {
   theme: {
   	extend: {
   		fontFamily: {
-  			poppins: [
-  				'Poppins',
-  				'sans-serif'
-  			]
+  			sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+  			display: ['"Bricolage Grotesque"', '"DM Sans"', 'system-ui', 'sans-serif'],
+  			mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+  			poppins: ['"DM Sans"', 'system-ui', 'sans-serif']
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -19,6 +19,22 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			// the Vesture theme colours (see src/index.css); the /NN opacity forms work, e.g. bg-brand/20
+  			brand: 'rgb(var(--brand-rgb) / <alpha-value>)',
+  			mint: 'rgb(var(--mint-rgb) / <alpha-value>)',
+  			gold: 'rgb(var(--gold-rgb) / <alpha-value>)',
+  			danger: 'rgb(var(--danger-rgb) / <alpha-value>)',
+  			fg: 'rgb(var(--fg-rgb) / <alpha-value>)',
+  			fg2: 'rgb(var(--fg2-rgb) / <alpha-value>)',
+  			fg3: 'rgb(var(--fg3-rgb) / <alpha-value>)',
+  			ink: 'var(--ink)',
+  			deck: 'var(--deck)',
+  			surface: 'var(--surface)',
+  			panel: 'var(--panel)',
+  			'panel-hi': 'var(--panel-hi)',
+  			field: 'var(--field)',
+  			line: 'var(--line)',
+  			'line-hi': 'var(--line-hi)',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

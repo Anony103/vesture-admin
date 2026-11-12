@@ -1,3 +1,5 @@
+import { StatCard } from "@/components/shared/stat-card";
+import { Tabs } from "@/components/shared/tabs";
 import { ReactElement, useState } from "react";
 import { Container } from "../components/shared/container";
 import { IoIosArrowBack } from "react-icons/io";
@@ -133,54 +135,22 @@ function ViewCategories(): ReactElement {
                 </p>
               </div>
             </div>
-            <div className="flex gap-8 w-[100%] md:w-[30%] mt-4 md:mt-0">
-              <div className="h-full bg-[#F6EBFE] py-8 px-2 gap-2 flex flex-col text-center justify-center items-center rounded-md w-[50%]">
-                {categoriesDetailsLoading ? (
-                  <ClipLoader size="10px" />
-                ) : (
-                  categoriesDetails?.assets?.length
-                )}
-                <p className="text-[#8D8D8D] text-xs">Sub Categories</p>
-              </div>
-              <div className="h-full bg-[#F6EBFE] py-8 px-2 gap-2 flex flex-col text-center justify-center items-center rounded-md w-[50%]">
-                <p className="text-[#7C2EBF] text-medium font-bold">
-                  {categoriesDetailsLoading ? (
-                    <ClipLoader size="10px" />
-                  ) : (
-                    categoriesDetails?.assets?.length
-                  )}
-                </p>
-                <p className="text-[#8D8D8D] text-xs">Assets</p>
-              </div>
+            <div className="mt-4 grid w-full grid-cols-2 gap-3 md:mt-0 md:w-[34%]">
+              <StatCard
+                label="Sub Categories"
+                tone="sky"
+                value={categoriesDetailsLoading ? <ClipLoader size="10px" /> : categoriesDetails?.assets?.length}
+              />
+              <StatCard
+                label="Assets"
+                tone="brand"
+                value={categoriesDetailsLoading ? <ClipLoader size="10px" /> : categoriesDetails?.assets?.length}
+              />
             </div>
           </div>
           <div className=" bg-white ">
-            <div className="flex flex-row  gap-10 text-xs text-[#6D6C6C] pt-6 px-2">
-              {/* <p
-                className={`${
-                  customerType === "subCategories"
-                    ? "border-b-2 border-[#7C2EBF] text-[#7C2EBF] font-semibold"
-                    : ""
-                } mx-2 pb-6`}
-                onClick={() => {
-                  setCustomerType("subCategories");
-                }}
-              >
-                Sub Categories{" "}
-              </p> */}
-              <p
-                className={`${
-                  customerType === "assets"
-                    ? "border-b-2 border-[#7C2EBF] text-[#7C2EBF] font-semibold"
-                    : ""
-                } mx-2 pb-6`}
-                onClick={() => {
-                  setCustomerType("assets");
-                }}
-              >
-                {" "}
-                Assets{" "}
-              </p>
+            <div className="px-4 pt-4">
+              <Tabs tabs={[{ value: "assets", label: "Assets" }]} value={customerType} onChange={setCustomerType} />
             </div>
             {customerType ? (
               <div>

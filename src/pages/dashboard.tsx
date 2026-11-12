@@ -1,9 +1,5 @@
 import { Container } from "../components/shared/container";
 import DashboardCard from "../components/dashboard/DashboardCard";
-import Savings from "../assets/savings.svg";
-import Customer from "../assets/customers.svg";
-import Assets from "../assets/assets.svg";
-import Categories from "../assets/categories.svg";
 // import { useRoleAccess } from "@/hooks";
 import PieChartComp from "../components/dashboard/PieChart";
 import BarChartComponent from "../components/dashboard/BarChart";
@@ -13,27 +9,8 @@ import { ColumnDef } from "@tanstack/react-table";
 // import { users } from "../data/Datafortable";
 import { User } from "../types";
 import useDashboard from "@/hooks/use-dashboard";
-import TabItem from "@/components/tabItem";
-import {
-  Dialog,
-  // DialogTrigger,
-  // DialogContent,
-  // DialogHeader,
-  // DialogTitle,
-  // DialogDescription,
-  // DialogClose,
-} from "@/components/ui/dialog";
-import React from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  // DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { Panel } from "@/components/shared/panel";
+import { BarChart3, Gem, Layers, PieChart as PieChartIcon, TrendingUp, Users } from "lucide-react";
 import { Tabs } from "@/data/ItemData";
 const Dashboard = () => {
   // useRoleAccess("manager");
@@ -128,11 +105,11 @@ const Dashboard = () => {
 
         // if (!isEnabled) return <span className="text-red-500">Disabled</span>;
         // if (!isLocked) return <span className="text-red-500">Locked</span>;
-     if (status === "deactivated")
-          return <span className="text-red-500">{status}</span>;
+        if (status === "deactivated")
+          return <span className="v-chip v-chip-bad">{status}</span>;
         if (status === "pending")
-          return <span className="text-yellow-500">{status}</span>;
-        return <span className="text-green-500">{status}</span>;
+          return <span className="v-chip v-chip-warn">{status}</span>;
+        return <span className="v-chip v-chip-ok">{status}</span>;
       },
     },
     {
@@ -200,155 +177,170 @@ const Dashboard = () => {
     { title: "This Year", value: "this-year" },
   ];
 
+  // one colour per product, in the order of chartData above
+  const productColors = ["var(--brand)", "var(--mint)", "rgb(var(--sky-rgb))", "var(--gold)"];
+
+  const transactions = monthlyTransaction ?? [];
+  const volume = transactions.reduce(
+    (sum: number, row: { totalAmount: number }) => sum + (Number(row.totalAmount) || 0),
+    0
+  );
+  const peak = transactions.reduce(
+    (best: { month: string; totalAmount: number } | null, row: { month: string; totalAmount: number }) =>
+      !best || row.totalAmount > best.totalAmount ? row : best,
+    null
+  );
+  const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
+  const noInvestmentData = chartData.every((item) => !item.value);
+
   return (
     <Container>
-      <article className="min-h-screen">
-        <div className=" grid grid-cols-1 md:grid-cols-4 gap-4">
-          {" "}
+      <article className="min-h-screen space-y-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <DashboardCard
             title="Investment"
             amount={stats?.totalSavings}
-            icon={Savings}
+            icon={TrendingUp}
+            accent="164 92 255"
+            to="/savings/all"
             loading={statsLoading}
+            delay={0}
           />
           <DashboardCard
-            title="Customer"
+            title="Customers"
             amount={stats?.totalCustomers}
-            icon={Customer}
+            icon={Users}
+            accent="53 224 194"
+            to="/customers"
             loading={statsLoading}
+            delay={70}
           />
           <DashboardCard
             title="Assets"
             amount={stats?.totalAssets}
-            icon={Assets}
+            icon={Gem}
+            accent="96 165 250"
+            to="/assets"
             loading={statsLoading}
+            delay={140}
           />
           <DashboardCard
             title="Categories"
             amount={stats?.totalAssetCategories}
-            icon={Categories}
+            icon={Layers}
+            accent="255 181 71"
+            to="/assetsCategories"
             loading={statsLoading}
+            delay={210}
           />
         </div>
-        <div className="grid gap-8 grid-cols-1 md:grid-cols-3  mt-4 ">
-          <div className=" bg-white rounded p-4 h-[300px] ">
-            <div className="flex justify-between items-center">
-              <p className="text-xs font-semibold">Investment</p>
-              <div className="flex">
-                <p className="text-[10px] text-[#7C2EBF] bg-[#F6EBFE] rounded-lg px-2 py-1">
-                  {displayTime}
-                </p>
-                <Dialog>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="flex items-center text-customRed focus:outline-none">
-                        <ChevronDown className=" h-[16px]" />
-                      </button>
-                    </DropdownMenuTrigger>
 
-                    <DropdownMenuContent
-                      className="w-56 p-0 bg-white"
-                      align="center"
-                      sideOffset={4}
-                      forceMount
-                    >
-                      {/* Header */}
-                      <DropdownMenuLabel className="font-normal mt-2">
-                        {/* <p className="text-[14px] text-[#8C8C8C]">
-                        Select your preferred wallet
-                      </p> */}
-                      </DropdownMenuLabel>
-
-                      {/* Dynamically generated wallet items */}
-                      {options?.map((item, index: number) => (
-                        <React.Fragment key={index}>
-                          {/* Add separator before all items except the first */}
-                          {index > 0 && (
-                            <DropdownMenuSeparator className="h-[2px] " />
-                          )}
-                          <DropdownMenuItem
-                            onSelect={() => {
-                              setMonth(item?.value);
-                              setDisplayTime(item.title);
-                            }}
-                            className="hover:bg-gray-100 py-2 cursor-pointer border-b-2 py-4"
-                          >
-                            <p className="text-[14px] font-medium leading-none">
-                              {item?.title}
-                            </p>
-                          </DropdownMenuItem>
-                        </React.Fragment>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </Dialog>
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-5">
+          <Panel
+            className="xl:col-span-2"
+            delay={280}
+            title="Investment mix"
+            subtitle="Share of each product"
+            action={
+              <div className="v-seg" role="group" aria-label="Period">
+                {options.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    aria-pressed={displayTime.toLowerCase() === option.title.toLowerCase()}
+                    onClick={() => {
+                      setMonth(option.value);
+                      setDisplayTime(option.title);
+                    }}
+                  >
+                    {option.title.replace("This ", "")}
+                  </button>
+                ))}
               </div>
-            </div>
-            {chartData.every((item) => item.value === 0) ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <div className="text-4xl mb-2">🫙</div>
-                <p className="text-gray-500 text-sm font-semibold">
-                  No chart data yet
-                </p>
-                <p className="text-gray-400 text-xs">
-                  Start saving to see your progress here!
-                </p>
+            }
+          >
+            {noInvestmentData ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-2 py-10 text-center">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl border border-line bg-panel-hi text-fg3">
+                  <PieChartIcon size={22} />
+                </span>
+                <p className="text-sm font-semibold">No investments in this period</p>
+                <p className="text-xs text-fg3">Try a wider period.</p>
               </div>
             ) : (
-              <PieChartComp data={chartData} />
+              <PieChartComp data={chartData} colors={productColors} />
             )}
+          </Panel>
 
-            <ul className="flex flex-row mt-0 gap-2 justify-between items-center mx-auto">
-              <li className="flex items-center text-xs">
-                <span className="text-[#7C2EBF] text-xl mr-2">•</span> Buy Now Pay Later
-              </li>
-              <li className="flex items-center text-xs">
-                <span className="text-[#C87DFE] text-xl mr-2">•</span> Smart Lock
-              </li>
-              <li className="flex items-center text-xs whitespace-nowrap">
-                <span className="text-[#DDAEFE] text-xl mr-2">•</span> SmallVest
-              </li>
-              <li className="flex items-center text-xs whitespace-nowrap">
-                <span className="text-[#A97DFE] text-xl mr-2">•</span>{" "}
-                Target Lock
-              </li>
-            </ul>
-          </div>
-          <div className="md:col-span-2 bg-white rounded p-4 ">
-            <p className="text-xs font-semibold">Transactions</p>
-            <BarChartComponent data={monthlyTransaction} />
-          </div>
+          <Panel
+            className="xl:col-span-3"
+            delay={350}
+            title="Transactions"
+            subtitle="Volume by month"
+            action={
+              transactions.length > 0 && (
+                <div className="flex gap-5 text-right">
+                  <div>
+                    <p className="v-eyebrow">Total</p>
+                    <p className="v-mono text-sm font-semibold">₦{compact.format(volume)}</p>
+                  </div>
+                  {peak && (
+                    <div>
+                      <p className="v-eyebrow">Peak</p>
+                      <p className="text-sm font-semibold">{peak.month}</p>
+                    </div>
+                  )}
+                </div>
+              )
+            }
+          >
+            <div className="h-[260px] min-w-0">
+              {transactions.length === 0 ? (
+                <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+                  <span className="grid h-12 w-12 place-items-center rounded-2xl border border-line bg-panel-hi text-fg3">
+                    <BarChart3 size={22} />
+                  </span>
+                  <p className="text-sm font-semibold">No transactions yet</p>
+                </div>
+              ) : (
+                <BarChartComponent data={transactions} />
+              )}
+            </div>
+          </Panel>
         </div>
-        <article className=" mt-6 ">
-          <h1 className="text-base font-semibold">Customers</h1>
-          <div className=" bg-white rounded-md mt-2 py-4">
-            <div className="flex flex-row  gap-10 text-xs text-[#6D6C6C] pt-6 px-2">
+
+        <Panel
+          delay={420}
+          title="Customers"
+          subtitle="Newest registrations"
+          action={
+            <div className="v-seg" role="group" aria-label="Customer filter">
               {Tabs.map((tab) => (
-                <TabItem
+                <button
                   key={tab.value}
-                  label={tab.label}
-                  value={tab.value}
-                  active={customerType === tab.value}
-                  onClick={setCustomerType}
-                />
+                  type="button"
+                  aria-pressed={customerType === tab.value}
+                  onClick={() => setCustomerType(tab.value)}
+                >
+                  {tab.label}
+                </button>
               ))}
             </div>
-            <div>
-              <DataTable
-                data={allUsers}
-                loading={allUsersLoading}
-                columns={columns}
-                useApiPagination={true}
-                totalPages={totalPages || 1}
-                currentPage={currentPage}
-                onPageChange={(newPage) => setCurrentPage(newPage)}
-                setPageSize = {setPageSize}
-                pageSize={pageSize}
-              />
-            </div>
-          </div>
-          <div></div>
-        </article>
+          }
+        >
+          <DataTable
+            data={allUsers}
+            loading={allUsersLoading}
+            columns={columns}
+            useApiPagination={true}
+            totalPages={totalPages || 1}
+            currentPage={currentPage}
+            onPageChange={(newPage) => setCurrentPage(newPage)}
+            setPageSize={setPageSize}
+            pageSize={pageSize}
+            boxed
+          />
+        </Panel>
       </article>
     </Container>
   );

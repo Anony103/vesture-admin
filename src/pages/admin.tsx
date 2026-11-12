@@ -112,8 +112,8 @@ const Admin = () => {
       header: "Status",
       cell: ({ row }) => {
         if (!row.original.enabled)
-          return <span className="text-red-500">Inactive</span>;
-        return <span className="text-green-500">Active</span>;
+          return <span className="v-chip v-chip-bad">Inactive</span>;
+        return <span className="v-chip v-chip-ok">Active</span>;
       },
     },
     {
@@ -174,61 +174,48 @@ const Admin = () => {
           </div>
         </div>
         <div className=" bg-white pb-2 rounded-md mt-2 h-auto">
-          <div className="flex flex-row  gap-5 md:gap-10 text-xs text-[#6D6C6C] pt-6 px-2">
-            {/* {Tabs?.map((tab) => (
-              <TabItem
-               key={tab.value}
-                label={tab.label}
-                value={tab.value}
-                active={customerType === tab.value}
-                onClick={setCustomerType}
-              />
-            ))} */}
-            <div className="flex flex-col md:flex-row justify-between items-center gap-3 px-2 py-4 border-b">
-              <div className="flex flex-row gap-4">
-                <div className="flex items-center gap-2">
-                  <label className="text-xs text-gray-600">From:</label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={handleStartDateChange}
-                    className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <label className="text-xs text-gray-600">To:</label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={handleEndDateChange}
-                    className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
-                  />
-                </div>
-
-                {(startDate || endDate) && (
-                  <button
-                    onClick={() => {
-                      setStartDate("");
-                      setEndDate("");
-                    }}
-                    className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded-md"
-                  >
-                    Clear
-                  </button>
-                )}
+          <div className="flex flex-col gap-3 border-b border-line px-4 py-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-row flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-gray-600">From:</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={handleStartDateChange}
+                  className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+                />
               </div>
 
-              <div className="flex flex-row justify-end p-6">
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-gray-600">To:</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={handleEndDateChange}
+                  className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+                />
+              </div>
+
+              {(startDate || endDate) && (
                 <button
-                  onClick={exportAdminsToExcel}
-                  disabled={allAdminsLoading}
-                  className="text-xs flex bg-[#7C2EBF] py-3 px-4 text-white rounded-md justify-end"
+                  onClick={() => {
+                    setStartDate("");
+                    setEndDate("");
+                  }}
+                  className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded-md"
                 >
-                  Export As Excel
+                  Clear
                 </button>
-              </div>
+              )}
             </div>
+
+            <button
+              onClick={exportAdminsToExcel}
+              disabled={allAdminsLoading}
+              className="text-xs flex bg-[#7C2EBF] py-3 px-4 text-white rounded-md"
+            >
+              Export As Excel
+            </button>
           </div>
           <DataTable
             data={allAdmins}

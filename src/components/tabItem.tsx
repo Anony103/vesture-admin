@@ -18,10 +18,12 @@ interface TabItemProps {
   }) => {
     return (
       <p
-        className={`mx-2 pb-6 cursor-pointer ${
+        role="tab"
+        aria-selected={active}
+        className={`mx-2 pb-6 cursor-pointer border-b-2 text-sm transition-colors ${
           active
-            ? "border-b-2 border-[#7C2EBF] text-[#7C2EBF] font-semibold"
-            : ""
+            ? "border-brand text-brand font-semibold"
+            : "border-transparent text-fg2 hover:text-fg"
         }`}
         onClick={() => onClick(value)}
       >

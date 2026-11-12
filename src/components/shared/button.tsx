@@ -16,21 +16,13 @@ const Button: React.FC<ButtonProps> = ({
   type,
   loading,
 }) => {
-  const colorVariants = {
-    lightpurple: "bg-[#E2CEF3] text-[#7C2EBF]",
-    purple: "bg-[#7C2EBF] text-white hover:bg-[#7C2EBF]",
-  };
   return (
     <button
       onClick={onClick}
       type={type}
-      className={`text-xs flex py-3 px-4  rounded-md ${
-        color === "lightpurple"
-          ? colorVariants.lightpurple
-          : colorVariants.purple
-      }`}
+      className={`v-btn ${color === "lightpurple" ? "v-btn-soft" : "v-btn-primary"}`}
     >
-      {loading ? <ClipLoader size="10px" color="white" /> : name}
+      {loading ? <ClipLoader size="12px" color="currentColor" /> : name}
     </button>
   );
 };
