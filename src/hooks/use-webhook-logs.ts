@@ -3,13 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { SESSION_STORAGE_KEY } from "@/constants";
 import { GET_WEBHOOK_LOG, GET_WEBHOOK_LOGS } from "@/constants/query-keys";
 import { WebhookLogService } from "@/services/webhook-log-service";
-import { WebhookFilter } from "@/types/webhook-type";
+import { WebhookAppFilter, WebhookFilter } from "@/types/webhook-type";
 
 const useWebhookLogs = () => {
   const token = sessionStorage.getItem(SESSION_STORAGE_KEY) ?? "";
   const service = useMemo(() => new WebhookLogService(token), [token]);
 
   const [filter, setFilter] = useState<WebhookFilter>("ALL");
+  const [app, setApp] = useState<WebhookAppFilter>("ALL");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,14 +31,19 @@ const useWebhookLogs = () => {
     setCurrentPage(1);
   };
 
+  const changeApp = (value: string) => {
+    setApp(value as WebhookAppFilter);
+    setCurrentPage(1);
+  };
+
   const {
     data: list,
     isLoading: listLoading,
     error: listError,
     refetch: refetchList,
   } = useQuery({
-    queryKey: [GET_WEBHOOK_LOGS, filter, search, currentPage, pageSize],
-    queryFn: async () => (await service.getList(filter, search, currentPage - 1, pageSize))?.data,
+    queryKey: [GET_WEBHOOK_LOGS, filter, app, search, currentPage, pageSize],
+    queryFn: async () => (await service.getList(filter, app, search, currentPage - 1, pageSize))?.data,
     refetchOnWindowFocus: false,
   });
 
@@ -51,6 +57,8 @@ const useWebhookLogs = () => {
   return {
     filter,
     changeFilter,
+    app,
+    changeApp,
     searchInput,
     setSearchInput,
     currentPage,

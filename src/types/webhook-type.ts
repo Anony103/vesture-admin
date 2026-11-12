@@ -1,5 +1,8 @@
 export type WebhookOutcome = "CREDITED" | "DUPLICATE" | "IGNORED" | "REFUSED" | "RETRY" | "ERROR";
 export type WebhookFilter = "ALL" | WebhookOutcome;
+/** The app a call is for: the same Flutterwave account also serves Travel and Rent+. OTHER is anything with a prefix nobody has told us about. */
+export type WebhookApp = "VESTURE" | "TRAVEL" | "RENT_PLUS" | "OTHER";
+export type WebhookAppFilter = "ALL" | WebhookApp;
 
 export type WebhookLogItem = {
   id: string;
@@ -10,6 +13,7 @@ export type WebhookLogItem = {
   event: string | null;
   flwRef: string | null;
   txRef: string | null;
+  app: WebhookApp;
   providerTransactionId: number | null;
   amount: number | null;
   currency: string | null;
@@ -29,6 +33,8 @@ export type WebhookLogList = {
   totalPages: number;
   totalElements: number;
   counts: Record<WebhookFilter, number>;
+  /** How many calls each app has, whatever outcome. */
+  appCounts: Record<WebhookAppFilter, number>;
 };
 
 export type WebhookApiResponse<T> = {
