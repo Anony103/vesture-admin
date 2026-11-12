@@ -5,7 +5,7 @@ import TabItem from "@/components/tabItem";
 import Button from "../components/shared/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import useWebhookLogs from "@/hooks/use-webhook-logs";
-import { WebhookFilter, WebhookLogItem } from "@/types/webhook-type";
+import { WebhookAppFilter, WebhookFilter, WebhookLogItem } from "@/types/webhook-type";
 
 const TABS: { label: string; value: WebhookFilter }[] = [
   { label: "All", value: "ALL" },
@@ -16,6 +16,23 @@ const TABS: { label: string; value: WebhookFilter }[] = [
   { label: "Ignored", value: "IGNORED" },
   { label: "Error", value: "ERROR" },
 ];
+
+const APPS: { label: string; value: WebhookAppFilter }[] = [
+  { label: "All apps", value: "ALL" },
+  { label: "Vesture", value: "VESTURE" },
+  { label: "Travel", value: "TRAVEL" },
+  { label: "Rent+", value: "RENT_PLUS" },
+  { label: "Other", value: "OTHER" },
+];
+
+const APP_SHORT: Record<string, string> = { VESTURE: "Vesture", TRAVEL: "Travel", RENT_PLUS: "Rent+", OTHER: "Other" };
+
+const APP_LONG: Record<string, string> = {
+  VESTURE: "Vesture (its own tx_ref prefix)",
+  TRAVEL: "Travel (shares the Flutterwave account)",
+  RENT_PLUS: "Rent+ (shares the Flutterwave account)",
+  OTHER: "Other: the tx_ref matches no known app. If this is Rent+ or Travel, its tx_ref prefix needs to be added to the server settings.",
+};
 
 const MEANING: Record<string, string> = {
   CREDITED: "Money was added to the customer's wallet or plan.",
@@ -96,6 +113,20 @@ const WebhookLogs = () => {
       accessorKey: "createdOn",
       cell: ({ row }) => <span className="text-xs whitespace-nowrap">{when(row.original.createdOn)}</span>,
     },
+    {
+      header: "App",
+      accessorKey: "app",
+      cell: ({ row }) => (
+        <span
+          title={APP_LONG[row.original.app]}
+          className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+            row.original.app === "VESTURE" ? "bg-purple-100 text-purple-700" : row.original.app === "OTHER" ? "bg-gray-100 text-gray-600" : "bg-blue-100 text-blue-700"
+          }`}
+        >
+          {APP_SHORT[row.original.app] ?? row.original.app}
+        </span>
+      ),
+    },
     { header: "Outcome", accessorKey: "outcome", cell: ({ row }) => <Chip outcome={row.original.outcome} /> },
     {
       header: "Source",
@@ -162,8 +193,22 @@ const WebhookLogs = () => {
               placeholder="Search Flutterwave ref, tx ref, customer email or reason"
               className="border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-sm w-full md:w-96 focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
             />
+            <select
+              value={w.app}
+              onChange={(e) => w.changeApp(e.target.value)}
+              aria-label="App"
+              className="border border-gray-300 bg-white text-gray-900 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+            >
+              {APPS.map((a) => (
+                <option key={a.value} value={a.value}>
+                  {a.label}
+                  {w.list?.appCounts ? ` (${w.list.appCounts[a.value] ?? 0})` : ""}
+                </option>
+              ))}
+            </select>
             <Button name="Refresh" color="lightpurple" onClick={() => w.refetchList()} />
           </div>
+          {w.app === "OTHER" && <p className="px-3 pt-3 text-xs text-gray-500">{APP_LONG.OTHER}</p>}
           {w.filter !== "ALL" && <p className="px-3 pt-3 text-xs text-gray-500">{MEANING[w.filter]}</p>}
           <DataTable
             data={w.list?.content ?? []}
@@ -198,6 +243,7 @@ const WebhookLogs = () => {
                 <div className="grid md:grid-cols-2 gap-x-6 gap-y-3">
                   <Row label="Received" value={when(detail.createdOn)} />
                   <Row label="Source" value={SOURCE_LONG[detail.source] ?? detail.source} />
+                  <Row label="App" value={APP_LONG[detail.app] ?? detail.app} />
                   <Row label="Event" value={detail.event} />
                   <Row label="Amount" value={money(detail.amount, detail.currency)} />
                   <Row label="Flutterwave status" value={detail.providerStatus} />

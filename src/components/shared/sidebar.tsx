@@ -143,6 +143,24 @@ export const Sidebar: React.FC<Props> = ({ open, handleToggleSidebar }) => {
       id: "17",
     },
     {
+      title: "Auto-save",
+      path: "/autoSave",
+      icon: <TransactionIcon />,
+      id: "19",
+    },
+    {
+      title: "Deposit Fees",
+      path: "/depositFees",
+      icon: <TransactionIcon />,
+      id: "20",
+    },
+    {
+      title: "Withdrawal Payouts",
+      path: "/withdrawalPayouts",
+      icon: <TransactionIcon />,
+      id: "21",
+    },
+    {
       title: "Audit Log",
       path: "/auditLog",
       icon: <AuditLogsIcon />,

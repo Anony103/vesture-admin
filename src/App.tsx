@@ -24,6 +24,9 @@ import CreditEntry from "./pages/creditentry";
 import Transactions from "./pages/transactions";
 import AuditLogs from "./pages/auditLogs";
 import WebhookLogs from "./pages/webhookLogs";
+import AutoSave from "./pages/autoSave";
+import DepositFees from "./pages/depositFees";
+import WithdrawalPayouts from "./pages/withdrawalPayouts";
 import StagingFunding from "./pages/stagingFunding";
 import Settings from "./pages/settings";
 // import LedgerPage from "./pages/ledger";   // Ledger is switched off for now
@@ -180,6 +183,18 @@ function App() {
         {
           path: "/webhookLogs",
           element: <WebhookLogs />,
+        },
+        {
+          path: "/autoSave",
+          element: <AutoSave />,
+        },
+        {
+          path: "/depositFees",
+          element: <DepositFees />,
+        },
+        {
+          path: "/withdrawalPayouts",
+          element: <WithdrawalPayouts />,
         },
         {
           path: "/stagingFunding",
