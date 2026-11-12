@@ -50,7 +50,7 @@ export const Pagination: React.FC<Props> = ({
         page === "..." ? (
           <span
             key={idx}
-            className="px-2 text-gray-400 select-none"
+            className="select-none px-2 text-fg3"
           >
             ...
           </span>
@@ -58,11 +58,12 @@ export const Pagination: React.FC<Props> = ({
           <button
             key={page}
             onClick={() => handlePageClick(page as number)}
-            className={`px-3 py-1 text-sm font-medium rounded-md border transition-all duration-200
+            aria-current={page === currentPage ? "page" : undefined}
+            className={`v-mono min-w-[2.25rem] rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors duration-200
               ${
                 page === currentPage
-                  ? "bg-[#7C2EBF] text-white border-[#7C2EBF]"
-                  : "bg-white text-gray-800 hover:bg-gray-100 border-gray-300"
+                  ? "border-brand/50 bg-brand/20 text-fg shadow-[0_0_0_1px_rgb(var(--brand-rgb)/0.25)]"
+                  : "border-line bg-panel text-fg2 hover:border-line-hi hover:bg-panel-hi hover:text-fg"
               }`}
           >
             {page}

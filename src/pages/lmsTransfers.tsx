@@ -1,3 +1,4 @@
+import { Tabs } from "@/components/shared/tabs";
 import { Container } from "../components/shared/container";
 import { DataTable } from "../components/shared/data-table";
 import { ColumnDef } from "@tanstack/react-table";
@@ -451,7 +452,7 @@ const LmsTransfers = () => {
                   No configuration changes recorded yet.
                 </p>
               ) : (
-                <table className="table w-full whitespace-nowrap text-xs">
+                <table className="v-table">
                   <thead>
                     <tr className="text-left border-b">
                       <th className="py-2 pr-4 font-semibold">Date</th>
@@ -495,21 +496,15 @@ const LmsTransfers = () => {
         {/* TRANSFERS / REPORT */}
         <div className="bg-white rounded-md pb-2">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between pt-6 px-2 gap-3">
-            <div className="flex flex-row gap-6 text-xs text-[#6D6C6C]">
-              {(["transfers", "report"] as const).map((tab) => (
-                <p
-                  key={tab}
-                  className={`${
-                    view === tab
-                      ? "border-b-2 border-[#7C2EBF] text-[#7C2EBF] font-semibold"
-                      : ""
-                  } mx-2 pb-6 cursor-pointer capitalize`}
-                  onClick={() => setView(tab)}
-                >
-                  {tab === "transfers" ? "Transfers" : "Report"}
-                </p>
-              ))}
-            </div>
+            <Tabs
+              tabs={[
+                { value: "transfers", label: "Transfers" },
+                { value: "report", label: "Report" },
+              ]}
+              value={view}
+              onChange={(value) => setView(value as typeof view)}
+              label="View"
+            />
             {view === "transfers" && (
               <div className="pb-4 md:pb-6 pr-2">
                 <Button
@@ -526,21 +521,12 @@ const LmsTransfers = () => {
           {view === "transfers" ? (
             <>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between px-2 gap-3 border-t pt-4">
-                <div className="flex flex-row gap-8 text-xs text-[#6D6C6C]">
-                  {TRANSFER_STATUS_TABS.map((tab) => (
-                    <p
-                      key={tab.label}
-                      className={`${
-                        transferStatusFilter === tab.value
-                          ? "border-b-2 border-[#7C2EBF] text-[#7C2EBF] font-semibold"
-                          : ""
-                      } mx-2 pb-4 cursor-pointer`}
-                      onClick={() => setTransferStatusFilter(tab.value)}
-                    >
-                      {tab.label}
-                    </p>
-                  ))}
-                </div>
+                <Tabs
+                  tabs={TRANSFER_STATUS_TABS}
+                  value={transferStatusFilter}
+                  onChange={setTransferStatusFilter}
+                  label="Transfer status"
+                />
                 <div className="flex items-center gap-2 pb-4 pr-2">
                   <label className="text-xs text-gray-600">
                     Treatment Status:

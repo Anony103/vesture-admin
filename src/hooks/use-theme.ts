@@ -1,0 +1,8 @@
+import { useSyncExternalStore } from "react";
+import { getTheme, setTheme, subscribeTheme, toggleTheme, type Theme } from "@/lib/theme";
+
+/** The current colour theme and the way to change it. */
+export const useTheme = (): { theme: Theme; setTheme: (theme: Theme) => void; toggleTheme: () => void } => {
+  const theme = useSyncExternalStore(subscribeTheme, getTheme, getTheme);
+  return { theme, setTheme, toggleTheme };
+};

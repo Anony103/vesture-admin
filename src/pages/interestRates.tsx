@@ -1,3 +1,4 @@
+import { Tabs } from "@/components/shared/tabs";
 import { Container } from "../components/shared/container";
 // import { useState } from "react";
 import { DataTable } from "../components/shared/data-table";
@@ -341,20 +342,15 @@ const InterestRates = () => {
     <Container>
       <article className=" mt-6 min-h-screen">
         <div className="flex justify-between">
-          <div className="flex gap-2 text-sm">
-            {(["rates", "requests", "history"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`rounded-md px-4 py-2 ${tab === t ? "bg-[#7C2EBF] text-white" : "bg-white text-gray-600"}`}
-              >
-                {t === "rates" ? "Rates" : t === "requests" ? "Requests" : "History"}
-                {t === "requests" && pendingCount > 0 && (
-                  <span className={`ml-2 rounded-full px-2 py-0.5 text-[11px] font-semibold ${tab === t ? "bg-white text-[#7C2EBF]" : "bg-amber-100 text-amber-800"}`}>{pendingCount}</span>
-                )}
-              </button>
-            ))}
-          </div>
+          <Tabs
+            tabs={[
+              { value: "rates", label: "Rates" },
+              { value: "requests", label: "Requests", count: pendingCount > 0 ? pendingCount : undefined, attention: true },
+              { value: "history", label: "History" },
+            ]}
+            value={tab}
+            onChange={(value) => setTab(value as typeof tab)}
+          />
           <button
             onClick={() => {
               navigate("createRates");

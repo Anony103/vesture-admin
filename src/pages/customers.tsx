@@ -15,7 +15,7 @@ import useMangeCustomer from "@/hooks/use-manage-customers";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import { User } from "@/types";
-import TabItem from "@/components/tabItem";
+import { Tabs } from "@/components/shared/tabs";
 import { useNavigate } from "react-router";
 import { exportToExcel } from "@/utils/exportAsExcel";
 const Customers = () => {
@@ -135,10 +135,10 @@ const Customers = () => {
         // if (!isEnabled) return <span className="text-red-500">Disabled</span>;
         // if (!isLocked) return <span className="text-red-500">Locked</span>;
         if (status === "deactivated")
-          return <span className="text-red-500">{status}</span>;
+          return <span className="v-chip v-chip-bad">{status}</span>;
         if (status === "pending")
-          return <span className="text-yellow-500">{status}</span>;
-        return <span className="text-green-500">{status}</span>;
+          return <span className="v-chip v-chip-warn">{status}</span>;
+        return <span className="v-chip v-chip-ok">{status}</span>;
       },
     },
     {
@@ -241,19 +241,11 @@ const Customers = () => {
     <Container>
       <article className=" mt-6 min-h-screen">
         <div className=" bg-white rounded-md pb-2">
-          <div className="flex flex-row gap-5  md:gap-10 text-xs text-[#6D6C6C] pt-6 px-2">
-            {tabs.map((tab) => (
-              <TabItem
-                key={tab.value}
-                label={tab.label}
-                value={tab.value}
-                active={customerType === tab.value}
-                onClick={setCustomerType}
-              />
-            ))}
+          <div className="px-4 pt-4">
+            <Tabs tabs={tabs} value={customerType} onChange={setCustomerType} label="Customer filter" />
           </div>
           {/* {customerType === "all" ? ( */}
-          <div className="flex flex-col md:flex-row items-center gap-3 px-2 py-4 border-b">
+          <div className="flex flex-col md:flex-row items-center gap-3 px-4 py-4 border-b">
             <div className="flex items-center gap-2">
               <label className="text-xs text-gray-600">From:</label>
               <input
@@ -285,7 +277,7 @@ const Customers = () => {
                 Clear
               </button>
             )}
-            <div className="flex flex-row justify-end p-6">
+            <div className="flex flex-row justify-end md:ml-auto">
               <button
                 onClick={() => {
                   exportToExcel<User>({

@@ -1,3 +1,4 @@
+import { StatCard, type StatTone } from "@/components/shared/stat-card";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { SESSION_STORAGE_KEY } from "@/constants";
@@ -84,14 +85,8 @@ export function Card({ title, children, action }: { title?: string; children: Re
 }
 
 export function Tile({ label, value, tone = "neutral", hint }: { label: string; value: ReactNode; tone?: "neutral" | "good" | "bad" | "warn"; hint?: string }) {
-  const color = { neutral: "text-gray-900", good: "text-green-700", bad: "text-red-600", warn: "text-amber-600" }[tone];
-  return (
-    <div className="bg-white rounded-md p-4 min-w-[150px] flex-1">
-      <p className="text-[11px] uppercase tracking-wide text-gray-500">{label}</p>
-      <p className={`text-xl font-semibold mt-1 ${color}`}>{value}</p>
-      {hint && <p className="text-[11px] text-gray-500 mt-1">{hint}</p>}
-    </div>
-  );
+  const statTone = { neutral: "neutral", good: "mint", bad: "danger", warn: "gold" }[tone] as StatTone;
+  return <StatCard className="min-w-[150px] flex-1" label={label} value={value} hint={hint} tone={statTone} />;
 }
 
 export function Badge({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "good" | "bad" | "warn" }) {

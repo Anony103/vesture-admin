@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Container } from "../components/shared/container";
 import { DataTable } from "../components/shared/data-table";
-import TabItem from "@/components/tabItem";
+import { Tabs } from "@/components/shared/tabs";
 import Button from "../components/shared/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import useWebhookLogs from "@/hooks/use-webhook-logs";
@@ -175,18 +175,18 @@ const WebhookLogs = () => {
     <Container>
       <article className="mt-6 min-h-screen">
         <div className="bg-white rounded-md pb-2">
-          <div className="flex flex-row flex-wrap gap-x-5 md:gap-x-8 text-xs text-[#6D6C6C] pt-6 px-2">
-            {TABS.map((t) => (
-              <TabItem
-                key={t.value}
-                label={`${t.label}${w.list?.counts ? ` (${w.list.counts[t.value] ?? 0})` : ""}`}
-                value={t.value}
-                active={w.filter === t.value}
-                onClick={w.changeFilter as never}
-              />
-            ))}
+          <div className="px-4 pt-4">
+            <Tabs
+              tabs={TABS.map((t) => ({
+                value: t.value,
+                label: t.label,
+                count: w.list?.counts ? (w.list.counts[t.value] ?? 0) : undefined,
+              }))}
+              value={w.filter}
+              onChange={w.changeFilter as never}
+            />
           </div>
-          <div className="flex flex-col md:flex-row md:items-center gap-3 px-2 py-4 border-b">
+          <div className="flex flex-col md:flex-row md:items-center gap-3 px-4 py-4 border-b">
             <input
               value={w.searchInput}
               onChange={(e) => w.setSearchInput(e.target.value)}

@@ -232,7 +232,7 @@ const AuditLogs = () => {
           </div> */}
           {/* {customerType === "allcustomers" ? (
             <div> */}{" "}
-          <div className="flex flex-col md:flex-row justify-between items-center gap-3 px-2 py-4 border-b">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-3 px-4 py-4 border-b">
             <div className="flex flex-row gap-4">
               <div className="flex items-center gap-2">
                 <label className="text-xs text-gray-600">From:</label>
@@ -267,7 +267,7 @@ const AuditLogs = () => {
               )}
             </div>
 
-            <div className="flex flex-row justify-end p-6">
+            <div className="flex flex-row justify-end md:ml-auto">
               <button
                 onClick={exportAuditsToExcel}
                 disabled={auditLogsLoading}

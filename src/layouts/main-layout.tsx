@@ -1,40 +1,102 @@
-import { useEffect, useState } from "react";
-import { Sidebar } from "../components/shared/sidebar";
-import { Container } from "../components/shared/container";
-import { Outlet } from "react-router-dom";
-// import { Cross1Icon } from "@radix-ui/react-icons";
-// import { useUser } from "@/hooks";
-import { ClipLoader } from "react-spinners";
-// import { USERS_INFO } from "@/constants";
-// import profile from "../assets/profile.svg";
-import { FaChevronDown } from "react-icons/fa6";
-import { useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { useUser } from "../hooks";
+import { useCallback, useEffect, useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { ChevronDown, LogOut, Moon, Search, Sun } from "lucide-react";
 import { useIdleTimer } from "react-idle-timer";
 import { toast } from "react-toastify";
-import { FaUserCircle } from "react-icons/fa";
+import { Sidebar } from "../components/shared/sidebar";
+import { Container } from "../components/shared/container";
+import { SIDEBAR_WIDTH, isItemActive, useNavGroups } from "../components/shared/nav-config";
+import { useUser } from "../hooks";
+import { useTheme } from "@/hooks/use-theme";
 import { useAppContext } from "@/context/AppContext";
 import { EnvironmentBadge } from "@/components/shared/environment-badge";
 import { ENVIRONMENT } from "@/constants/environment";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const DESKTOP_QUERY = "(min-width: 768px)";
+const SIDEBAR_KEY = "vesture-admin-sidebar";
+
+/** True on a wide screen. Falls back to wide when the browser cannot say. */
+const useIsDesktop = () => {
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia ? window.matchMedia(DESKTOP_QUERY).matches : true
+  );
+  useEffect(() => {
+    if (!window.matchMedia) return;
+    const query = window.matchMedia(DESKTOP_QUERY);
+    const onChange = () => setIsDesktop(query.matches);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+  return isDesktop;
+};
+
+const readCollapsed = (): boolean => {
+  try {
+    return localStorage.getItem(SIDEBAR_KEY) === "collapsed";
+  } catch {
+    return false;
+  }
+};
 
 export const MainLayout = () => {
-  const { isAuthLoading, user } = useUser();
+  const { user } = useUser();
   const { searchTerm, handleSearchChange } = useAppContext();
-
+  const { theme, toggleTheme } = useTheme();
+  const groups = useNavGroups();
   const location = useLocation();
+  const navigate = useNavigate();
+  const isDesktop = useIsDesktop();
+
+  // On a wide screen the sidebar is wide unless the admin collapsed it (remembered). On a phone it is the narrow rail and
+  // opens over the page when asked.
+  const [desktopCollapsed, setDesktopCollapsed] = useState(readCollapsed);
+  const [phoneOpen, setPhoneOpen] = useState(false);
+  const expanded = isDesktop ? !desktopCollapsed : phoneOpen;
+  const overlay = !isDesktop && phoneOpen;
+
+  const toggleSidebar = useCallback(() => {
+    if (isDesktop) {
+      setDesktopCollapsed((collapsed) => {
+        try {
+          localStorage.setItem(SIDEBAR_KEY, collapsed ? "expanded" : "collapsed");
+        } catch {
+          // storage blocked: the choice lasts for this visit only
+        }
+        return !collapsed;
+      });
+    } else {
+      setPhoneOpen((open) => !open);
+    }
+  }, [isDesktop]);
+
+  const closePhoneDrawer = useCallback(() => setPhoneOpen(false), []);
+
+  // Escape closes the phone drawer; so does growing the window to desktop size
+  useEffect(() => {
+    if (!overlay) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPhoneOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [overlay]);
+  useEffect(() => {
+    if (isDesktop) setPhoneOpen(false);
+  }, [isDesktop]);
+
   // the tab says which backend it is on, so several tabs can be told apart
   useEffect(() => {
     const base = document.title.replace(/^\[[^\]]*\]\s*/, "");
     document.title = `[${ENVIRONMENT.label}] ${base}`;
   }, []);
-  const [isLoading, setIsLoading] = useState(false);
-  const [open, setOpen] = useState(window.innerWidth > 768);
-  const navigate = useNavigate();
-  const handleToggleSidebar = () => {
-    setOpen((open) => !open);
-    setIsLoading(false);
-  };
 
   useIdleTimer({
     timeout: 1000 * 60 * 5,
@@ -45,120 +107,109 @@ export const MainLayout = () => {
     },
   });
 
-  // const storedResponse = sessionStorage.getItem(USERS_INFO);
-  // const user_info = storedResponse ? JSON.parse(storedResponse) : null;
-  // console.log(user_info)
-  console.log(isAuthLoading);
-  return isLoading ? (
-    <section className="h-screen flex items-center justify-center">
-      <ClipLoader size={20} color="#7C2EBF" />
-    </section>
-  ) : (
-    <main className="flex flex-col md:flex-row relative">
-      <div className="h-0">
-        <Sidebar open={open} handleToggleSidebar={handleToggleSidebar} />
-      </div>
-      <section className={`w-auto  flex-1 flex-col `}>
-        <Container>
-          <header className="h-12 flex items-center mt-8">
-            <div className=" w-full flex md:flex-row justify-between items-center ">
-              {/* {open ? <div></div> : <Cross1Icon />} */}
-              {/* <div className="flex items-center gap-1">
-                <div
-                  className="lg:hidden self-end cursor-pointer"
-                  onClick={handleToggleSidebar}
-                ></div>
-              </div> */}
-              <div className="w-[30%]">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M14.3333 15.5L9.08333 10.25C8.66667 10.5833 8.1875 10.8472 7.64583 11.0417C7.10417 11.2361 6.52778 11.3333 5.91667 11.3333C4.40278 11.3333 3.12153 10.809 2.07292 9.76042C1.02431 8.71181 0.5 7.43056 0.5 5.91667C0.5 4.40278 1.02431 3.12153 2.07292 2.07292C3.12153 1.02431 4.40278 0.5 5.91667 0.5C7.43056 0.5 8.71181 1.02431 9.76042 2.07292C10.809 3.12153 11.3333 4.40278 11.3333 5.91667C11.3333 6.52778 11.2361 7.10417 11.0417 7.64583C10.8472 8.1875 10.5833 8.66667 10.25 9.08333L15.5 14.3333L14.3333 15.5ZM5.91667 9.66667C6.95833 9.66667 7.84375 9.30208 8.57292 8.57292C9.30208 7.84375 9.66667 6.95833 9.66667 5.91667C9.66667 4.875 9.30208 3.98958 8.57292 3.26042C7.84375 2.53125 6.95833 2.16667 5.91667 2.16667C4.875 2.16667 3.98958 2.53125 3.26042 3.26042C2.53125 3.98958 2.16667 4.875 2.16667 5.91667C2.16667 6.95833 2.53125 7.84375 3.26042 8.57292C3.98958 9.30208 4.875 9.66667 5.91667 9.66667Z"
-                        fill="#E4E4E4"
-                      />
-                    </svg>
-                  </div>
-                  <input
-                    className="bg-white border border-gray-300 text-sm text-black w-full h-[40px] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F6EBFE] focus:border-transparent pl-10 pr-4 py-2 rounded-md"
-                    placeholder="Search"
-                    value={searchTerm}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                  />
-                </div>
+  const current = groups
+    .flatMap((group) => group.items.map((item) => ({ item, group: group.label })))
+    .find(({ item }) => isItemActive(item, location.pathname));
+
+  const logout = () => {
+    navigate("/auth");
+    sessionStorage.clear();
+  };
+
+  const username = user?.username ?? "";
+  const initials = (username.trim().slice(0, 2) || "VA").toUpperCase();
+  const sidebarWidth = isDesktop && expanded ? SIDEBAR_WIDTH.expanded : SIDEBAR_WIDTH.rail;
+
+  return (
+    <div className="min-h-screen">
+      <Sidebar expanded={expanded} isDesktop={isDesktop} onToggle={toggleSidebar} onNavigate={closePhoneDrawer} />
+
+      {/* the dim layer behind the phone drawer */}
+      {overlay && (
+        <button
+          type="button"
+          aria-label="Close menu"
+          onClick={closePhoneDrawer}
+          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-[2px]"
+        />
+      )}
+
+      <div style={{ marginLeft: sidebarWidth }} className="min-h-screen transition-[margin] duration-300 ease-out">
+        <header className="sticky top-0 z-20 border-b border-line bg-[var(--topbar)] backdrop-blur-xl">
+          <Container>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3 md:h-16 md:flex-nowrap md:py-0">
+              <div className="min-w-0 flex-1 md:flex-none md:basis-56">
+                {current && <p className="v-eyebrow truncate">{current.group}</p>}
+                <h1 className="truncate font-display text-lg font-semibold leading-tight md:text-xl">
+                  {current?.item.title ?? "Vesture Admin"}
+                </h1>
               </div>
 
-              <div className="font-bold">
-                {location.pathname === "/dashboard" && <h1></h1>}
-                {location.pathname === "/customers" && <h1>Customers</h1>}
-                {location.pathname === "/manageAdmins" && <h1>Admin</h1>}
-                {location.pathname === "/savings" && <h1>Investment</h1>}
-                {location.pathname === "/assetsCategories" && (
-                  <h1>Categories</h1>
-                )}
-                {location.pathname === "/assets" && <h1>Assets</h1>}
-                {location.pathname === "/creditEntry" && <h1>Public Sector Credit Entry</h1>}
-                {location.pathname === "/transactions" && <h1>Transactions History</h1>}
-                {location.pathname === "/auditLog" && <h1>Audit Logs</h1>}
-                {location.pathname === "/webhookLogs" && <h1>Webhook Log</h1>}
-                {location.pathname === "/stagingFunding" && <h1>Test Funding</h1>}
-                {location.pathname === "/ledger" && <h1>Ledger</h1>}
-                {location.pathname === "/interestRates" && (
-                  <h1>Interest Rates</h1>
-                )}
-                {location.pathname === "/employeeInfo" && (
-                  <h1>Data Refresh</h1>
-                )}
+              {/* search: second row on a phone, in the bar on a wide screen */}
+              <label className="relative order-last w-full md:order-none md:max-w-md md:flex-1">
+                <span className="sr-only">Search</span>
+                <Search
+                  size={16}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-fg3"
+                  aria-hidden
+                />
+                <input
+                  className="h-10 w-full rounded-xl border border-line bg-field pl-9 pr-3 text-sm text-fg placeholder:text-fg3 transition-colors focus:border-brand/60 focus:outline-none focus:ring-2 focus:ring-brand/25"
+                  placeholder="Search"
+                  value={searchTerm}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                />
+              </label>
 
-                {location.pathname === "/settings" && <h1>Settings</h1>}
-              </div>
+              <div className="flex items-center gap-2 md:ml-auto">
+                <EnvironmentBadge />
 
-              <div className="flex flex-row gap-2 justify-center items-center ">
-                <EnvironmentBadge className="mr-2" />
-                {/* <div>
-                  <img src={profile} alt="" />
-                </div> */}
-                <div className="flex items-center justify-center">
-                  <FaUserCircle className="text-gray-400 text-6xl" />
-                </div>
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+                  title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+                  className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-panel text-fg2 transition-colors hover:bg-panel-hi hover:text-fg"
+                >
+                  {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+                </button>
 
-                <div className=" md:mr-8 ">
-                  <p className="text-xs font-semibold">{user?.username}</p>
-                  <p className="text-xs text-[#A8A8A8] ">{user?.email}</p>
-                </div>
-                <div className="dropdown dropdown-end flex justify-center items">
-                  <label tabIndex={0} className="cursor-pointer">
-                    <FaChevronDown size="10" />
-                  </label>
-                  <ul
-                    tabIndex={0}
-                    className="dropdown-content z-[1] menu p-0 border-0.5 bg-white rounded-sm w-32 mt-4 py-2  rounded"
-                  >
-                    <li
-                      className="cursor-pointer hover:bg-gray-100 px-2 text-xs py-2"
-                      onClick={() => {
-                        navigate("/auth");
-                      }}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="flex h-10 items-center gap-2 rounded-xl border border-line bg-panel pl-1 pr-2 transition-colors hover:bg-panel-hi md:pr-3"
                     >
-                      Log Out
-                    </li>
-                  </ul>
-                </div>
+                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-brand to-brand/55 text-xs font-bold text-white">
+                        {initials}
+                      </span>
+                      <span className="hidden min-w-0 text-left md:block">
+                        <span className="block max-w-[140px] truncate text-xs font-semibold leading-tight">{username}</span>
+                        <span className="block max-w-[140px] truncate text-[11px] leading-tight text-fg3">{user?.email}</span>
+                      </span>
+                      <ChevronDown size={14} className="text-fg3" aria-hidden />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel className="font-normal">
+                      <span className="block truncate text-sm font-semibold">{username}</span>
+                      <span className="block truncate text-xs text-fg3">{user?.email}</span>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={logout} className="cursor-pointer gap-2 text-danger focus:text-danger">
+                      <LogOut size={14} /> Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
-          </header>
-        </Container>
+          </Container>
+        </header>
 
-        <article className={`mt-6 md:w-auto max-h-auto min-h-screen `}>
+        <main className="min-h-screen pb-10 pt-6">
           <Outlet />
-        </article>
-      </section>
-    </main>
+        </main>
+      </div>
+    </div>
   );
 };

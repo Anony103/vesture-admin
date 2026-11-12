@@ -3,6 +3,8 @@ import { Container } from "../components/shared/container";
 import { DataTable } from "../components/shared/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import useFinance from "@/hooks/use-finance";
+import { Tabs } from "@/components/shared/tabs";
+import { StatCard, StatGrid } from "@/components/shared/stat-card";
 
 type Investment = {
   id: string;
@@ -247,35 +249,23 @@ const Finance = () => {
       <article className="mt-6 min-h-screen">
         <div className="bg-white rounded-md pb-4">
           {/* Page Header */}
-          <div className="px-6 pt-6 pb-2">
-            <h2 className="text-xl font-semibold text-gray-800">Finance Overview</h2>
-            <p className="text-sm text-gray-500 mt-1">
+          <div className="px-5 pt-5 pb-3">
+            <h2 className="font-display text-xl font-semibold">Finance Overview</h2>
+            <p className="mt-1 text-sm text-fg2">
               Monitor running investments and interest payment history.
             </p>
           </div>
 
           {/* Tabs */}
-          <div className="flex flex-row gap-8 text-sm text-[#6D6C6C] px-6 border-b border-gray-100">
-            <button
-              className={`pb-3 ${
-                activeTab === "investments"
-                  ? "border-b-2 border-[#7C2EBF] text-[#7C2EBF] font-semibold"
-                  : ""
-              }`}
-              onClick={() => setActiveTab("investments")}
-            >
-              Running Investments
-            </button>
-            <button
-              className={`pb-3 ${
-                activeTab === "interest"
-                  ? "border-b-2 border-[#7C2EBF] text-[#7C2EBF] font-semibold"
-                  : ""
-              }`}
-              onClick={() => setActiveTab("interest")}
-            >
-              Interest Payments
-            </button>
+          <div className="px-5 pb-1">
+            <Tabs
+              tabs={[
+                { value: "investments", label: "Running Investments" },
+                { value: "interest", label: "Interest Payments" },
+              ]}
+              value={activeTab}
+              onChange={(value) => setActiveTab(value as "investments" | "interest")}
+            />
           </div>
 
           {/* Running Investments Tab */}
@@ -283,32 +273,12 @@ const Finance = () => {
             <div className="px-4 pt-4">
               {/* Summary Cards */}
               {!runningInvestmentsLoading && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                  <div className="bg-purple-50 rounded-lg p-3">
-                    <p className="text-xs text-gray-500">Total Investments</p>
-                    <p className="text-lg font-bold text-[#7C2EBF]">
-                      {investmentsSummary.totalCount}
-                    </p>
-                  </div>
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    <p className="text-xs text-gray-500">Total Principal</p>
-                    <p className="text-lg font-bold text-blue-700">
-                      {formatCurrency(investmentsSummary.totalPrincipal)}
-                    </p>
-                  </div>
-                  <div className="bg-green-50 rounded-lg p-3">
-                    <p className="text-xs text-gray-500">Accrued Interest</p>
-                    <p className="text-lg font-bold text-green-700">
-                      {formatCurrency(investmentsSummary.totalAccruedInterest)}
-                    </p>
-                  </div>
-                  <div className="bg-orange-50 rounded-lg p-3">
-                    <p className="text-xs text-gray-500">Total Liability</p>
-                    <p className="text-lg font-bold text-orange-700">
-                      {formatCurrency(investmentsSummary.totalLiability)}
-                    </p>
-                  </div>
-                </div>
+                <StatGrid className="mb-4">
+                  <StatCard label="Total Investments" tone="brand" value={investmentsSummary.totalCount} />
+                  <StatCard label="Total Principal" tone="sky" value={formatCurrency(investmentsSummary.totalPrincipal)} />
+                  <StatCard label="Accrued Interest" tone="mint" value={formatCurrency(investmentsSummary.totalAccruedInterest)} />
+                  <StatCard label="Total Liability" tone="gold" value={formatCurrency(investmentsSummary.totalLiability)} />
+                </StatGrid>
               )}
 
               <DataTable
@@ -324,6 +294,7 @@ const Finance = () => {
                 onPageChange={setInvestmentsPage}
                 pageSize={investmentsPageSize}
                 setPageSize={setInvestmentsPageSize}
+                boxed
               />
             </div>
           )}
@@ -342,6 +313,7 @@ const Finance = () => {
                 onPageChange={setInterestPage}
                 pageSize={interestPageSize}
                 setPageSize={setInterestPageSize}
+                boxed
               />
             </div>
           )}

@@ -1,3 +1,4 @@
+import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { ReactElement } from "react";
 import { Container } from "../components/shared/container";
 import { IoIosArrowBack } from "react-icons/io";
@@ -97,33 +98,12 @@ function ViewAssets(): ReactElement {
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-[#F6EBFE] rounded-md p-3 text-center">
-                  <p className="text-[#7C2EBF] font-bold text-sm">
-                    ₦{assetDetails?.amount?.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-gray-500">Amount</p>
-                </div>
-
-                <div className="bg-[#F6EBFE] rounded-md p-3 text-center">
-                  <p className="text-[#7C2EBF] font-bold text-sm">
-                    {assetDetails?.maxTenor} Months
-                  </p>
-                  <p className="text-xs text-gray-500">Max Tenor</p>
-                </div>
-
-                <div className="bg-[#F6EBFE] rounded-md p-3 text-center">
-                  <p className="text-[#7C2EBF] font-bold text-sm">
-                    {assetDetails?.availableUnits}
-                  </p>
-                  <p className="text-xs text-gray-500">Available Units</p>
-                </div>
-
-                <div className="bg-[#F6EBFE] rounded-md p-3 text-center">
-                  <p className="text-[#7C2EBF] font-bold text-sm">Active</p>
-                  <p className="text-xs text-gray-500">Status</p>
-                </div>
-              </div>
+              <StatGrid>
+                <StatCard label="Amount" tone="brand" value={`₦${assetDetails?.amount?.toLocaleString()}`} />
+                <StatCard label="Max Tenor" tone="sky" value={`${assetDetails?.maxTenor} Months`} />
+                <StatCard label="Available Units" tone="gold" value={assetDetails?.availableUnits} />
+                <StatCard label="Status" tone="mint" value="Active" />
+              </StatGrid>
 
               {/* Description */}
               <div className="border rounded-md p-4">

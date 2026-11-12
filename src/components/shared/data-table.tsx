@@ -15,6 +15,7 @@ import {
 } from "@tanstack/react-table";
 import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
 import { ClipLoader } from "react-spinners";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
 import { Pagination } from "./pagination";
 
 declare module "@tanstack/table-core" {
@@ -40,6 +41,8 @@ interface Props<T> {
   setPageSize : Dispatch<SetStateAction<number>>;
 
   pageSizeOptions ?: [10, 25, 50, 100];
+  /** draw the table as its own bordered card; leave off when the table already sits edge to edge in a card */
+  boxed?: boolean;
 }
 
 const fuzzyFilter = <T,>(
@@ -69,6 +72,7 @@ export function DataTable<T>({
   setPageSize,
   onPageSizeChange,
   pageSizeOptions = [10, 25, 50, 100],
+  boxed = false,
 }: Props<T>): JSX.Element {
   const [globalFilter, setGlobalFilter] = useState("");
   const safeData = data ?? [];
@@ -146,111 +150,114 @@ export function DataTable<T>({
   };
 
   return (
-    <div className="grid grid-cols-1 bg-white ">
-      <div className="overflow-x-auto overflow-y-hidden">
-        <table className="table w-full whitespace-nowrap  border-collapse">
-          <thead className="bg-white text-black border-t-2 text-xs">
-            {getHeaderGroups().map((headerGroup, idx) => (
-              <tr key={headerGroup.id + idx}>
-                {headerGroup.headers.map((header, idx) => (
-                  <th
-                    key={header.id + idx}
-                    colSpan={header.colSpan}
-                    className="text-left font-semibold last:text-center px-2 py-4 first:pl-3 last:pr-3"
+    <div className="grid grid-cols-1">
+      <div className={boxed ? "v-table-boxed" : "v-table-wrap"}>
+        <div className="v-table-scroll">
+          <table className="v-table">
+            <thead>
+              {getHeaderGroups().map((headerGroup, idx) => (
+                <tr key={headerGroup.id + idx}>
+                  {headerGroup.headers.map((header, idx) => {
+                    const sorted = header.column.getIsSorted();
+                    return (
+                      <th
+                        key={header.id + idx}
+                        colSpan={header.colSpan}
+                        aria-sort={sorted === "asc" ? "ascending" : sorted === "desc" ? "descending" : undefined}
+                        className="last:text-center first:pl-4 last:pr-4"
+                      >
+                        {header.isPlaceholder ? null : (
+                          <div
+                            {...{
+                              className: header.column.getCanSort()
+                                ? "inline-flex cursor-pointer select-none items-center gap-1 hover:text-fg"
+                                : "",
+                              onClick: header.column.getToggleSortingHandler(),
+                            }}
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                            {sorted === "asc" ? (
+                              <ChevronUp size={13} className="text-brand" />
+                            ) : sorted === "desc" ? (
+                              <ChevronDown size={13} className="text-brand" />
+                            ) : null}
+                          </div>
+                        )}
+                      </th>
+                    );
+                  })}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="py-10 text-center text-fg2"
+                    aria-live="polite"
                   >
-                    {header.isPlaceholder ? null : (
-                      <div
-                        {...{
-                          className: header.column.getCanSort()
-                            ? "cursor-pointer select-none"
-                            : "",
-                          onClick: header.column.getToggleSortingHandler(),
-                        }}
+                    <div className="flex items-center justify-center gap-3">
+                      <ClipLoader size={22} color="rgb(164, 92, 255)" />
+                      <span>Loading data...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="py-10 text-center text-danger"
+                    aria-live="assertive"
+                  >
+                    <span>
+                      {error.message || "An error occurred while fetching data"}
+                    </span>
+                  </td>
+                </tr>
+              ) : isTableEmpty ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="py-10 text-center text-fg3"
+                    aria-live="polite"
+                  >
+                    No records available
+                  </td>
+                </tr>
+              ) : (
+                getRowModel().rows.map((row, idx) => (
+                  <tr key={row.id + idx}>
+                    {row.getVisibleCells().map((cell, idx) => (
+                      <td
+                        key={cell.id + idx}
+                        className="text-left first:pl-4 last:pr-4 last:text-center"
                       >
                         {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
+                          cell.column.columnDef.cell,
+                          cell.getContext()
                         )}
-                        {{
-                          asc: " 🔼",
-                          desc: " 🔽",
-                        }[header.column.getIsSorted() as string] ?? null}
-                      </div>
-                    )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="text-center py-6"
-                  aria-live="polite"
-                >
-                  <div className="flex justify-center items-center gap-2">
-                    <ClipLoader size={30} color="#434343" />
-                    <span>Loading data...</span>
-                  </div>
-                </td>
-              </tr>
-            ) : error ? (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="text-center py-6 text-red-600"
-                  aria-live="assertive"
-                >
-                  <span>
-                    {error.message || "An error occurred while fetching data"}
-                  </span>
-                </td>
-              </tr>
-            ) : isTableEmpty ? (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="text-center py-6 text-gray-600"
-                  aria-live="polite"
-                >
-                  No records available
-                </td>
-              </tr>
-            ) : (
-              getRowModel().rows.map((row, idx) => (
-                <tr
-                  key={row.id + idx}
-                  className="text-xs font-light border-t-2 border-b-2"
-                >
-                  {row.getVisibleCells().map((cell, idx) => (
-                    <td
-                      key={cell.id + idx}
-                      className="text-left last:text-center px-2 py-6 last:pr-3"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
       {showPagination && (
-        <div className="w-auto flex flex-col md:flex-row  md:items-center gap-2 mt-4 px-2">
-         
-          <div className="flex md:justify-between gap-1 w-full">
+        <div className={`flex w-auto flex-col gap-3 md:flex-row md:items-center ${boxed ? "mt-4 px-1" : "border-t border-line px-4 py-4"}`}>
+          <div className="flex w-full items-center justify-between gap-2">
             <button
-              className="border rounded p-2 bg-[#434343] text-white text-sm disabled:opacity-50"
+              className="v-btn v-btn-ghost"
               onClick={() => handlePageChange(effectiveCurrentPage - 1)}
               disabled={effectiveCurrentPage <= 1}
             >
-              {"< Prev"}
+              <ChevronLeft size={14} /> Prev
             </button>
             <Pagination
               totalPages={effectivePageCount}
@@ -258,19 +265,19 @@ export function DataTable<T>({
               handlePageClick={handlePageChange}
             />
             <button
-              className="border rounded p-2 bg-[#434343] text-white text-sm disabled:opacity-50"
+              className="v-btn v-btn-ghost"
               onClick={() => handlePageChange(effectiveCurrentPage + 1)}
               disabled={effectiveCurrentPage >= effectivePageCount}
             >
-              {"Next >"}
+              Next <ChevronRight size={14} />
             </button>
           </div>
-           <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-700">Show</span>
+          <div className="flex items-center gap-2 whitespace-nowrap text-sm text-fg2">
+            <span>Show</span>
             <select
               value={pageSize}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-              className="border border-gray-300 rounded px-2 py-1 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              className="h-9 rounded-lg border border-line-hi bg-field px-2 text-fg focus:outline-none focus:ring-2 focus:ring-brand/30"
             >
               {pageSizeOptions.map((size) => (
                 <option key={size} value={size}>
@@ -278,7 +285,7 @@ export function DataTable<T>({
                 </option>
               ))}
             </select>
-            <span className="text-gray-700">per page</span>
+            <span>per page</span>
           </div>
         </div>
       )}

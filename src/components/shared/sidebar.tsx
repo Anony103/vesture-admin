@@ -1,319 +1,145 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  DashboardIcon,
-  ManageAdminIcon,
-  CustomersIcon,
-  SavingsIcon,
-  AssetsCategories,
-  AssetIcon,
-  CreditEntryIcon,
-  TransactionIcon,
-  AuditLogsIcon,
-  SettingsIcon,
-  LogoutIcon,
-  InterestRateIcon
-} from "../svg-icons";
-// import { ReceiptIcon } from "../svg-icons/receipt-icon";
-import { HamburgerMenuIcon } from "@radix-ui/react-icons";
-
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { EnvironmentBadge } from "@/components/shared/environment-badge";
-import { useStagingFundingStatus } from "@/hooks/use-staging-funding";
-
-// import { NOTIFY_TOKEN_SESSION_STORAGE_KEY } from "@/constants";
-// import { toast } from "react-toastify";
-// import { useUser } from "@/hooks";
+import { SIDEBAR_WIDTH, isItemActive, useNavGroups } from "@/components/shared/nav-config";
+import { useTheme } from "@/hooks/use-theme";
 
 type Props = {
-  open: boolean;
-  handleToggleSidebar: () => void;
+  /** wide, with labels; otherwise the narrow icon rail */
+  expanded: boolean;
+  /** a wide screen: the sidebar takes its own space. On a phone it floats over the page when expanded. */
+  isDesktop: boolean;
+  onToggle: () => void;
+  /** called after a link is tapped (the layout closes the phone drawer) */
+  onNavigate: () => void;
 };
-export const Sidebar: React.FC<Props> = ({ open, handleToggleSidebar }) => {
-  const navigate = useNavigate();
-  // only staging, and only a super admin, is told this exists
-  const stagingFunding = useStagingFundingStatus();
-  // const { user } = useUser();
 
-  const onLinkClick = () => {
-    if (window.innerWidth > 768) {
-      return;
-    }
-    handleToggleSidebar();
+/** The brand mark used when the sidebar is the narrow rail. */
+const LogoMark = () => (
+  <span
+    aria-hidden
+    className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand to-brand/60 font-display text-lg font-bold text-white shadow-[var(--glow-brand)]"
+  >
+    V
+  </span>
+);
+
+export const Sidebar: React.FC<Props> = ({ expanded, isDesktop, onToggle, onNavigate }) => {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const groups = useNavGroups();
+  const { theme } = useTheme();
+
+  const logout = () => {
+    navigate("/auth");
+    sessionStorage.clear();
   };
 
-  const menuItems = [
-    {
-      title: "Dashboard",
-      path: "/",
-      icon: <DashboardIcon />,
-      id: "1",
-    },
-
-    {
-      title: "Customers",
-      path: "/customers",
-      icon: <CustomersIcon />,
-      id: "2",
-    },
-    {
-      title: "Manage Admins",
-      path: "/manageAdmins",
-      icon: <ManageAdminIcon />,
-      id: "3",
-    },
-    {
-      title: "Investment",
-      path: "/savings/all",
-      icon: <SavingsIcon />,
-      id: "4",
-    },
-    {
-      title: "Assets Categories",
-      path: "/assetsCategories",
-      icon: <AssetsCategories />,
-      id: "5",
-    },
-    {
-      title: "Assets",
-      path: "/assets",
-      icon: <AssetIcon />,
-      id: "6",
-    },
-    {
-      title: "Public Sector Credit Entry",
-      path: "/creditEntry",
-      icon: <CreditEntryIcon />,
-      id: "7",
-    },
-    {
-      title: "Interest Rates",
-      path: "/interestRates",
-      icon: <InterestRateIcon />,
-      id: "8",
-    },
-      {
-      title: "Data Refresh",
-      path: "/employeeInfo",
-      icon: <InterestRateIcon />,
-      id: "9",
-    },
-    {
-      title: "Finance",
-      path: "/finance",
-      icon: <TransactionIcon />,
-      id: "13",
-    },
-    {
-      title: "LMS Transfers",
-      path: "/lmsTransfers",
-      icon: <TransactionIcon />,
-      id: "14",
-    },
-    {
-      title: "KYC",
-      path: "/kyc",
-      icon: <CustomersIcon />,
-      id: "16",
-    },
-    // Ledger is switched off for now. To bring it back, uncomment this item, the "/ledger" route and the
-    // LedgerPage import in App.tsx.
-    // {
-    //   title: "Ledger",
-    //   path: "/ledger",
-    //   icon: <TransactionIcon />,
-    //   id: "15",
-    // },
-    {
-      title: "Transaction History",
-      path: "/transactions",
-      icon: <TransactionIcon />,
-      id: "10",
-    },
-    {
-      title: "Webhook Log",
-      path: "/webhookLogs",
-      icon: <TransactionIcon />,
-      id: "17",
-    },
-    {
-      title: "Auto-save",
-      path: "/autoSave",
-      icon: <TransactionIcon />,
-      id: "19",
-    },
-    {
-      title: "Deposit Fees",
-      path: "/depositFees",
-      icon: <TransactionIcon />,
-      id: "20",
-    },
-    {
-      title: "Withdrawal Payouts",
-      path: "/withdrawalPayouts",
-      icon: <TransactionIcon />,
-      id: "21",
-    },
-    {
-      title: "Audit Log",
-      path: "/auditLog",
-      icon: <AuditLogsIcon />,
-      id: "11",
-    },
-    ...(stagingFunding.enabled
-      ? [
-          {
-            title: "Test Funding",
-            path: "/stagingFunding",
-            icon: <TransactionIcon />,
-            id: "18",
-          },
-        ]
-      : []),
-    {
-      title: "Settings",
-      path: "/settings",
-      icon: <SettingsIcon />,
-      id: "12",
-    },
-  ];
-
-  // const handleLogout = () => {
-  //   sessionStorage.removeItem(NOTIFY_TOKEN_SESSION_STORAGE_KEY);
-  //   toast.success("Logout successful..");
-  //   navigate("/auth/login");
-  // };
+  const ToggleIcon = expanded ? PanelLeftClose : PanelLeftOpen;
+  const toggleLabel = isDesktop
+    ? expanded
+      ? "Collapse sidebar"
+      : "Expand sidebar"
+    : expanded
+      ? "Close menu"
+      : "Open menu";
 
   return (
     <aside
-      className={` h-screen  ${
-        open ? "lg:w-72 " : "lg:w-20"
-      } duration-300 overflow-y-auto no-scrollbar`}
+      aria-label="Main navigation"
+      style={{ width: expanded ? SIDEBAR_WIDTH.expanded : SIDEBAR_WIDTH.rail }}
+      className="fixed inset-y-0 left-0 z-40 flex flex-col border-r border-line bg-deck transition-[width] duration-300 ease-out"
     >
-      <nav
-        className={`bg-white fixed md:pt-2 lg:left-0 top-0 bottom-0 z-20 ${
-          open ? "w-72 " : "w-0 -left-20 lg:block lg:w-20"
-        } duration-300 flex flex-col gap-2`}
-      >
-        <div
-          className={`flex items-center justify-start px-5 ${
-            open ? "w-[100%]" : "w-full"
-          } h-8`}
-        >
-          <div className="flex justify-between items-center w-[100%]">
-            <h1
-              className={`origin-left ${
-                open ? "scale-1" : "scale-0 lg:hidden"
-              } duration-300`}
-            >
-              {/* dark lettering for the white sidebar */}
-              <span className="flex items-center gap-2">
-                <img src="/vesture-logo-dark.png" alt="Vesture" className="h-7 w-auto" />
-                <EnvironmentBadge />
-              </span>
-            </h1>
-            <div>
-              <HamburgerMenuIcon
-                onClick={handleToggleSidebar}
-                className="cursor-pointer text-center"
-              />
-            </div>
+      {/* brand + collapse */}
+      <div className={`flex h-16 shrink-0 items-center ${expanded ? "justify-between px-4" : "justify-center"}`}>
+        {expanded ? (
+          <span className="flex min-w-0 items-center gap-2">
+            {/* the logo file has light lettering; the light theme gets the dark-lettered one */}
+            <img
+              src={theme === "light" ? "/vesture-logo-dark.png" : "/vesture-logo.png"}
+              alt="Vesture"
+              className="h-7 w-auto"
+            />
+            <EnvironmentBadge />
+          </span>
+        ) : (
+          <button type="button" onClick={onToggle} aria-label={toggleLabel} title={toggleLabel} className="rounded-xl">
+            <LogoMark />
+          </button>
+        )}
+        {expanded && (
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={toggleLabel}
+            title={toggleLabel}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-fg3 transition-colors hover:bg-panel-hi hover:text-fg"
+          >
+            <ToggleIcon size={18} />
+          </button>
+        )}
+      </div>
+
+      {/* links */}
+      <nav className="no-scrollbar flex-1 overflow-y-auto overflow-x-hidden px-3 pb-3">
+        {groups.map((group, groupIndex) => (
+          <div key={group.label} className={groupIndex === 0 ? "" : "mt-4"}>
+            {expanded ? (
+              <p className="v-eyebrow px-3 pb-1.5">{group.label}</p>
+            ) : (
+              groupIndex > 0 && <div className="mx-3 mb-3 h-px bg-line" />
+            )}
+            <ul className="flex flex-col gap-0.5">
+              {group.items.map((item) => {
+                const active = isItemActive(item, pathname);
+                const Icon = item.icon;
+                return (
+                  <li key={item.id}>
+                    <NavLink
+                      to={item.path}
+                      onClick={onNavigate}
+                      title={expanded ? undefined : item.title}
+                      aria-current={active ? "page" : undefined}
+                      className={`group relative flex h-10 items-center gap-3 rounded-xl text-[13px] font-medium transition-colors ${
+                        expanded ? "px-3" : "justify-center"
+                      } ${
+                        active
+                          ? "bg-brand/15 text-fg shadow-[inset_0_0_0_1px_rgb(var(--brand-rgb)/0.3)]"
+                          : "text-fg2 hover:bg-panel-hi hover:text-fg"
+                      }`}
+                    >
+                      {active && (
+                        <span
+                          aria-hidden
+                          className="absolute -left-3 top-2 bottom-2 w-[3px] rounded-r-full bg-brand shadow-[0_0_12px_rgb(var(--brand-rgb)/0.9)]"
+                        />
+                      )}
+                      <Icon size={18} className={`shrink-0 ${active ? "text-brand" : ""}`} strokeWidth={active ? 2.2 : 1.9} />
+                      {expanded && <span className="truncate">{item.title}</span>}
+                    </NavLink>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-        </div>
-        <div className="flex h-full flex-col justify-between">
-          <ul className=" flex flex-col gap-2 overflow-x-hidden ">
-            {menuItems.map((item, index) => (
-              <li
-                className={` gap-0.5
-                 ${ index === 2 || index === 7 || index === 9
-                    ? "border-b-2 border-gray-100"
-                    : ""}
-                `}
-                key={item.id}
-              >
-                <NavLink
-                  to={item.path}
-                  onClick={onLinkClick}
-                  className={({ isActive }) =>
-                    `w-full ${
-                      open ? "" : "lg:justify-center"
-                    } text-black flex items-center gap-x-4 text-xs cursor-pointer hover:opacity-80 p-2 pl-5 ${
-                      isActive
-                        ? "bg-[#F6EBFE] font-bold border-r-4 border-r-[#7C2EBF]"
-                        : "bg-transparent"
-                    }`
-                  }
-                >
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span>{item.icon}</span>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="left"
-                        sideOffset={open ? 250 : 35}
-                        className="bg-white shadow-sm text-black"
-                        arrowPadding={4}
-                      >
-                        <p className="text-sm">{item.title}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <span
-                    className={`font-sm text-xs ${
-                      open ? "scale-1 w-auto" : "scale-0 w-0"
-                    }`}
-                  >
-                    {item.title}
-                  </span>
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-          <div className="flex h-[10vh] w-full items-center justify-center ">
-            <button
-              className={`flex items-center p-1 pl-5 gap-3 text-black w-full font-bold ${
-                open ? "" : "lg:justify-center"
-              }`}
-            >
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span>
-                      <LogoutIcon />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="left"
-                    sideOffset={open ? 250 : 35}
-                    className="bg-white shadow-sm text-black"
-                    arrowPadding={4}
-                  >
-                    <p className=" font-normal">Logout</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <span
-                className={`text-xs text-base ${
-                  open ? "scale-1 w-auto " : "scale-0 w-0"
-                }`}
-                onClick={() => {
-                  navigate("/auth");
-                  sessionStorage.clear();
-                }}
-              >
-                Logout
-              </span>
-            </button>
-          </div>
-        </div>
+        ))}
       </nav>
+
+      {/* log out */}
+      <div className="shrink-0 border-t border-line p-3">
+        <button
+          type="button"
+          onClick={logout}
+          title={expanded ? undefined : "Log out"}
+          className={`flex h-10 w-full items-center gap-3 rounded-xl text-[13px] font-medium text-fg2 transition-colors hover:bg-danger/10 hover:text-danger ${
+            expanded ? "px-3" : "justify-center"
+          }`}
+        >
+          <LogOut size={18} className="shrink-0" strokeWidth={1.9} />
+          {expanded && <span>Log out</span>}
+        </button>
+      </div>
     </aside>
   );
 };
