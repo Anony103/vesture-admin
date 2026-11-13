@@ -4,8 +4,7 @@ import { Container } from "../components/shared/container";
 // import { AssetDataTable } from "../components/shared/data-table-assets";
 import { ColumnDef } from "@tanstack/react-table";
 import { AssetType } from "../types/table-type";
-import { ActionIcon } from "../components/svg-icons/action-icon";
-import { Link } from "react-router-dom";
+import { RowMenu } from "@/components/shared/row-menu";
 import { useNavigate } from "react-router-dom";
 import useMangeAssets from "@/hooks/use-manage-assests";
 import { DataTable } from "@/components/shared/data-table";
@@ -97,37 +96,23 @@ const Assets = () => {
     {
       accessorKey: "actions",
       header: "",
-      cell: ({ row }) => {
-        const id = row?.original.id;
-        console.log(row.original)
-        return (
-          <div className="dropdown dropdown-end">
-            <div tabIndex={0} className="p-0 cursor-pointer">
-              <ActionIcon />
-            </div>
-            <ul
-              tabIndex={0}
-              className="dropdown-content text-left bg-[#4F4F4F] rounded-md text-sm text-white z-[1] w-52 shadow"
-            >
-              <li className="py-2 pl-3 cursor-pointer">
-                <Link to={`${id}`}>View Details</Link>
-              </li>
-              <li className="border-t-[1px] cursor-pointer border-t-white py-2 pl-3">
-                <a
-                  onClick={() => {
-                    navigate("createassets");
-                    setSelectedAsset(row?.original)
-                    sessionStorage.setItem("selectedAsset" , JSON.stringify(row?.original))
-                    sessionStorage.setItem("mode" , "true")
-                  }}
-                >
-                  Edit Assets
-                </a>
-              </li>
-            </ul>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <RowMenu
+          items={[
+            { label: "View Details", to: `${row?.original.id}` },
+            {
+              label: "Edit Assets",
+              separated: true,
+              onSelect: () => {
+                navigate("createassets");
+                setSelectedAsset(row?.original);
+                sessionStorage.setItem("selectedAsset", JSON.stringify(row?.original));
+                sessionStorage.setItem("mode", "true");
+              },
+            },
+          ]}
+        />
+      ),
     },
   ];
 

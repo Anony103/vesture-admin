@@ -6,6 +6,7 @@ import { ColumnDef } from "@tanstack/react-table";
 // import { ActionIcon } from "../components/svg-icons/action-icon";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
+import { modalSx, modalSlotProps } from "@/components/shared/modal-style";
 import { IoEyeOutline } from "react-icons/io5";
 import { IoEyeOffOutline } from "react-icons/io5";
 // import TabItem from "@/components/tabItem";
@@ -16,7 +17,7 @@ import { ClipLoader } from "react-spinners";
 import { ErrorPage } from "@/components/errorpage";
 import useMangeUser from "@/hooks/use-manage-admin";
 import { AdminUser } from "@/types/general-type";
-import { ActionIcon } from "@/components/svg-icons/action-icon";
+import { RowMenu } from "@/components/shared/row-menu";
 // import {
 //   Select,
 //   SelectContent,
@@ -25,18 +26,6 @@ import { ActionIcon } from "@/components/svg-icons/action-icon";
 //   SelectValue,
 // } from "@/components/ui/select"; // Adjust the import path as needed
 
-const style = {
-  position: "absolute" as const,
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  height: "auto",
-  width: 500,
-  bgcolor: "background.paper",
-  borderRadius: 1,
-  boxShadow: 24,
-  p: 2,
-};
 
 const Admin = () => {
   const {
@@ -122,38 +111,12 @@ const Admin = () => {
       cell: ({ row }) => {
         const data = row.original;
         return (
-          <div className="dropdown dropdown-end">
-            <div tabIndex={0} className="p-0">
-              <ActionIcon />
-            </div>
-            <ul
-              tabIndex={0}
-              className="dropdown-content flex flex-col gap-y-4 text-left bg-[#4F4F4F] cursor-pointer  rounded-md text-sm text-white z-[100] p-2 w-52  shadow"
-            >
-              {!row.original.enabled ? (
-                <li
-                  onClick={() =>
-                    handleToggleModal(MODAL_TYPE.UPDATE_ADMIN, data, true)
-                  }
-                >
-                  <a>Activate</a>
-                </li>
-              ) : (
-                ""
-              )}
-              {row.original.enabled ? (
-                <li
-                  onClick={() =>
-                    handleToggleModal(MODAL_TYPE.UPDATE_ADMIN, data, false)
-                  }
-                >
-                  <a>Deactivate</a>
-                </li>
-              ) : (
-                ""
-              )}
-            </ul>
-          </div>
+          <RowMenu
+            items={[
+              { label: "Activate", hidden: !!row.original.enabled, onSelect: () => handleToggleModal(MODAL_TYPE.UPDATE_ADMIN, data, true) },
+              { label: "Deactivate", hidden: !row.original.enabled, onSelect: () => handleToggleModal(MODAL_TYPE.UPDATE_ADMIN, data, false) },
+            ]}
+          />
         );
       },
     },
@@ -234,12 +197,13 @@ const Admin = () => {
       </article>
 
       <Modal
+        slotProps={modalSlotProps}
         open={open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
+        <Box sx={modalSx(500)}>
           <h1 className="font-bold text-lg">
             {modalState === MODAL_TYPE.CREATE_ADMIN ? "Create Admin" : "Admin"}
           </h1>

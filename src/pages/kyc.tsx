@@ -3,6 +3,26 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Container } from "../components/shared/container";
 import { DataTable } from "../components/shared/data-table";
 import { Tabs } from "@/components/shared/tabs";
+import { StatCard, StatGrid } from "@/components/shared/stat-card";
+import {
+  BadgeCheck,
+  CheckCircle2,
+  ChevronDown,
+  Circle,
+  Clock,
+  Eye,
+  FileClock,
+  Fingerprint,
+  Landmark,
+  Images,
+  RotateCcw,
+  Scale,
+  Search,
+  ShieldCheck,
+  UserCog,
+  XCircle,
+  type LucideIcon,
+} from "lucide-react";
 import Button from "../components/shared/button";
 import {
   Dialog,
@@ -42,34 +62,55 @@ const STEPS: { step: KycStepName; short: string; label: string }[] = [
 ];
 
 const TONE: Record<string, string> = {
-  VERIFIED: "bg-green-100 text-green-700",
-  PENDING: "bg-[#F6EBFE] text-[#7C2EBF]",
-  SUBMITTED: "bg-[#F6EBFE] text-[#7C2EBF]",
-  FAILED: "bg-red-100 text-red-700",
-  ERROR: "bg-red-100 text-red-700",
-  RESET: "bg-amber-100 text-amber-700",
-  UNDER_REVIEW: "bg-amber-100 text-amber-800",
-  REJECTED: "bg-red-100 text-red-700",
-  APPROVED: "bg-green-100 text-green-700",
-  NOT_STARTED: "bg-gray-100 text-gray-500",
+  VERIFIED: "v-chip-ok",
+  APPROVED: "v-chip-ok",
+  PENDING: "v-chip-brand",
+  SUBMITTED: "v-chip-brand",
+  FAILED: "v-chip-bad",
+  ERROR: "v-chip-bad",
+  REJECTED: "v-chip-bad",
+  RESET: "v-chip-warn",
+  UNDER_REVIEW: "v-chip-warn",
+  NOT_STARTED: "",
 };
 
 const Chip = ({ status, text, title }: { status: string; text?: string; title?: string }) => (
-  <span
-    title={title ?? status}
-    className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${TONE[status] ?? TONE.NOT_STARTED}`}
-  >
+  <span title={title ?? status} className={`v-chip ${TONE[status] ?? ""}`}>
     {text ?? status.replace("_", " ")}
   </span>
+);
+
+/** The icon and colour that stand for a step's state in the timeline. */
+const STATE_LOOK: Record<string, { icon: LucideIcon; tone: string }> = {
+  VERIFIED: { icon: CheckCircle2, tone: "text-mint" },
+  APPROVED: { icon: CheckCircle2, tone: "text-mint" },
+  FAILED: { icon: XCircle, tone: "text-danger" },
+  ERROR: { icon: XCircle, tone: "text-danger" },
+  REJECTED: { icon: XCircle, tone: "text-danger" },
+  UNDER_REVIEW: { icon: Eye, tone: "text-gold" },
+  RESET: { icon: RotateCcw, tone: "text-gold" },
+  PENDING: { icon: Clock, tone: "text-brand" },
+  SUBMITTED: { icon: Clock, tone: "text-brand" },
+  NOT_STARTED: { icon: Circle, tone: "text-fg3" },
+};
+
+/** A section heading inside the customer dialog. */
+const SectionTitle = ({ icon: Icon, children }: { icon: LucideIcon; children: React.ReactNode }) => (
+  <h3 className="mb-3 flex items-center gap-2 font-display text-sm font-semibold">
+    <span className="grid h-6 w-6 place-items-center rounded-lg bg-brand/15 text-brand">
+      <Icon size={14} />
+    </span>
+    {children}
+  </h3>
 );
 
 const when = (value: string | null | undefined) =>
   value ? new Date(value).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" }) : "-";
 
 const DetailRow = ({ label, value }: { label: string; value: React.ReactNode }) => (
-  <div className="flex flex-col gap-1 border-b pb-2">
-    <span className="text-[11px] uppercase tracking-wide text-gray-400">{label}</span>
-    <span className="text-sm text-gray-800 break-words">{value ?? "-"}</span>
+  <div className="flex flex-col gap-1 border-b border-line pb-2">
+    <span className="v-eyebrow">{label}</span>
+    <span className="break-words text-sm text-fg">{value ?? "-"}</span>
   </div>
 );
 
@@ -104,26 +145,26 @@ const KycImage = ({ service, doc }: { service: KycService; doc: KycDocumentMeta 
   };
 
   return (
-    <div className="border rounded-md p-3 flex flex-col gap-2">
+    <div className="flex flex-col gap-2 rounded-xl border border-line bg-panel p-3">
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-semibold">
           {doc.type === "LIVENESS_SELFIE" ? "Live selfie" : doc.type === "UTILITY_BILL" ? "Utility bill" : "ID document"}
         </span>
-        <span className="text-[11px] text-gray-400">{when(doc.createdOn)}</span>
+        <span className="text-[11px] text-fg3">{when(doc.createdOn)}</span>
       </div>
       {url ? (
-        <img src={url} alt={doc.type} className="max-h-64 w-full object-contain rounded bg-gray-50" />
+        <img src={url} alt={doc.type} className="max-h-64 w-full rounded-lg bg-ink object-contain" />
       ) : (
         <button
           onClick={show}
           disabled={loading}
-          className="text-xs bg-[#E2CEF3] text-[#7C2EBF] rounded-md py-2 disabled:opacity-50"
+          className="v-btn v-btn-soft v-btn-sm"
         >
           {loading ? "Loading..." : "View image"}
         </button>
       )}
-      {failed && <p className="text-[11px] text-red-600">Could not load the image.</p>}
-      <p className="text-[11px] text-gray-400">
+      {failed && <p className="text-[11px] text-danger">Could not load the image.</p>}
+      <p className="text-[11px] text-fg3">
         {Math.round((doc.sizeBytes ?? 0) / 1024)} KB · Cloudinary:{" "}
         {doc.cloudinaryStatus === "UPLOADED" ? "copied" : (doc.cloudinaryStatus ?? "-").toLowerCase()}
       </p>
@@ -140,22 +181,22 @@ const AttemptRow = ({ a }: { a: KycAttempt }) => {
       <td className="py-2 pr-3"><Chip status={a.status} /></td>
       <td className="py-2 pr-3 text-xs">{a.attempt ?? "-"}</td>
       <td className="py-2 pr-3 text-xs">
-        {a.failureReason && <p className="text-red-600">{a.failureReason}</p>}
+        {a.failureReason && <p className="text-danger">{a.failureReason}</p>}
         {a.idNumber && <p>NIN {a.idNumber}</p>}
         {a.confidence != null && <p>Face confidence {a.confidence}</p>}
         {a.jobId && <p>Job {a.jobId}</p>}
-        {a.providerReference && <p className="text-gray-400">Ref {a.providerReference}</p>}
-        {a.autoRetries ? <p className="text-gray-400">Retried {a.autoRetries}×</p> : null}
+        {a.providerReference && <p className="text-fg3">Ref {a.providerReference}</p>}
+        {a.autoRetries ? <p className="text-fg3">Retried {a.autoRetries}×</p> : null}
         {a.reviewedBy && (
-          <p className="text-gray-600">
+          <p className="text-fg2">
             Reviewed by {a.reviewedBy} on {when(a.reviewedOn)}{a.reviewReason ? `: ${a.reviewReason}` : ""}
           </p>
         )}
         {details.length > 0 && (
-          <p className="text-gray-400">{details.map(([k, v]) => `${k}: ${String(v)}`).join(" · ")}</p>
+          <p className="text-fg3">{details.map(([k, v]) => `${k}: ${String(v)}`).join(" · ")}</p>
         )}
       </td>
-      <td className="py-2 text-xs whitespace-nowrap text-gray-500">{when(a.updatedOn)}</td>
+      <td className="py-2 text-xs whitespace-nowrap text-fg3">{when(a.updatedOn)}</td>
     </tr>
   );
 };
@@ -191,24 +232,24 @@ const ReviewForm = ({
     if (await onReject(reason.trim())) setReason("");
   };
   return (
-    <div className="border border-amber-200 bg-amber-50 rounded-md p-3 space-y-2">
-      <p className="text-xs font-semibold text-amber-900">Your decision: {shortTitle(step)}</p>
+    <div className="space-y-3 rounded-xl border border-gold/30 bg-gold/10 p-4">
+      <p className="flex items-center gap-2 text-sm font-semibold text-gold"><Scale size={15} /> Your decision: {shortTitle(step)}</p>
       <textarea
         value={reason}
         onChange={(e) => setReason(e.target.value)}
         rows={3}
         maxLength={1000}
         placeholder="Why? (required, at least 10 characters). It is recorded with your name. If you reject, the customer is shown this reason and can upload again."
-        className="w-full border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+        className="v-field"
       />
       {hasBill && (
-        <p className="text-[11px] text-amber-900">
+        <p className="text-[11px] text-fg2">
           Check on the bill: it carries the customer&apos;s name, the address matches the typed one, and its date is within the last {BILL_MAX_AGE_DAYS} days.
         </p>
       )}
       {hasBill && (
         <div className="space-y-1">
-          <label className="text-[11px] font-semibold text-amber-900" htmlFor="address-on-bill">
+          <label className="text-[11px] font-semibold text-fg2" htmlFor="address-on-bill">
             Address as printed on the utility bill (needed to approve)
           </label>
           <input
@@ -217,7 +258,7 @@ const ReviewForm = ({
             onChange={(e) => setAddressOnBill(e.target.value)}
             maxLength={500}
             placeholder="Copy the address from the bill that you compared with the typed one"
-            className="w-full border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+            className="v-field"
           />
         </div>
       )}
@@ -225,14 +266,14 @@ const ReviewForm = ({
         <button
           onClick={approve}
           disabled={!ready || !billReady || busy}
-          className="text-xs bg-green-600 text-white rounded-md px-3 py-1.5 disabled:opacity-40"
+          className="v-btn v-btn-ok v-btn-sm"
         >
           {busy ? "Saving..." : "Approve - mark as verified"}
         </button>
         <button
           onClick={reject}
           disabled={!ready || busy}
-          className="text-xs bg-red-600 text-white rounded-md px-3 py-1.5 disabled:opacity-40"
+          className="v-btn v-btn-danger v-btn-sm"
         >
           {busy ? "Saving..." : "Reject - customer uploads again"}
         </button>
@@ -247,20 +288,20 @@ const ResetForm = ({ busy, onReset }: { busy: boolean; onReset: (reason: string)
   const [reason, setReason] = useState("");
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} className="text-xs text-[#7C2EBF] font-semibold">
+      <button onClick={() => setOpen(true)} className="text-xs font-semibold text-brand hover:underline">
         Reset attempts
       </button>
     );
   }
   return (
-    <div className="border rounded-md p-3 space-y-2">
+    <div className="space-y-2 rounded-xl border border-line bg-panel p-3">
       <textarea
         value={reason}
         onChange={(e) => setReason(e.target.value)}
         rows={2}
         maxLength={1000}
         placeholder="Why are you resetting this? (required, at least 10 characters)"
-        className="w-full border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+        className="v-field"
       />
       <div className="flex gap-2">
         <button
@@ -271,11 +312,11 @@ const ResetForm = ({ busy, onReset }: { busy: boolean; onReset: (reason: string)
             }
           }}
           disabled={reason.trim().length < 10 || busy}
-          className="text-xs bg-[#7C2EBF] text-white rounded-md px-3 py-1.5 disabled:opacity-40"
+          className="v-btn v-btn-primary v-btn-sm"
         >
           {busy ? "Resetting..." : "Reset attempts"}
         </button>
-        <button onClick={() => setOpen(false)} className="text-xs text-gray-500">
+        <button onClick={() => setOpen(false)} className="text-xs text-fg3 hover:text-fg">
           Cancel
         </button>
       </div>
@@ -338,7 +379,7 @@ const factsFor = (step: KycStepName, s: Record<string, unknown>, detail: KycDeta
 
 const StepDetail = ({ step, detail, k }: { step: KycStepName; detail: KycDetail; k: ReturnType<typeof useKyc> }) => {
   const attempt = [...detail.attempts].reverse().find((a) => a.step === step);
-  if (!attempt) return <p className="text-xs text-gray-500 p-3">Nothing submitted for this step yet.</p>;
+  if (!attempt) return <p className="p-4 text-xs text-fg3">Nothing submitted for this step yet.</p>;
   const summary = parseSummary(attempt.summary);
   const facts = factsFor(step, summary, detail);
   const doc: KycDocumentMeta | undefined = detail.documents.find((d) => d.id === attempt.documentId);
@@ -349,17 +390,17 @@ const StepDetail = ({ step, detail, k }: { step: KycStepName; detail: KycDetail;
   const busy = k.actionLoading === `review-${step}`;
   const unread = facts.some((f) => f.label === "Name" && !f.onRecord);
   return (
-    <div className="bg-gray-50 border-t p-3 space-y-4">
+    <div className="space-y-4 border-t border-line bg-field p-4">
       <div className="space-y-1">
         <div className="flex items-center gap-2">
           <Chip status={attempt.status} />
-          <span className="text-[11px] text-gray-500">Attempt {attempt.attempt ?? "-"} · {when(attempt.updatedOn)}</span>
+          <span className="text-[11px] text-fg3">Attempt {attempt.attempt ?? "-"} · {when(attempt.updatedOn)}</span>
         </div>
         {attempt.failureReason && (
-          <p className="text-xs text-red-700">Automatic check: {attempt.failureReason}</p>
+          <p className="text-xs text-danger">Automatic check: {attempt.failureReason}</p>
         )}
         {unread && (
-          <p className="text-xs text-amber-800">
+          <p className="text-xs text-gold">
             The provider returned no name for this {step === "NIN" ? "NIN" : "document"}. That is why it could not be matched automatically, so the name has to be
             checked by eye against the image below.
           </p>
@@ -367,9 +408,9 @@ const StepDetail = ({ step, detail, k }: { step: KycStepName; detail: KycDetail;
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
+        <table className="v-mini">
           <thead>
-            <tr className="text-[11px] uppercase text-gray-400">
+            <tr>
               <th className="pb-1 pr-3">Detail</th>
               <th className="pb-1 pr-3">Read by the provider</th>
               <th className="pb-1">On the customer&apos;s account</th>
@@ -378,29 +419,29 @@ const StepDetail = ({ step, detail, k }: { step: KycStepName; detail: KycDetail;
           <tbody>
             {facts.map((f) => (
               <tr key={f.label} className="border-t">
-                <td className="py-1.5 pr-3 text-gray-500">{f.label}</td>
-                <td className={`py-1.5 pr-3 ${f.bad || !f.onRecord ? "text-red-600 font-medium" : "text-gray-800"}`}>{f.onRecord || "not returned"}</td>
-                <td className="py-1.5 text-gray-800">{f.onAccount ?? "-"}</td>
+                <td className="py-1.5 pr-3 text-fg3">{f.label}</td>
+                <td className={`py-1.5 pr-3 ${f.bad || !f.onRecord ? "font-medium text-danger" : "text-fg"}`}>{f.onRecord || "not returned"}</td>
+                <td className="py-1.5 text-fg">{f.onAccount ?? "-"}</td>
               </tr>
             ))}
             {attempt.confidence != null && (
               <tr className="border-t">
-                <td className="py-1.5 pr-3 text-gray-500">Face confidence</td>
-                <td className="py-1.5 pr-3 text-gray-800">{Math.round(attempt.confidence * 10) / 10}</td>
+                <td className="py-1.5 pr-3 text-fg3">Face confidence</td>
+                <td className="py-1.5 pr-3 text-fg">{Math.round(attempt.confidence * 10) / 10}</td>
                 <td />
               </tr>
             )}
             {attempt.idNumber && (
               <tr className="border-t">
-                <td className="py-1.5 pr-3 text-gray-500">NIN</td>
-                <td className="py-1.5 pr-3 text-gray-800">{attempt.idNumber}</td>
+                <td className="py-1.5 pr-3 text-fg3">NIN</td>
+                <td className="py-1.5 pr-3 text-fg v-mono">{attempt.idNumber}</td>
                 <td />
               </tr>
             )}
             {typeof summary.fieldsReturned === "string" && (
               <tr className="border-t">
-                <td className="py-1.5 pr-3 text-gray-500">Fields the provider sent</td>
-                <td className="py-1.5 pr-3 text-gray-600" colSpan={2}>{summary.fieldsReturned || "none"}</td>
+                <td className="py-1.5 pr-3 text-fg3">Fields the provider sent</td>
+                <td className="py-1.5 pr-3 text-fg2" colSpan={2}>{summary.fieldsReturned || "none"}</td>
               </tr>
             )}
           </tbody>
@@ -416,9 +457,9 @@ const StepDetail = ({ step, detail, k }: { step: KycStepName; detail: KycDetail;
 
       {reviews.length > 0 && (
         <div className="space-y-1">
-          <p className="text-[11px] uppercase tracking-wide text-gray-400">Decisions on this step</p>
+          <p className="v-eyebrow">Decisions on this step</p>
           {reviews.map((r) => (
-            <p key={r.id} className="text-xs text-gray-700">
+            <p key={r.id} className="text-xs text-fg2">
               <Chip status={r.decision} /> {r.adminName || r.adminEmail} ({r.adminRole?.replace("ROLE_", "").toLowerCase()}) · {when(r.createdOn)} - {r.reason}
               {r.addressOnBill ? ` (address on the bill: ${r.addressOnBill})` : ""}
             </p>
@@ -461,16 +502,16 @@ const AccountStatusCard = ({ detail, k }: { detail: KycDetail; k: ReturnType<typ
     }
   };
   return (
-    <div className="border rounded-md p-3 space-y-3">
+    <div className="space-y-3 rounded-xl border border-line bg-panel p-4">
       <div className="flex flex-wrap items-center gap-3">
         <Chip status={deactivated ? "FAILED" : "VERIFIED"} text={deactivated ? "Deactivated" : "Active"} />
-        <span className="text-[11px] text-gray-500">
+        <span className="text-[11px] text-fg3">
           {deactivated
             ? "Cannot sign in. Money and plans are untouched; money sent to them still arrives."
             : "Can sign in and use the app."}
         </span>
         {!open && (
-          <button onClick={() => setOpen(true)} className="text-xs text-[#7C2EBF] font-semibold">
+          <button onClick={() => setOpen(true)} className="text-xs font-semibold text-brand hover:underline">
             {deactivated ? "Reactivate" : "Deactivate"}
           </button>
         )}
@@ -483,17 +524,17 @@ const AccountStatusCard = ({ detail, k }: { detail: KycDetail; k: ReturnType<typ
             rows={2}
             maxLength={1000}
             placeholder={deactivated ? "Why is this customer being reactivated? (at least 10 characters)" : "Why is this customer being deactivated? (at least 10 characters). The customer is emailed this."}
-            className="w-full border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+            className="v-field"
           />
           <div className="flex gap-2">
             <button
               onClick={submit}
               disabled={!ready || busy}
-              className={`text-xs text-white rounded-md px-3 py-1.5 disabled:opacity-40 ${deactivated ? "bg-green-600" : "bg-red-600"}`}
+              className={`v-btn v-btn-sm ${deactivated ? "v-btn-ok" : "v-btn-danger"}`}
             >
               {busy ? "Saving..." : deactivated ? "Reactivate customer" : "Deactivate customer"}
             </button>
-            <button onClick={() => setOpen(false)} className="text-xs text-gray-500">
+            <button onClick={() => setOpen(false)} className="text-xs text-fg3 hover:text-fg">
               Cancel
             </button>
           </div>
@@ -501,9 +542,9 @@ const AccountStatusCard = ({ detail, k }: { detail: KycDetail; k: ReturnType<typ
       )}
       {k.statusHistory.length > 0 && (
         <div className="space-y-1">
-          <p className="text-[11px] uppercase tracking-wide text-gray-400">Status history</p>
+          <p className="v-eyebrow">Status history</p>
           {k.statusHistory.slice(0, 5).map((h) => (
-            <p key={h.id} className="text-xs text-gray-700">
+            <p key={h.id} className="text-xs text-fg2">
               <Chip status={h.action === "DEACTIVATED" ? "FAILED" : "VERIFIED"} text={h.action === "DEACTIVATED" ? "Deactivated" : "Reactivated"} /> {h.adminName || h.adminEmail}{" "}
               · {when(h.createdOn)} - {h.reason}
             </p>
@@ -520,7 +561,7 @@ const BvnCard = ({ bvn, k }: { bvn: KycBvnInfo; k: ReturnType<typeof useKyc> }) 
   // A new customer must never inherit the previous customer's revealed number.
   useEffect(() => setShown(null), [k.selectedId]);
   if (!bvn.present) {
-    return <p className="text-xs text-gray-500">No BVN on this customer&apos;s account.</p>;
+    return <p className="text-xs text-fg3">No BVN on this customer&apos;s account.</p>;
   }
   const reveal = async () => {
     setLoading(true);
@@ -528,18 +569,18 @@ const BvnCard = ({ bvn, k }: { bvn: KycBvnInfo; k: ReturnType<typeof useKyc> }) 
     setLoading(false);
   };
   return (
-    <div className="border rounded-md p-3 space-y-3">
+    <div className="space-y-3 rounded-xl border border-line bg-panel p-4">
       <div className="flex flex-wrap items-center gap-3">
-        <span className="text-sm font-mono">{shown ?? bvn.masked}</span>
+        <span className="v-mono text-sm">{shown ?? bvn.masked}</span>
         {shown ? (
-          <button onClick={() => setShown(null)} className="text-xs text-[#7C2EBF] font-semibold">Hide</button>
+          <button onClick={() => setShown(null)} className="text-xs font-semibold text-brand hover:underline">Hide</button>
         ) : (
-          <button onClick={reveal} disabled={loading} className="text-xs text-[#7C2EBF] font-semibold disabled:opacity-50">
+          <button onClick={reveal} disabled={loading} className="text-xs font-semibold text-brand hover:underline disabled:opacity-50">
             {loading ? "Loading..." : "Reveal"}
           </button>
         )}
         {bvn.sandbox && <Chip status="RESET" text="Sandbox record" />}
-        <span className="text-[11px] text-gray-400">Revealing the full number is recorded in the audit log.</span>
+        <span className="text-[11px] text-fg3">Revealing the full number is recorded in the audit log.</span>
       </div>
       {bvn.recorded ? (
         <div className="grid md:grid-cols-2 gap-x-6 gap-y-3">
@@ -556,19 +597,19 @@ const BvnCard = ({ bvn, k }: { bvn: KycBvnInfo; k: ReturnType<typeof useKyc> }) 
           <DetailRow label="Times looked up" value={bvn.lookupCount} />
         </div>
       ) : (
-        <p className="text-xs text-gray-500">No saved BVN lookup for this number (the customer signed up before BVN records were kept).</p>
+        <p className="text-xs text-fg3">No saved BVN lookup for this number (the customer signed up before BVN records were kept).</p>
       )}
       {bvn.lookups && bvn.lookups.length > 0 && (
         <div className="overflow-x-auto">
-          <p className="text-[11px] uppercase tracking-wide text-gray-400 mb-1">Lookups</p>
-          <table className="w-full text-left text-xs">
+          <p className="v-eyebrow mb-1">Lookups</p>
+          <table className="v-mini">
             <tbody>
               {bvn.lookups.map((l, i) => (
                 <tr key={i} className="border-t">
-                  <td className="py-1 pr-3 whitespace-nowrap text-gray-500">{when(l.createdAt)}</td>
+                  <td className="py-1 pr-3 whitespace-nowrap text-fg3">{when(l.createdAt)}</td>
                   <td className="py-1 pr-3">{l.source}</td>
                   <td className="py-1 pr-3">{l.sector ?? "-"}</td>
-                  <td className="py-1 text-gray-400">{l.detail ?? ""}</td>
+                  <td className="py-1 text-fg3">{l.detail ?? ""}</td>
                 </tr>
               ))}
             </tbody>
@@ -581,12 +622,12 @@ const BvnCard = ({ bvn, k }: { bvn: KycBvnInfo; k: ReturnType<typeof useKyc> }) 
 
 const ReviewHistory = ({ reviews }: { reviews: KycReviewAction[] }) =>
   reviews.length === 0 ? (
-    <p className="text-xs text-gray-500">No manual decisions yet.</p>
+    <p className="text-xs text-fg3">No manual decisions yet.</p>
   ) : (
     <div className="overflow-x-auto">
-      <table className="w-full text-left text-xs">
+      <table className="v-mini">
         <thead>
-          <tr className="text-[11px] uppercase text-gray-400">
+          <tr>
             <th className="pb-1 pr-3">When</th>
             <th className="pb-1 pr-3">Step</th>
             <th className="pb-1 pr-3">Decision</th>
@@ -597,17 +638,17 @@ const ReviewHistory = ({ reviews }: { reviews: KycReviewAction[] }) =>
         <tbody>
           {[...reviews].reverse().map((r) => (
             <tr key={r.id} className="border-t align-top">
-              <td className="py-1.5 pr-3 whitespace-nowrap text-gray-500">{when(r.createdOn)}</td>
+              <td className="py-1.5 pr-3 whitespace-nowrap text-fg3">{when(r.createdOn)}</td>
               <td className="py-1.5 pr-3 whitespace-nowrap">{shortTitle(r.step)}{r.attempt ? ` #${r.attempt}` : ""}</td>
               <td className="py-1.5 pr-3"><Chip status={r.decision} /></td>
-              <td className="py-1.5 pr-3 text-gray-800">
+              <td className="py-1.5 pr-3 text-fg">
                 {r.reason}
-                {r.addressOnBill && <span className="block text-[11px] text-gray-500">Address on the bill: {r.addressOnBill}</span>}
+                {r.addressOnBill && <span className="block text-[11px] text-fg3">Address on the bill: {r.addressOnBill}</span>}
               </td>
-              <td className="py-1.5 text-gray-600">
+              <td className="py-1.5 text-fg2">
                 {r.adminName || r.adminEmail}
                 <br />
-                <span className="text-[11px] text-gray-400">{r.adminEmail} · {r.adminRole?.replace("ROLE_", "").toLowerCase()} · {r.ipAddress ?? "-"}</span>
+                <span className="text-[11px] text-fg3">{r.adminEmail} · {r.adminRole?.replace("ROLE_", "").toLowerCase()} · {r.ipAddress ?? "-"}</span>
               </td>
             </tr>
           ))}
@@ -626,8 +667,8 @@ const Kyc = () => {
       accessorKey: "name",
       cell: ({ row }) => (
         <button onClick={() => k.setSelectedId(row.original.id)} className="text-left">
-          <p className="font-medium text-[#7C2EBF] hover:underline">{row.original.name || "-"}</p>
-          <p className="text-[11px] text-gray-500">{row.original.email}</p>
+          <p className="font-medium text-brand hover:underline">{row.original.name || "-"}</p>
+          <p className="text-[11px] text-fg3">{row.original.email}</p>
         </button>
       ),
     },
@@ -663,11 +704,11 @@ const Kyc = () => {
       id: "attention",
       cell: ({ row }) =>
         row.original.attention.length ? (
-          <span title={row.original.attention.join("\n")} className="text-xs font-semibold text-red-600">
+          <span title={row.original.attention.join("\n")} className="v-chip v-chip-bad">
             {row.original.attention.length} issue{row.original.attention.length === 1 ? "" : "s"}
           </span>
         ) : (
-          <span className="text-xs text-gray-400">-</span>
+          <span className="text-xs text-fg3">-</span>
         ),
     },
     {
@@ -675,12 +716,12 @@ const Kyc = () => {
       id: "waiting",
       cell: ({ row }) =>
         row.original.reviewWaitingSince ? (
-          <span className="text-xs font-semibold text-amber-700">
+          <span className="v-chip v-chip-warn">
             since {when(row.original.reviewWaitingSince)}
-            {row.original.addressBillUploaded && <span className="ml-1 rounded-full bg-[#F6EBFE] px-1.5 py-0.5 text-[10px] text-[#7C2EBF]">utility bill</span>}
+            {row.original.addressBillUploaded && <span className="v-chip v-chip-brand">utility bill</span>}
           </span>
         ) : (
-          <span className="text-xs text-gray-400">-</span>
+          <span className="text-xs text-fg3">-</span>
         ),
     },
     { header: "Last activity", accessorKey: "lastActivity", cell: ({ row }) => <span className="text-xs">{when(row.original.lastActivity)}</span> },
@@ -688,7 +729,7 @@ const Kyc = () => {
       header: "",
       id: "view",
       cell: ({ row }) => (
-        <button onClick={() => k.setSelectedId(row.original.id)} className="text-xs text-[#7C2EBF] font-semibold">
+        <button onClick={() => k.setSelectedId(row.original.id)} className="text-xs font-semibold text-brand hover:underline">
           View
         </button>
       ),
@@ -698,6 +739,14 @@ const Kyc = () => {
   const [openStep, setOpenStep] = useState<KycStepName | null>(null);
   // Opening another customer starts with every step closed.
   useEffect(() => setOpenStep(null), [k.selectedId]);
+
+  const initials = (detail?.customer?.name ?? "")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
   return (
     <Container>
@@ -714,13 +763,17 @@ const Kyc = () => {
               onChange={k.changeFilter as never}
             />
           </div>
-          <div className="flex flex-col md:flex-row md:items-center gap-3 px-4 py-4 border-b">
-            <input
-              value={k.searchInput}
-              onChange={(e) => k.setSearchInput(e.target.value)}
-              placeholder="Search name, email, phone or account number"
-              className="border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-sm w-full md:w-96 focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
-            />
+          <div className="flex flex-col gap-3 border-b border-line px-4 py-4 md:flex-row md:items-center">
+            <label className="relative w-full md:w-96">
+              <span className="sr-only">Search customers</span>
+              <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-fg3" aria-hidden />
+              <input
+                value={k.searchInput}
+                onChange={(e) => k.setSearchInput(e.target.value)}
+                placeholder="Search name, email, phone or account number"
+                className="v-field pl-9"
+              />
+            </label>
             <Button name="Refresh" color="lightpurple" onClick={() => k.refetchList()} />
           </div>
           <DataTable
@@ -738,62 +791,93 @@ const Kyc = () => {
         </div>
 
         <Dialog open={!!k.selectedId} onOpenChange={(open) => !open && k.setSelectedId(null)}>
-          <DialogContent className="bg-white max-w-3xl max-h-[88vh] overflow-y-auto">
+          <DialogContent className="max-h-[88vh] max-w-3xl overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>KYC — {detail?.customer?.name || "Customer"}</DialogTitle>
+              <div className="flex items-center gap-4 pr-8">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-brand to-brand/55 font-display text-lg font-bold text-white">
+                  {initials || "?"}
+                </span>
+                <div className="min-w-0">
+                  <DialogTitle className="truncate">{detail?.customer?.name || "Customer"}</DialogTitle>
+                  <p className="mt-1 truncate text-sm text-fg2">{detail?.customer?.email ?? "KYC review"}</p>
+                </div>
+              </div>
             </DialogHeader>
-            {k.detailLoading && <p className="text-sm text-gray-500">Loading...</p>}
+            {k.detailLoading && <p className="text-sm text-fg3">Loading...</p>}
             {detail && (
-              <div className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-x-6 gap-y-3">
-                  <DetailRow label="Email" value={detail.customer.email} />
+              <div className="space-y-7">
+                {/* where this customer is, at a glance */}
+                <div>
+                  <div className="mb-2 flex gap-1.5" role="img" aria-label="Progress through the verification steps">
+                    {detail.steps.map((s) => (
+                      <span
+                        key={s.step}
+                        title={`${STEPS.find((x) => x.step === s.step)?.label}: ${s.status}`}
+                        className={`h-1.5 flex-1 rounded-full ${
+                          s.status === "VERIFIED" ? "bg-mint" : s.status === "UNDER_REVIEW" || s.status === "RESET" ? "bg-gold" : s.status === "FAILED" || s.status === "ERROR" ? "bg-danger" : s.status === "PENDING" || s.status === "SUBMITTED" ? "bg-brand" : "bg-line-hi"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <StatGrid>
+                    <StatCard label="Account tier" tone={detail.tier === 3 ? "mint" : detail.tier === 2 ? "brand" : "neutral"} value={`Tier ${detail.tier}`} icon={<BadgeCheck size={16} />} />
+                    <StatCard label="Next step" tone="gold" value={<span className="text-base">{detail.nextStep ?? "All steps done"}</span>} icon={<FileClock size={16} />} />
+                    <StatCard label="BankOne account" tone="sky" value={<span className="text-base">{detail.customer.bankOneAccountNumber ?? "-"}</span>} icon={<Landmark size={16} />} />
+                    <StatCard label="NIN" tone="neutral" value={<span className="text-base">{detail.ninMasked ?? "-"}</span>} icon={<Fingerprint size={16} />} />
+                  </StatGrid>
+                </div>
+
+                <div className="grid gap-x-6 gap-y-3 md:grid-cols-2">
                   <DetailRow label="Phone" value={detail.customer.phone} />
-                  <DetailRow label="BankOne account" value={detail.customer.bankOneAccountNumber} />
-                  <DetailRow label="Account tier" value={<Chip status={detail.tier === 3 ? "VERIFIED" : detail.tier === 2 ? "PENDING" : "NOT_STARTED"} text={`Tier ${detail.tier}`} />} />
                   <DetailRow label="Date of birth" value={detail.customer.dateOfBirth} />
                   <DetailRow label="Sector" value={[detail.customer.sector, detail.customer.ippisNo].filter(Boolean).join(" · ")} />
-                  <DetailRow label="NIN" value={detail.ninMasked} />
-                  <DetailRow label="Next step" value={detail.nextStep ?? "All steps done"} />
                 </div>
 
                 <section>
-                  <h3 className="text-sm font-semibold mb-2">Account status</h3>
+                  <SectionTitle icon={UserCog}>Account status</SectionTitle>
                   <AccountStatusCard detail={detail} k={k} />
                 </section>
 
                 <section>
-                  <h3 className="text-sm font-semibold mb-2">Steps</h3>
-                  <p className="text-[11px] text-gray-400 mb-2">Click a step to see exactly what was read and decide it.</p>
-                  <div className="border rounded-md divide-y">
-                    {detail.steps.map((s) => (
-                      <div key={s.step}>
-                        <button
-                          onClick={() => setOpenStep(openStep === s.step ? null : s.step)}
-                          className="w-full flex items-center justify-between gap-3 p-3 text-left hover:bg-gray-50"
-                          aria-expanded={openStep === s.step}
-                        >
-                          <div>
-                            <p className="text-sm font-medium">{STEPS.find((x) => x.step === s.step)?.label}</p>
-                            <p className="text-[11px] text-gray-500">{s.message ?? "Not started"}</p>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <Chip status={s.status} />
-                            <span className="text-xs text-gray-400">{openStep === s.step ? "Hide" : "Details"}</span>
-                          </div>
-                        </button>
-                        {openStep === s.step && <StepDetail step={s.step} detail={detail} k={k} />}
-                      </div>
-                    ))}
+                  <SectionTitle icon={ShieldCheck}>Steps</SectionTitle>
+                  <p className="mb-3 text-[11px] text-fg3">Click a step to see exactly what was read and decide it.</p>
+                  <div className="divide-y divide-line overflow-hidden rounded-xl border border-line">
+                    {detail.steps.map((s) => {
+                      const look = STATE_LOOK[s.status] ?? STATE_LOOK.NOT_STARTED;
+                      const StateIcon = look.icon;
+                      return (
+                        <div key={s.step}>
+                          <button
+                            onClick={() => setOpenStep(openStep === s.step ? null : s.step)}
+                            className="flex w-full items-center justify-between gap-3 p-3 text-left transition-colors hover:bg-panel-hi"
+                            aria-expanded={openStep === s.step}
+                          >
+                            <div className="flex min-w-0 items-center gap-3">
+                              <StateIcon size={20} className={`shrink-0 ${look.tone}`} />
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium">{STEPS.find((x) => x.step === s.step)?.label}</p>
+                                <p className="truncate text-[11px] text-fg3">{s.message ?? "Not started"}</p>
+                              </div>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-3">
+                              <Chip status={s.status} />
+                              <ChevronDown size={16} className={`text-fg3 transition-transform duration-200 ${openStep === s.step ? "rotate-180" : ""}`} />
+                            </div>
+                          </button>
+                          {openStep === s.step && <StepDetail step={s.step} detail={detail} k={k} />}
+                        </div>
+                      );
+                    })}
                   </div>
                 </section>
 
                 <section>
-                  <h3 className="text-sm font-semibold mb-2">BVN</h3>
+                  <SectionTitle icon={Fingerprint}>BVN</SectionTitle>
                   <BvnCard bvn={detail.bvn} k={k} />
                 </section>
 
                 <section>
-                  <h3 className="text-sm font-semibold mb-2">BankOne upgrade</h3>
+                  <SectionTitle icon={Landmark}>BankOne upgrade</SectionTitle>
                   <div className="flex flex-wrap gap-3">
                     {([2, 3] as const).map((tier) => {
                       const status = (tier === 2 ? detail.bankOne.tier2 : detail.bankOne.tier3) as KycStepStatus;
@@ -801,11 +885,11 @@ const Kyc = () => {
                       const unlockedBy = tier === 2 ? "DOCUMENT" : "ADDRESS";
                       const ready = detail.steps.find((s) => s.step === unlockedBy)?.status === "VERIFIED";
                       return (
-                        <div key={tier} className="border rounded-md p-3 flex items-center gap-3">
-                          <span className="text-sm">Tier {tier}</span>
+                        <div key={tier} className="flex items-center gap-3 rounded-xl border border-line bg-panel p-3">
+                          <span className="text-sm font-medium">Tier {tier}</span>
                           <Chip status={status} />
                           {status !== "VERIFIED" && !ready && (
-                            <span className="text-[11px] text-gray-400">
+                            <span className="text-[11px] text-fg3">
                               Waiting for {tier === 2 ? "the ID" : "the address"} to be verified
                             </span>
                           )}
@@ -813,7 +897,7 @@ const Kyc = () => {
                             <button
                               onClick={() => k.retryBankOne(tier)}
                               disabled={k.actionLoading !== null}
-                              className="text-xs bg-[#7C2EBF] text-white rounded-md px-3 py-1.5 disabled:opacity-50"
+                              className="v-btn v-btn-primary v-btn-sm"
                             >
                               {k.actionLoading === `bankone-${tier}` ? "Retrying..." : "Retry now"}
                             </button>
@@ -825,30 +909,30 @@ const Kyc = () => {
                 </section>
 
                 <section>
-                  <h3 className="text-sm font-semibold mb-2">Images on record</h3>
+                  <SectionTitle icon={Images}>Images on record</SectionTitle>
                   {detail.documents.length === 0 ? (
-                    <p className="text-xs text-gray-500">None yet.</p>
+                    <p className="text-xs text-fg3">None yet.</p>
                   ) : (
-                    <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="grid gap-3 sm:grid-cols-2">
                       {detail.documents.map((d) => (
                         <KycImage key={d.id} service={k.service} doc={d} />
                       ))}
                     </div>
                   )}
-                  <p className="text-[11px] text-gray-400 mt-2">Each time an image is opened it is recorded in the audit log.</p>
+                  <p className="mt-2 text-[11px] text-fg3">Each time an image is opened it is recorded in the audit log.</p>
                 </section>
 
                 <section>
-                  <h3 className="text-sm font-semibold mb-2">Review decisions</h3>
+                  <SectionTitle icon={Scale}>Review decisions</SectionTitle>
                   <ReviewHistory reviews={detail.reviews} />
                 </section>
 
                 <section>
-                  <h3 className="text-sm font-semibold mb-2">Every attempt</h3>
+                  <SectionTitle icon={FileClock}>Every attempt</SectionTitle>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                    <table className="v-mini">
                       <thead>
-                        <tr className="text-[11px] uppercase text-gray-400">
+                        <tr>
                           <th className="pb-1 pr-3">Step</th>
                           <th className="pb-1 pr-3">Status</th>
                           <th className="pb-1 pr-3">#</th>

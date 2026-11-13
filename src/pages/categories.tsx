@@ -4,26 +4,15 @@ import { Container } from "../components/shared/container";
 import { ColumnDef } from "@tanstack/react-table";
 // import { User } from "../types/table-type";
 import { AssetCategory } from "@/types/table-type";
-import { ActionIcon } from "../components/svg-icons/action-icon";
-import { Link } from "react-router-dom";
+import { RowMenu } from "@/components/shared/row-menu";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
+import { modalSx, modalSlotProps } from "@/components/shared/modal-style";
 import useMangeAssetsCategories from "@/hooks/use-manage-categories";
 import { DataTable } from "@/components/shared/data-table";
 import { Input } from "@/components/ui/input";
 import { ClipLoader } from "react-spinners";
 
-const style = {
-  position: "absolute" as const,
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  borderRadius: 1,
-  boxShadow: 24,
-  p: 2,
-};
 const Categories = () => {
   // useRoleAccess("manager");
 
@@ -104,27 +93,7 @@ const Categories = () => {
     {
       accessorKey: "actions",
       header: "",
-      cell: ({ row }) => {
-        const id = row?.original.id;
-        return (
-          <div className="dropdown dropdown-end">
-            <div tabIndex={0} className="p-0 cursor-pointer">
-              <ActionIcon />
-            </div>
-            <ul
-              tabIndex={0}
-              className="dropdown-content text-left bg-[#4F4F4F] rounded-md text-sm text-white z-[1] w-52 shadow"
-            >
-              <li className="py-2 pl-3 cursor-pointer">
-                <Link to={`${id}`}>View Details</Link>
-              </li>
-              {/* <li className="border-t-[1px] cursor-pointer border-t-white py-2 pl-3">
-                <a>Deactivate</a>
-              </li> */}
-            </ul>
-          </div>
-        );
-      },
+      cell: ({ row }) => <RowMenu items={[{ label: "View Details", to: `${row?.original.id}` }]} />,
     },
   ];
   return (
@@ -206,12 +175,13 @@ const Categories = () => {
         </div>
       </article>
       <Modal
+        slotProps={modalSlotProps}
         open={open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
+        <Box sx={modalSx(400)}>
           <h1 className="font-bold text-medium">Create Category</h1>
           {modalState === MODAL_TYPE.CREATE_CATEGORY ? (
             <div className="flex flex-col gap-5 mt-3">

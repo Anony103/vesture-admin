@@ -335,6 +335,56 @@ body::before {
     border-color: var(--line-hi);
   }
 
+  /* a text field for forms written without the Input component */
+  .v-field {
+    width: 100%;
+    border-radius: 0.625rem;
+    border: 1px solid var(--line-hi);
+    background-color: var(--field);
+    color: var(--fg);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .v-field:focus {
+    outline: none;
+    border-color: rgb(var(--brand-rgb) / 0.6);
+    box-shadow: 0 0 0 3px rgb(var(--brand-rgb) / 0.2);
+  }
+  /* smaller buttons, and decision colours */
+  .v-btn-sm {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  .v-btn-ok {
+    color: #04211c;
+    background: rgb(var(--mint-rgb));
+    box-shadow: 0 8px 22px -12px rgb(var(--mint-rgb) / 0.8);
+  }
+  .v-btn-danger {
+    color: #fff;
+    background: rgb(var(--danger-rgb));
+    box-shadow: 0 8px 22px -12px rgb(var(--danger-rgb) / 0.8);
+  }
+  .v-btn-ok:hover,
+  .v-btn-danger:hover {
+    filter: brightness(1.08);
+  }
+  /* a small table for detail panels: wraps text, no pinned header */
+  .v-mini {
+    width: 100%;
+    text-align: left;
+    font-size: 0.75rem;
+    border-collapse: collapse;
+  }
+  .v-mini th {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+  }
+
   /* status chips */
   .v-chip {
     display: inline-flex;
