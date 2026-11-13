@@ -1,7 +1,7 @@
 import { Container } from "../components/shared/container";
 import { DataTable } from "../components/shared/data-table";
 import { ColumnDef } from "@tanstack/react-table";
-import { ActionIcon } from "../components/svg-icons/action-icon";
+import { RowMenu } from "@/components/shared/row-menu";
 import { ClipLoader } from "react-spinners";
 // import useDashboard from "@/hooks/use-dashboard";
 import useMangeCustomer from "@/hooks/use-manage-customers";
@@ -14,6 +14,7 @@ import useMangeCustomer from "@/hooks/use-manage-customers";
 // } from "@/components/ui/select";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
+import { modalSx, modalSlotProps } from "@/components/shared/modal-style";
 import { User } from "@/types";
 import { Tabs } from "@/components/shared/tabs";
 import { useNavigate } from "react-router";
@@ -152,90 +153,36 @@ const Customers = () => {
     {
       accessorKey: "status",
       header: () => <span></span>,
-      cell: ({ row }) => {
-        console.log(row?.original);
-        return (
-          <div className="dropdown dropdown-end">
-            <div tabIndex={0} className="p-0">
-              <ActionIcon />
-            </div>
-            <ul
-              tabIndex={0}
-              className="dropdown-content text-left bg-[#4F4F4F] gap-y-2 cursor-pointer  rounded-md text-sm text-white z-[100] w-52 shadow"
-            >
-              {row?.original.status === "deactivated" ||
-              row?.original.status === "pending" ? (
-                <li
-                  onClick={() =>
-                    handleToggleModal(
-                      MODAL_TYPE.ACTIVATE_CUSTOMER,
-                      row?.original
-                    )
-                  }
-                  className="cursor-pointer py-2 pl-3"
-                >
-                  <a>Activate</a>
-                </li>
-              ) : (
-                ""
-              )}
-
-              {row?.original.status !== "deactivated" ? (
-                <li
-                  onClick={() =>
-                    handleToggleModal(
-                      MODAL_TYPE.DEACTIVATE_CUSTOMER,
-                      row?.original
-                    )
-                  }
-                  className="cursor-pointer py-2 pl-3"
-                >
-                  <a>DeActivate</a>
-                </li>
-              ) : (
-                ""
-              )}
-              {row?.original.status === "ACTIVE" ||
-              row?.original.status === null ? (
-                <li
-                  onClick={() => navigate(`/savings/${row?.original.id}`)}
-                  className="border-t-[1px] cursor-pointer border-t-white py-2 pl-3"
-                >
-                  <a>View Savings</a>
-                </li>
-              ) : (
-                ""
-              )}
-              {row?.original.bvn ? (
-                <li
-                  onClick={() =>
-                    handleToggleModal(MODAL_TYPE.VERIFY_BVN, row?.original)
-                  }
-                  className="border-t-[1px] cursor-pointer border-t-white py-2 pl-3"
-                >
-                  <a>Verify BVN</a>
-                </li>
-              ) : (
-                ""
-              )}
-            </ul>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <RowMenu
+          items={[
+            {
+              label: "Activate",
+              hidden: !(row?.original.status === "deactivated" || row?.original.status === "pending"),
+              onSelect: () => handleToggleModal(MODAL_TYPE.ACTIVATE_CUSTOMER, row?.original),
+            },
+            {
+              label: "DeActivate",
+              hidden: row?.original.status === "deactivated",
+              onSelect: () => handleToggleModal(MODAL_TYPE.DEACTIVATE_CUSTOMER, row?.original),
+            },
+            {
+              label: "View Savings",
+              hidden: !(row?.original.status === "ACTIVE" || row?.original.status === null),
+              separated: true,
+              onSelect: () => navigate(`/savings/${row?.original.id}`),
+            },
+            {
+              label: "Verify BVN",
+              hidden: !row?.original.bvn,
+              separated: true,
+              onSelect: () => handleToggleModal(MODAL_TYPE.VERIFY_BVN, row?.original),
+            },
+          ]}
+        />
+      ),
     },
   ];
-  const style = {
-    position: "absolute" as const,
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    height: "auto",
-    width: 400,
-    bgcolor: "background.paper",
-    borderRadius: 1,
-    boxShadow: 24,
-    p: 2,
-  };
 
   return (
     <Container>
@@ -315,12 +262,13 @@ const Customers = () => {
         </div>
         <div></div>
         <Modal
+        slotProps={modalSlotProps}
           open={open}
           onClose={handleClose}
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"
         >
-          <Box sx={style}>
+          <Box sx={modalSx(400)}>
             <h1 className="font-bold text-lg">
               {modalState === MODAL_TYPE.VERIFY_BVN
                 ? "Verify BVN"

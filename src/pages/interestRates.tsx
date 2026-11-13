@@ -1,4 +1,6 @@
 import { Tabs } from "@/components/shared/tabs";
+import { StatCard, StatGrid } from "@/components/shared/stat-card";
+import { AlertTriangle, BellRing, Plus } from "lucide-react";
 import { Container } from "../components/shared/container";
 // import { useState } from "react";
 import { DataTable } from "../components/shared/data-table";
@@ -30,20 +32,20 @@ const PRODUCT_NAMES: Record<string, string> = {
 // An active rate is the one new plans are given; an inactive one is kept on record but not used. The two must not look alike.
 const StatusPill = ({ active }: { active: boolean }) =>
   active ? (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
-      <span className="size-1.5 rounded-full bg-green-600" />
+    <span className="v-chip v-chip-ok">
+      <span className="size-1.5 rounded-full bg-current" />
       Active
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-200 px-2.5 py-0.5 text-xs font-semibold text-gray-500">
-      <span className="size-1.5 rounded-full border border-gray-400" />
+    <span className="v-chip">
+      <span className="size-1.5 rounded-full border border-current" />
       Inactive
     </span>
   );
 
 // Everything else in an inactive rate's row is dimmed.
 const Dim = ({ active, children }: { active: boolean; children: React.ReactNode }) => (
-  <span className={`inline-block w-full ${active ? "" : "text-gray-400"}`}>{children}</span>
+  <span className={`inline-block w-full ${active ? "" : "text-fg3"}`}>{children}</span>
 );
 
 const rate = (v: number | null | undefined) => (v === null || v === undefined ? "-" : `${Number(v).toFixed(2)}%`);
@@ -70,17 +72,29 @@ const describeChange = (h: RateHistoryType): string => {
   }
 };
 
-const requestSummary = (r: RateRequestType) =>
-  r.items
-    .map((i) => `${Number(i.annualRate).toFixed(2)}% for ${i.minTenorDays != null && i.maxTenorDays != null ? `${i.minTenorDays}-${i.maxTenorDays} days` : "any tenor"}`)
-    .join(" · ");
-
 const REQUEST_TONE: Record<string, string> = {
-  PENDING: "bg-amber-100 text-amber-800",
-  APPROVED: "bg-green-100 text-green-700",
-  REJECTED: "bg-red-100 text-red-700",
-  CANCELLED: "bg-gray-200 text-gray-500",
+  PENDING: "v-chip-warn",
+  APPROVED: "v-chip-ok",
+  REJECTED: "v-chip-bad",
+  CANCELLED: "",
 };
+
+/** One rate in a request, shown as a figure the reviewer can scan: the percentage, then the tenor it applies to. */
+const tenorText = (i: RateRequestType["items"][number]) =>
+  i.minTenorDays != null && i.maxTenorDays != null ? `${i.minTenorDays}-${i.maxTenorDays} days` : "any tenor";
+
+/** A banner that something needs attention. */
+const Notice = ({ tone, children }: { tone: "warn" | "bad"; children: React.ReactNode }) => (
+  <div
+    role="status"
+    className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
+      tone === "warn" ? "border-gold/30 bg-gold/10" : "border-danger/30 bg-danger/10"
+    }`}
+  >
+    {tone === "warn" ? <BellRing size={17} className="mt-0.5 shrink-0 text-gold" /> : <AlertTriangle size={17} className="mt-0.5 shrink-0 text-danger" />}
+    <p className="text-fg">{children}</p>
+  </div>
+);
 
 // The signed-in admin's email (the login's username), only used to tell them "you asked for this" before the server has to say so.
 const myEmail = (token: string): string => {
@@ -153,6 +167,10 @@ const InterestRates = () => {
     return names;
   }, [liveAll]);
 
+  const activeRates = liveAll.filter((r) => r.active);
+  const topRate = activeRates.reduce((best, r) => Math.max(best, Number(r.annualRate) || 0), 0);
+  const productsCovered = new Set(activeRates.map((r) => r.savingsType)).size;
+
   const runDecision = async () => {
     if (!acting) return;
     setWorking(true);
@@ -210,9 +228,9 @@ const InterestRates = () => {
         <span className="inline-block w-full">
           {row.original.changedByName || row.original.changedByEmail || "-"}
           {row.original.requestedByName && (
-            <span className="block text-[11px] text-gray-500">approved · asked for by {row.original.requestedByName}</span>
+            <span className="block text-[11px] text-fg3">approved · asked for by {row.original.requestedByName}</span>
           )}
-          <span className="block text-[11px] text-gray-400">
+          <span className="block text-[11px] text-fg3">
             {row.original.changedByRole?.replace("ROLE_", "").replace("_", " ").toLowerCase() ?? ""}
           </span>
         </span>
@@ -266,7 +284,7 @@ const InterestRates = () => {
     {
       accessorKey: "annualRate",
       header: () => <span>Annual Rate</span>,
-      cell: ({ row }) => <Dim active={row.original.active}>{((row.original.annualRate as number) ?? 0).toFixed(2)}%</Dim>,
+      cell: ({ row }) => <Dim active={row.original.active}><span className="v-mono font-semibold">{((row.original.annualRate as number) ?? 0).toFixed(2)}%</span></Dim>,
     },
     {
       accessorKey: "active",
@@ -281,7 +299,7 @@ const InterestRates = () => {
         row.original.active ? (
           <button
             onClick={() => { setActing({ kind: "switchoff", id: row.original.id, label: `Switch off the ${PRODUCT_NAMES[row.original.savingsType] ?? row.original.savingsType} rate` }); setReason(""); }}
-            className="text-xs text-red-600 font-semibold"
+            className="text-xs font-semibold text-danger hover:underline"
           >
             Switch off
           </button>
@@ -341,7 +359,7 @@ const InterestRates = () => {
   return (
     <Container>
       <article className=" mt-6 min-h-screen">
-        <div className="flex justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Tabs
             tabs={[
               { value: "rates", label: "Rates" },
@@ -355,51 +373,70 @@ const InterestRates = () => {
             onClick={() => {
               navigate("createRates");
             }}
-            className=" text-xs flex bg-[#7C2EBF] py-3 px-4 text-white rounded-md"
+            className="v-btn v-btn-primary v-sheen"
           >
-            Create Interest Rates
+            <Plus size={15} /> Create Interest Rates
           </button>
         </div>
+        {tab === "rates" && liveAll.length > 0 && (
+          <StatGrid className="mt-4">
+            <StatCard label="Active rates" tone="mint" value={activeRates.length} hint="Given to new plans" />
+            <StatCard label="Inactive rates" tone="neutral" value={liveAll.length - activeRates.length} hint="Kept on record" />
+            <StatCard label="Products covered" tone="sky" value={productsCovered} hint="With an active rate" />
+            <StatCard label="Highest rate" tone="brand" value={`${topRate.toFixed(2)}%`} hint="Per year, among active" />
+          </StatGrid>
+        )}
         {tab === "rates" && pendingCount > 0 && (
-          <p className="mt-3 text-xs bg-amber-50 border border-amber-200 text-amber-900 rounded-md px-3 py-2">
-            {pendingCount} new rate set{pendingCount === 1 ? " is" : "s are"} waiting for approval.{" "}
-            <button onClick={() => setTab("requests")} className="font-semibold underline">See requests</button>
-          </p>
+          <div className="mt-4">
+            <Notice tone="warn">
+              {pendingCount} new rate set{pendingCount === 1 ? " is" : "s are"} waiting for approval.{" "}
+              <button onClick={() => setTab("requests")} className="font-semibold text-brand underline">See requests</button>
+            </Notice>
+          </div>
         )}
         {tab === "rates" && mixed.length > 0 && (
-          <p className="mt-3 text-xs bg-red-50 border border-red-200 text-red-800 rounded-md px-3 py-2">
-            {mixed.join(" and ")} {mixed.length === 1 ? "has" : "have"} both an any-tenor rate and ranges active. Only one kind should be active: when a new rate set is approved for
-            {mixed.length === 1 ? " it" : " them"}, it replaces both.
-          </p>
+          <div className="mt-4">
+            <Notice tone="bad">
+              {mixed.join(" and ")} {mixed.length === 1 ? "has" : "have"} both an any-tenor rate and ranges active. Only one kind should be active: when a new rate set is approved for
+              {mixed.length === 1 ? " it" : " them"}, it replaces both.
+            </Notice>
+          </div>
         )}
         {tab === "requests" && (
           <div className="mt-3 space-y-3">
-            <div className="flex gap-2 text-xs">
+            <div className="v-seg" role="group" aria-label="Request filter">
               {([["PENDING", "Waiting for approval"], ["", "All requests"]] as const).map(([value, label]) => (
-                <button key={label} onClick={() => setRequestFilter(value)} className={`rounded-full px-3 py-1 ${requestFilter === value ? "bg-[#E2CEF3] text-[#7C2EBF] font-semibold" : "bg-white text-gray-500"}`}>
+                <button key={label} type="button" aria-pressed={requestFilter === value} onClick={() => setRequestFilter(value)}>
                   {label}
                 </button>
               ))}
             </div>
-            {requestsLoading && <p className="text-xs text-gray-500">Loading...</p>}
+            {requestsLoading && <p className="text-xs text-fg3">Loading...</p>}
             {!requestsLoading && (requestData?.content ?? []).length === 0 && (
-              <p className="text-xs text-gray-500 bg-white rounded-md p-4">{requestFilter === "PENDING" ? "Nothing is waiting for approval." : "No requests yet."}</p>
+              <p className="glass p-5 text-sm text-fg2">{requestFilter === "PENDING" ? "Nothing is waiting for approval." : "No requests yet."}</p>
             )}
             {(requestData?.content ?? []).map((r) => {
               const mine = !!me && !!r.requestedByEmail && r.requestedByEmail.toLowerCase() === me;
               return (
-                <div key={r.id} className="bg-white rounded-md p-4 space-y-2">
+                <div key={r.id} className="glass v-rise space-y-3 p-5">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className="font-semibold">{PRODUCT_NAMES[r.savingsType] ?? r.savingsType}</span>
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${REQUEST_TONE[r.status]}`}>{r.status === "PENDING" ? "Pending" : r.status.charAt(0) + r.status.slice(1).toLowerCase()}</span>
-                    <span className="text-xs text-gray-500">{r.mode === "ANY" ? "Any tenor" : `${r.items.length} range${r.items.length === 1 ? "" : "s"}`}</span>
+                    <span className="font-display text-base font-semibold">{PRODUCT_NAMES[r.savingsType] ?? r.savingsType}</span>
+                    <span className={`v-chip ${REQUEST_TONE[r.status] ?? ""}`}>{r.status === "PENDING" ? "Pending" : r.status.charAt(0) + r.status.slice(1).toLowerCase()}</span>
+                    <span className="text-xs text-fg3">{r.mode === "ANY" ? "Any tenor" : `${r.items.length} range${r.items.length === 1 ? "" : "s"}`}</span>
                   </div>
-                  <p className="text-sm">{requestSummary(r)}</p>
-                  <p className="text-[11px] text-gray-500">
+                  <div className="flex flex-wrap gap-2">
+                    {r.items.map((i, index) => (
+                      <span key={index} className="rounded-xl border border-brand/25 bg-brand/10 px-3 py-1.5">
+                        <span className="v-mono font-semibold">{Number(i.annualRate).toFixed(2)}%</span>
+                        <span className="ml-2 text-xs text-fg2">{tenorText(i)}</span>
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-fg3">
                     Asked for by {r.requestedByName || r.requestedByEmail} ({r.requestedByRole?.replace("ROLE_", "").replace("_", " ").toLowerCase()}) · {when(r.requestedOn)}
                   </p>
                   {r.status !== "PENDING" && (
-                    <p className="text-[11px] text-gray-600">
+                    <p className="text-[11px] text-fg2">
                       {r.status.charAt(0) + r.status.slice(1).toLowerCase()} by {r.decidedByName || r.decidedByEmail} · {when(r.decidedOn ?? "")}
                       {r.decisionReason ? ` - ${r.decisionReason}` : ""}
                     </p>
@@ -409,24 +446,24 @@ const InterestRates = () => {
                       <button
                         onClick={() => { setActing({ kind: "approve", id: r.id, label: `Approve the new ${PRODUCT_NAMES[r.savingsType] ?? r.savingsType} rates` }); setReason(""); }}
                         disabled={mine && !allowSelfApproval}
-                        className="text-xs bg-green-600 text-white rounded-md px-3 py-1.5 disabled:opacity-40"
+                        className="v-btn v-btn-ok v-btn-sm"
                         title={mine && !allowSelfApproval ? "You asked for this, so someone else has to approve it" : ""}
                       >
                         Approve
                       </button>
                       <button
                         onClick={() => { setActing({ kind: "reject", id: r.id, label: `Reject the new ${PRODUCT_NAMES[r.savingsType] ?? r.savingsType} rates` }); setReason(""); }}
-                        className="text-xs bg-red-600 text-white rounded-md px-3 py-1.5"
+                        className="v-btn v-btn-danger v-btn-sm"
                       >
                         Reject
                       </button>
                       <button
                         onClick={() => { setActing({ kind: "cancel", id: r.id, label: "Cancel this request" }); setReason(""); }}
-                        className="text-xs text-gray-600 px-2 py-1.5"
+                        className="px-2 py-1.5 text-xs text-fg3 hover:text-fg"
                       >
                         Cancel request
                       </button>
-                      {mine && !allowSelfApproval && <span className="text-[11px] text-amber-800">You asked for this, so someone else has to approve it.</span>}
+                      {mine && !allowSelfApproval && <span className="text-[11px] text-gold">You asked for this, so someone else has to approve it.</span>}
                     </div>
                   )}
                 </div>
@@ -435,41 +472,41 @@ const InterestRates = () => {
           </div>
         )}
         {acting && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
-            <div className="bg-white rounded-md p-5 w-full max-w-md space-y-3">
-              <h2 className="font-bold text-base">{acting.label}</h2>
-              {acting.kind === "approve" && <p className="text-xs text-gray-600">The rates that are active for this product now will be switched off, and this set becomes the active one.</p>}
-              {acting.kind === "switchoff" && <p className="text-xs text-gray-600">New plans will no longer be given this rate. Plans already created keep theirs. Only a Super Admin can do this.</p>}
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[rgba(6,3,14,0.72)] px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
+            <div className="v-rise w-full max-w-md space-y-4 rounded-2xl border border-line-hi bg-card p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]">
+              <h2 className="font-display text-lg font-semibold">{acting.label}</h2>
+              {acting.kind === "approve" && <p className="text-sm text-fg2">The rates that are active for this product now will be switched off, and this set becomes the active one.</p>}
+              {acting.kind === "switchoff" && <p className="text-sm text-fg2">New plans will no longer be given this rate. Plans already created keep theirs. Only a Super Admin can do this.</p>}
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 rows={3}
                 maxLength={1000}
                 placeholder={needsReason ? "Reason (required, at least 10 characters)" : "A note (optional)"}
-                className="w-full border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+                className="v-field"
               />
               <div className="flex gap-2">
                 <button
                   onClick={runDecision}
                   disabled={working || (needsReason && reason.trim().length < 10)}
-                  className={`text-xs text-white rounded-md px-4 py-2 disabled:opacity-40 ${acting.kind === "approve" ? "bg-green-600" : "bg-red-600"}`}
+                  className={`v-btn ${acting.kind === "approve" ? "v-btn-ok" : "v-btn-danger"}`}
                 >
                   {working ? "Saving..." : acting.kind === "approve" ? "Approve" : acting.kind === "reject" ? "Reject" : acting.kind === "cancel" ? "Cancel the request" : "Switch off"}
                 </button>
-                <button onClick={() => setActing(null)} disabled={working} className="text-xs text-gray-600 px-3">Back</button>
+                <button onClick={() => setActing(null)} disabled={working} className="v-btn v-btn-ghost">Back</button>
               </div>
             </div>
           </div>
         )}
         {tab === "rates" && (
-          <p className="mt-3 text-xs text-gray-500">
-            <span className="font-semibold text-green-700">Active</span> rates are the ones new plans are given.{" "}
-            <span className="font-semibold text-gray-500">Inactive</span> rates (dimmed) are kept on record but are not used.
+          <p className="mt-4 text-xs text-fg3">
+            <span className="font-semibold text-mint">Active</span> rates are the ones new plans are given.{" "}
+            <span className="font-semibold text-fg2">Inactive</span> rates (dimmed) are kept on record but are not used.
           </p>
         )}
         {tab === "history" && (
           <div className="bg-white rounded-lg mt-2 pb-2">
-            <p className="px-4 pt-4 text-xs text-gray-500">Every change to a rate: who made it, when, and what it was before and after. History starts from when this was switched on.</p>
+            <p className="px-4 pt-4 pb-3 text-xs text-fg3">Every change to a rate: who made it, when, and what it was before and after. History starts from when this was switched on.</p>
             <DataTable
               data={history ?? []}
               columns={historyColumns}

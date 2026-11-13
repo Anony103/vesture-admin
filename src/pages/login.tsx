@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { IoEyeOutline } from "react-icons/io5";
-import { IoEyeOffOutline } from "react-icons/io5";
+import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck, TriangleAlert } from "lucide-react";
+import { AuthCard } from "../components/shared/auth-card";
 import { schemaLogin } from "../schemas";
 import { z } from "zod";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -17,6 +17,8 @@ import { AxiosError } from 'axios';
 const Login = () => {
   const navigate = useNavigate();
   const [visibility, setVisibility] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
+  const [shaking, setShaking] = useState(false);
   const authService = new AuthService();
 
   type FormFields = z.infer<typeof schemaLogin>;
@@ -66,90 +68,78 @@ const Login = () => {
         message: "Login failed",
       });
       setValue("password", "");
+      // a quick shake of the form says "no" without a second message
+      setShaking(true);
+      window.setTimeout(() => setShaking(false), 600);
     }
   };
 
   return (
-    <main
-     className="w-screen h-screen min-h-screen flex items-center justify-center"
+    <AuthCard
+      title="Welcome back"
+      subtitle="Log in with your admin credentials to continue."
+      footer={
+        <button type="button" className="font-medium text-brand hover:underline" onClick={() => navigate("changePassword")}>
+          Forgotten your password?
+        </button>
+      }
     >
-      <div className="text-white text-center flex flex-col gap-6 w-[100%] md:w-[26%]  rounded mx-auto py-6 ">
-        <h1 className="flex justify-center">
-          {/* light lettering for the dark login background */}
-          <img src="/vesture-logo.png" alt="Vesture" className="h-10 w-auto" />
-        </h1>
-        <div className="border text-white  bg-white bg-opacity-30 backdrop-blur-md px-1 py-6 rounded-lg shadow-lg h-[70%]">
-          <div>
-            <p className="text-lg font-semibold">Log In</p>
-            <p className="text-xs text-gray-100 mt-2">
-              Enter your valid credentials to continue
-            </p>
-          </div>
-          <section className="flex flex-col gap-6 p-[5px] mt-[5%] text-left">
-            <form
-              className="mt-6 flex flex-col gap-4"
-              onSubmit={handleSubmit(onSubmit)}
+      <form className={`flex flex-col gap-1 ${shaking ? "v-shake" : ""}`} onSubmit={handleSubmit(onSubmit)}>
+        <Input
+          label="Email"
+          className="pl-10 text-sm"
+          leftIcon={<Mail size={16} className="ml-2.5 text-fg3" />}
+          placeholder="example@email.com"
+          id="email"
+          autoComplete="username"
+          {...register("username")}
+        />
+        <Input
+          label="Password"
+          type={visibility ? "text" : "password"}
+          {...register("password")}
+          error={errors?.password?.message}
+          disabled={isSubmitting}
+          name="password"
+          className="pl-10 pr-11 text-sm"
+          leftIcon={<Lock size={16} className="ml-2.5 text-fg3" />}
+          id="Password"
+          placeholder="Password"
+          autoComplete="current-password"
+          onKeyUp={(e) => setCapsLock(e.getModifierState("CapsLock"))}
+          rightIcon={
+            <button
+              onClick={() => setVisibility(!visibility)}
+              type="button"
+              aria-label={visibility ? "Hide password" : "Show password"}
+              className="grid h-8 w-8 place-items-center rounded-lg text-fg3 transition-colors hover:bg-panel-hi hover:text-fg"
             >
-              <div className="flex flex-col gap-1">
-                <label className="text-xs">Email</label>
-                <Input
-                  className="bg-transparent text-xs border border-gray-300 h-[40px]  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C2EBF] focus:border-transparent px-2 py-2 rounded-md"
-                  placeholder="example@email.com"
-                  id="email"
-                  {...register("username")}
-                />
-              </div>
-              <div className="flex flex-col gap-1 ">
-                <label className="text-xs">Password</label>
-                <Input
-                  type={visibility ? "text" : "password"}
-                  {...register("password")}
-                  error={errors?.password?.message}
-                  disabled={isSubmitting}
-                  name="password"
-                  className="bg-transparent text-xs border border-gray-300 h-[40px] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C2EBF] focus:border-transparent px-2 py-2 rounded-md pr-10"
-                  id="Password"
-                  placeholder="Password"
-                  rightIcon={
-                    <button
-                      onClick={() => setVisibility(!visibility)}
-                      type="button"
-                    >
-                      {visibility ? <IoEyeOutline /> : <IoEyeOffOutline />}
-                    </button>
-                  }
-                />
-              </div>
-              <div className="flex flex-col">
-                <button
-                  // onClick={() => navigate("/")}
-                  className="bg-[#7C2EBF] hover:opacity-40 text-white  py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition duration-150 ease-in-out"
-                  type="submit"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <ClipLoader color="#fff" size={12} /> Authenticating...
-                    </>
-                  ) : (
-                    "Login"
-                  )}
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
-        <p 
-        className="text-[#CEADEB] text-sm hover:underline hover:cursor-pointer"
-         onClick = {
-          ()=>{
-            navigate("changePassword")
+              {visibility ? <Eye size={16} /> : <EyeOff size={16} />}
+            </button>
           }
-         }
-        >
-          Forgotten your Password?
+        />
+        {capsLock && (
+          <p role="status" className="v-chip v-chip-warn mb-1 self-start">
+            <TriangleAlert size={12} /> Caps Lock is on
+          </p>
+        )}
+        <button className="v-btn v-btn-primary v-sheen group mt-2 h-12 w-full text-sm" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <ClipLoader color="#fff" size={14} /> Authenticating...
+            </>
+          ) : (
+            <>
+              Log in
+              <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+            </>
+          )}
+        </button>
+        <p className="mt-4 flex items-center justify-center gap-1.5 text-xs text-fg3">
+          <ShieldCheck size={13} /> Sessions end automatically after 5 minutes of inactivity.
         </p>
-      </div>
-    </main>
+      </form>
+    </AuthCard>
   );
 };
 

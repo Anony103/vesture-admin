@@ -1,10 +1,13 @@
+import { RowMenu } from "@/components/shared/row-menu";
+import { CopyText } from "@/components/shared/copy-text";
+import { StatCard, StatGrid } from "@/components/shared/stat-card";
+import { ArrowRight, Download } from "lucide-react";
 import { Container } from "../components/shared/container";
 // import { useRoleAccess } from "@/hooks";
 import { DataTable } from "../components/shared/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Transaction } from "../types/table-type";
 // import { users } from "../data/Datafortable";
-import { ActionIcon } from "../components/svg-icons/action-icon";
 import useMangeTransactions from "@/hooks/use-manage-transactions";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -29,25 +32,21 @@ const Party = ({
   return (
     <div className="flex flex-col leading-tight min-w-[150px]">
       {name && <span className="font-medium">{name}</span>}
-      {bank && <span className="text-xs text-[#6D6C6C]">{bank}</span>}
-      {account && <span className="text-xs text-[#6D6C6C]">{account}</span>}
+      {bank && <span className="text-xs text-fg3">{bank}</span>}
+      {account && <span className="v-mono text-xs text-fg3">{account}</span>}
     </div>
   );
 };
 
 const DetailRow = ({ label, value }: { label: string; value?: React.ReactNode }) => (
-  <div className="flex flex-col gap-1 border-b pb-2">
-    <span className="text-[11px] uppercase tracking-wide text-gray-400">{label}</span>
-    <span className="text-sm text-gray-800 break-words">{value || "-"}</span>
+  <div className="flex flex-col gap-1 border-b border-line pb-2">
+    <span className="v-eyebrow">{label}</span>
+    <span className="break-words text-sm text-fg">{value || "-"}</span>
   </div>
 );
 
 const statusTone = (status?: string | null) =>
-  status === "success"
-    ? "bg-green-100 text-green-700"
-    : status === "failed"
-    ? "bg-red-100 text-red-700"
-    : "bg-amber-100 text-amber-800";
+  status === "success" ? "v-chip-ok" : status === "failed" ? "v-chip-bad" : "v-chip-warn";
 
 const Transactions = () => {
   // useRoleAccess("manager");
@@ -72,6 +71,9 @@ const Transactions = () => {
     pageSize
   } = useMangeTransactions();
 
+  // the page of transactions being shown (the hook does not type it)
+  const rows: Transaction[] = allTransactions ?? [];
+
   const columns: ColumnDef<Transaction>[] = [
     {
       id: "number",
@@ -83,7 +85,7 @@ const Transactions = () => {
       header: () => <span>Amount</span>,
       cell: ({ getValue }) => {
         const value = (getValue() as number) ?? 0;
-        return <span className="inline-block w-full">{formatNaira(value)}</span>;
+        return <span className="v-mono inline-block w-full font-semibold">{formatNaira(value)}</span>;
       },
     },
     {
@@ -115,27 +117,14 @@ const Transactions = () => {
     {
       accessorKey: "transactionReference",
       header: () => <span>Transaction Reference</span>,
+      cell: ({ getValue }) => <CopyText value={(getValue() as string) ?? ""} />,
     },
     {
       accessorKey: "transactionStatus",
       header: () => <span>Status</span>,
       cell: ({ getValue }) => {
         const value = (getValue() as string) ?? "";
-        return (
-          <div>
-            {value === "success" ? (
-              <span className="inline-block text-[#2C9720] capitalize">
-                {value}
-              </span>
-            ) : value === "failed" ? (
-              <span className="inline-block text-[#E70E02] capitalize">
-                {value}
-              </span>
-            ) : (
-              <span className="inline-block capitalize">{value}</span>
-            )}
-          </div>
-        );
+        return <span className={`v-chip capitalize ${statusTone(value)}`}>{value || "-"}</span>;
       },
     },
     {
@@ -143,7 +132,7 @@ const Transactions = () => {
       header: () => <span>Type</span>,
       cell: ({ getValue }) => {
         const value = (getValue() as string) ?? "";
-        return <span className="inline-block capitalize">{value}</span>;
+        return <span className="v-chip capitalize">{value || "-"}</span>;
       },
     },
     {
@@ -177,37 +166,28 @@ const Transactions = () => {
      {
           accessorKey: "id",
           header: () => <span></span>,
-          cell: ({ row }) => {
-            return (
-              <div className="dropdown dropdown-end">
-                <div tabIndex={0} className="p-0 cursor-pointer">
-                  <ActionIcon />
-                </div>
-                <ul
-                  tabIndex={0}
-                  className="dropdown-content text-left bg-[#4F4F4F] rounded-md text-sm text-white z-[1] w-52 shadow"
-                >
-                  <li
-                    className="py-2 pl-3 cursor-pointer"
-                    onClick={() => {
-                      // close the dropdown, then show this row's details
-                      (document.activeElement as HTMLElement | null)?.blur();
-                      setSelected(row.original);
-                    }}
-                  >
-                    View Details
-                  </li>
-                
-                </ul>
-              </div>
-            );
-          },
+          cell: ({ row }) => (
+            <RowMenu items={[{ label: "View Details", onSelect: () => setSelected(row.original) }]} />
+          ),
         },
   ];
 
   return (
     <Container>
       <article className=" mt-6 min-h-screen">
+        {rows.length > 0 && (
+          <StatGrid className="mb-4">
+            <StatCard label="Shown" tone="brand" value={rows.length} hint="Transactions on this page" />
+            <StatCard
+              label="Volume"
+              tone="sky"
+              value={formatNaira(rows.reduce((sum, t) => sum + (Number(t.amount) || 0), 0))}
+              hint="Added up on this page"
+            />
+            <StatCard label="Successful" tone="mint" value={rows.filter((t) => t.transactionStatus === "success").length} hint="On this page" />
+            <StatCard label="Failed" tone="danger" value={rows.filter((t) => t.transactionStatus === "failed").length} hint="On this page" />
+          </StatGrid>
+        )}
         <div className=" bg-white rounded-md pb-2">
           {/* <div className="flex flex-row  gap-10 text-xs text-[#6D6C6C] pt-6 px-2">
             <p
@@ -261,24 +241,24 @@ const Transactions = () => {
             </p>
           </div> */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-3 px-4 py-4 border-b">
-            <div className="flex flex-row gap-4">
+            <div className="flex flex-row flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
-                <label className="text-xs text-gray-600">From:</label>
+                <label className="text-xs text-fg2">From:</label>
                 <input
                   type="date"
                   value={startDate}
                   onChange={handleStartDateChange}
-                  className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+                  className="v-field !w-auto !py-1.5"
                 />
               </div>
 
               <div className="flex items-center gap-2">
-                <label className="text-xs text-gray-600">To:</label>
+                <label className="text-xs text-fg2">To:</label>
                 <input
                   type="date"
                   value={endDate}
                   onChange={handleEndDateChange}
-                  className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
+                  className="v-field !w-auto !py-1.5"
                 />
               </div>
 
@@ -288,7 +268,7 @@ const Transactions = () => {
                     setStartDate("");
                     setEndDate("");
                   }}
-                  className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded-md"
+                  className="v-btn v-btn-ghost v-btn-sm"
                 >
                   Clear
                 </button>
@@ -299,9 +279,9 @@ const Transactions = () => {
               <button
                 onClick={exportTransactionsToExcel}
                 disabled={allTransactionsLoading}
-                className="text-xs flex bg-[#7C2EBF] py-3 px-4 text-white rounded-md justify-end"
+                className="v-btn v-btn-primary"
               >
-                Export as Excel
+                <Download size={15} /> Export as Excel
               </button>
             </div>
           </div>
@@ -321,37 +301,36 @@ const Transactions = () => {
         <div></div>
 
         <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-          <DialogContent className="bg-white max-w-3xl max-h-[88vh] overflow-y-auto">
+          <DialogContent className="max-h-[88vh] max-w-3xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Transaction details</DialogTitle>
             </DialogHeader>
             {selected && (
               <div className="space-y-5">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-2xl font-semibold text-gray-900">
+                  <span className="v-mono font-display text-3xl font-semibold tracking-tight">
                     {formatNaira(selected.amount ?? 0)}
                   </span>
-                  <span
-                    className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${statusTone(selected.transactionStatus)}`}
-                  >
+                  <span className={`v-chip capitalize ${statusTone(selected.transactionStatus)}`}>
                     {selected.transactionStatus || "-"}
                   </span>
-                  <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold capitalize text-gray-600">
-                    {selected.transactionType || "-"}
-                  </span>
+                  <span className="v-chip capitalize">{selected.transactionType || "-"}</span>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="rounded-md bg-gray-50 p-3">
-                    <span className="text-[11px] uppercase tracking-wide text-gray-400 block mb-1">From</span>
+                <div className="grid items-center gap-3 md:grid-cols-[1fr_auto_1fr]">
+                  <div className="rounded-xl border border-line bg-panel p-4">
+                    <span className="v-eyebrow mb-1 block">From</span>
                     <Party
                       name={selected.senderName}
                       bank={selected.senderBank}
                       account={selected.senderAccountNumber}
                     />
                   </div>
-                  <div className="rounded-md bg-gray-50 p-3">
-                    <span className="text-[11px] uppercase tracking-wide text-gray-400 block mb-1">To</span>
+                  <span className="mx-auto grid h-9 w-9 place-items-center rounded-full border border-brand/30 bg-brand/15 text-brand md:rotate-0 rotate-90">
+                    <ArrowRight size={16} />
+                  </span>
+                  <div className="rounded-xl border border-line bg-panel p-4">
+                    <span className="v-eyebrow mb-1 block">To</span>
                     <Party
                       name={selected.receiverName}
                       bank={selected.receiverBank}
@@ -363,12 +342,12 @@ const Transactions = () => {
                 <div className="grid md:grid-cols-2 gap-x-6 gap-y-3">
                   <DetailRow label="Customer" value={selected.userFullName} />
                   <DetailRow label="Reason" value={selected.transactionReason} />
-                  <DetailRow label="Transaction reference" value={selected.transactionReference} />
+                  <DetailRow label="Transaction reference" value={<CopyText value={selected.transactionReference} />} />
                   <DetailRow label="Product" value={selected.productType} />
                   <DetailRow label="Transaction date" value={selected.transactionDate} />
                   <DetailRow label="Created on" value={selected.created_on} />
                   <DetailRow label="Updated on" value={selected.updated_on} />
-                  <DetailRow label="Transaction id" value={selected.id} />
+                  <DetailRow label="Transaction id" value={<CopyText value={selected.id} />} />
                 </div>
               </div>
             )}

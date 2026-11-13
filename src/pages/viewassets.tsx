@@ -6,20 +6,10 @@ import { IoIosArrowBack } from "react-icons/io";
 // import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
+import { modalSx, modalSlotProps } from "@/components/shared/modal-style";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import useMangeAssets from "@/hooks/use-manage-assests";
-const style = {
-  position: "absolute" as const,
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  borderRadius: 1,
-  boxShadow: 24,
-  p: 2,
-};
 function ViewAssets(): ReactElement {
   // const [customerType, setCustomerType] = useState("assets");
   const navigate = useNavigate();
@@ -125,12 +115,13 @@ function ViewAssets(): ReactElement {
         </div>
       </div>
       <Modal
+        slotProps={modalSlotProps}
         open={open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
+        <Box sx={modalSx(400)}>
           {/* <h1 className="font-bold text-medium mb-2">Create Sub Category</h1> */}
 
           {/* Subcategory Form */}
