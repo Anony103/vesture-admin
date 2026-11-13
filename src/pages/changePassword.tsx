@@ -1,5 +1,7 @@
 // import { useState } from "react";
 // import { useNavigate } from "react-router";
+import { AuthCard } from "../components/shared/auth-card";
+import { Mail } from "lucide-react";
 // import { IoEyeOutline } from "react-icons/io5";
 // import { IoEyeOffOutline } from "react-icons/io5";
 // import { schemaLogin } from "../schemas";
@@ -67,51 +69,36 @@ const ChangePassword = () => {
   };
 
   return (
-    <main className="w-screen h-screen min-h-screen flex items-center justify-center">
-      <div className="text-white text-center flex flex-col gap-6 w-[100%] md:w-[26%]  rounded mx-auto py-6 ">
-        <div className="border text-white  bg-white bg-opacity-30 backdrop-blur-md px-1 py-6 rounded-lg shadow-lg h-[70%]">
-          <div>
-            <p className="text-lg font-semibold">Forgot Password</p>
-            <p className="text-xs text-gray-100 mt-2">
-              Enter your email to continue
-            </p>
-          </div>
-          <section className="flex flex-col gap-6 p-[5px] mt-[5%] text-left">
-            <form
-              className="mt-6 flex flex-col gap-4"
-              onSubmit={handleSubmit(onSubmit)}
-            >
-              <div className="flex flex-col gap-1">
-                <label className="text-xs">Email</label>
-                <Input
-                  className="bg-transparent text-xs border border-gray-300 h-[40px]  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C2EBF] focus:border-transparent px-2 py-2 rounded-md"
-                  placeholder="example@email.com"
-                  id="email"
-                  {...register("email")}
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <button
-                  // onClick={() => navigate("/")}
-                  className="bg-[#7C2EBF] hover:opacity-40 text-white  py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition duration-150 ease-in-out"
-                  type="submit"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <ClipLoader color="#fff" size={12} /> Authenticating...
-                    </>
-                  ) : (
-                    "Send Mail"
-                  )}
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
-      
-      </div>
-    </main>
+    <AuthCard
+      title="Forgot your password?"
+      subtitle="Enter your email and we will send you a link to set a new one."
+      footer={
+        <button type="button" className="font-medium text-brand hover:underline" onClick={() => navigate("/auth")}>
+          Back to log in
+        </button>
+      }
+    >
+      <form className="flex flex-col gap-1" onSubmit={handleSubmit(onSubmit)}>
+        <Input
+          label="Email"
+          className="pl-10 text-sm"
+          leftIcon={<Mail size={16} className="ml-2.5 text-fg3" />}
+          placeholder="example@email.com"
+          id="email"
+          autoComplete="username"
+          {...register("email")}
+        />
+        <button className="v-btn v-btn-primary mt-2 h-11 w-full text-sm" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <ClipLoader color="#fff" size={14} /> Sending...
+            </>
+          ) : (
+            "Send link"
+          )}
+        </button>
+      </form>
+    </AuthCard>
   );
 };
 

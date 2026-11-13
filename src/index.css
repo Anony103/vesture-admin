@@ -448,7 +448,7 @@ body::before {
 
 /* fade-up on arrival; stagger with style={{ animationDelay: "80ms" }} */
 .v-rise {
-  animation: v-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: v-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
 }
 
 .v-skeleton {
@@ -667,6 +667,156 @@ input[type="range"].appearance-none::-moz-range-thumb {
   border: 3px solid var(--brand);
   box-shadow: 0 0 0 4px rgb(var(--brand-rgb) / 0.2);
   cursor: grab;
+}
+
+/* ---------- sign-in pages ---------- */
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes v-border-spin {
+  to {
+    --angle: 360deg;
+  }
+}
+@keyframes v-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(80px, 60px, 0) scale(1.15); }
+}
+@keyframes v-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.05); }
+  50% { transform: translate3d(-90px, -50px, 0) scale(0.92); }
+}
+@keyframes v-drift-c {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(50px, -80px, 0) scale(1.2); }
+}
+@keyframes v-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes v-grid-pan {
+  to { background-position: 0 0, 0 0, 56px 56px, 56px 56px; }
+}
+@keyframes v-text-flow {
+  to { background-position: 200% 0; }
+}
+@keyframes v-pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgb(var(--mint-rgb) / 0.55); }
+  100% { box-shadow: 0 0 0 10px rgb(var(--mint-rgb) / 0); }
+}
+@keyframes v-shake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-7px); }
+  40%, 60% { transform: translateX(7px); }
+}
+@keyframes v-sheen {
+  to { transform: translateX(260%) skewX(-18deg); }
+}
+
+.v-shake {
+  animation: v-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* pointer-following light behind the sign-in form */
+.v-spot {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 40%), rgb(var(--brand-rgb) / 0.13), transparent 60%);
+}
+
+.v-blob {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(70px);
+  will-change: transform;
+}
+
+.v-grid-pan {
+  animation: v-grid-pan 6s linear infinite;
+}
+
+.v-gradient-text {
+  background-image: linear-gradient(90deg, rgb(var(--brand-rgb)), rgb(var(--mint-rgb)), rgb(var(--sky-rgb)), rgb(var(--brand-rgb)));
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: v-text-flow 6s linear infinite;
+}
+
+/* rotating rings, with a glowing node riding each one */
+.v-orbit {
+  position: absolute;
+  border-radius: 999px;
+  border: 1px dashed var(--line-hi);
+}
+.v-orbit > i {
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 999px;
+  background: var(--node, var(--brand));
+  box-shadow: 0 0 14px 2px var(--node, var(--brand));
+}
+
+/* the glass card holding the form, with a light travelling round its edge */
+.v-auth-card {
+  position: relative;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: var(--shadow-card), 0 40px 90px -40px rgb(var(--brand-rgb) / 0.45);
+}
+.v-auth-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--angle), var(--line) 0 55%, rgb(var(--brand-rgb) / 0.95) 75%, rgb(var(--mint-rgb) / 0.85) 88%, var(--line) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: v-border-spin 7s linear infinite;
+  pointer-events: none;
+}
+
+.v-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--mint);
+  animation: v-pulse-ring 1.8s ease-out infinite;
+}
+
+/* a bright sweep across a button on hover */
+.v-sheen {
+  position: relative;
+  overflow: hidden;
+}
+.v-sheen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent);
+  transform: skewX(-18deg);
+  pointer-events: none;
+}
+.v-sheen:hover::after {
+  animation: v-sheen 0.9s ease;
 }
 
 /* ---------- toasts ---------- */

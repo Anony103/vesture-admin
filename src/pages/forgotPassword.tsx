@@ -1,7 +1,7 @@
 import { useState } from "react";
 // import { useNavigate } from "react-router";
-import { IoEyeOutline } from "react-icons/io5";
-import { IoEyeOffOutline } from "react-icons/io5";
+import { Eye, EyeOff, Lock } from "lucide-react";
+import { AuthCard } from "../components/shared/auth-card";
 // import { schemaLogin } from "../schemas";
 import { z } from "zod";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -71,82 +71,67 @@ const ForgotPassword = () => {
   };
 
   return (
-    <main className="w-screen h-screen min-h-screen flex items-center justify-center">
-      <div className="text-white text-center flex flex-col gap-6 w-[100%] md:w-[26%]  rounded mx-auto py-6 ">
-        <div className="border text-white  bg-white bg-opacity-30 backdrop-blur-md px-1 py-6 rounded-lg shadow-lg h-[70%]">
-          <div>
-            <p className="text-lg font-semibold">Forgot Password</p>
-            <p className="text-xs text-gray-100 mt-2">
-              Enter your password to continue
-            </p>
-          </div>
-          <section className="flex flex-col gap-6 p-[5px] mt-[5%] text-left">
-            <form
-              className="mt-6 flex flex-col gap-4"
-              onSubmit={handleSubmit(onSubmit)}
-            >
-              <div className="flex flex-col gap-1 ">
-                <label className="text-xs">Password</label>
-                <Input
-                  type={visibility ? "text" : "password"}
-                  {...register("password")}
-                  error={errors?.password?.message}
-                  disabled={isSubmitting}
-                  name="password"
-                  className="bg-transparent text-xs border border-gray-300 h-[40px] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C2EBF] focus:border-transparent px-2 py-2 rounded-md pr-10"
-                  id="Password"
-                  placeholder="Password"
-                  rightIcon={
+    <AuthCard
+      title="Set a new password"
+      subtitle="Choose a password you have not used before."
+      footer={
+        <button type="button" className="font-medium text-brand hover:underline" onClick={() => navigate("/auth")}>
+          Back to log in
+        </button>
+      }
+    >
+      <form className="flex flex-col gap-1" onSubmit={handleSubmit(onSubmit)}>
+        <Input
+          label="Password"
+          type={visibility ? "text" : "password"}
+          {...register("password")}
+          error={errors?.password?.message}
+          disabled={isSubmitting}
+          name="password"
+          className="pl-10 pr-11 text-sm"
+          leftIcon={<Lock size={16} className="ml-2.5 text-fg3" />}
+          id="Password"
+          placeholder="Password"
+          autoComplete="new-password"
+          rightIcon={
                     <button
                       onClick={() => setVisibility(!visibility)}
                       type="button"
+                      aria-label={visibility ? "Hide password" : "Show password"}
+                      className="grid h-8 w-8 place-items-center rounded-lg text-fg3 transition-colors hover:bg-panel-hi hover:text-fg"
                     >
-                      {visibility ? <IoEyeOutline /> : <IoEyeOffOutline />}
+                      {visibility ? <Eye size={16} /> : <EyeOff size={16} />}
                     </button>
                   }
-                />
-                <label className="text-xs">Confirm Password</label>
-
-                <Input
-                  type={visibility ? "text" : "password"}
-                  {...register("confirmPassword")}
-                  error={errors?.confirmPassword?.message}
-                  disabled={isSubmitting}
-                  name="confirmPassword"
-                  className="bg-transparent text-xs border border-gray-300 h-[40px] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C2EBF] focus:border-transparent px-2 py-2 rounded-md pr-10"
-                  id="confirmPassword"
-                  placeholder="Confirm Password"
-                  rightIcon={
+        />
+        <Input
+          label="Confirm Password"
+          type={visibility ? "text" : "password"}
+          {...register("confirmPassword")}
+          error={errors?.confirmPassword?.message}
+          disabled={isSubmitting}
+          name="confirmPassword"
+          className="pl-10 pr-11 text-sm"
+          leftIcon={<Lock size={16} className="ml-2.5 text-fg3" />}
+          id="confirmPassword"
+          placeholder="Confirm Password"
+          autoComplete="new-password"
+          rightIcon={
                     <button
                       onClick={() => setVisibility(!visibility)}
                       type="button"
+                      aria-label={visibility ? "Hide password" : "Show password"}
+                      className="grid h-8 w-8 place-items-center rounded-lg text-fg3 transition-colors hover:bg-panel-hi hover:text-fg"
                     >
-                      {visibility ? <IoEyeOutline /> : <IoEyeOffOutline />}
+                      {visibility ? <Eye size={16} /> : <EyeOff size={16} />}
                     </button>
                   }
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <button
-                  // onClick={() => navigate("/")}
-                  className="bg-[#7C2EBF] hover:opacity-40 text-white  py-2 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition duration-150 ease-in-out"
-                  type="submit"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <ClipLoader color="#fff" size={12} /> ...
-                    </>
-                  ) : (
-                    "Submit"
-                  )}
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
-      </div>
-    </main>
+        />
+        <button className="v-btn v-btn-primary mt-2 h-11 w-full text-sm" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? <ClipLoader color="#fff" size={14} /> : "Submit"}
+        </button>
+      </form>
+    </AuthCard>
   );
 };
 

@@ -41,7 +41,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ) : null}
         <div className="relative">
           {leftIcon ? (
-            <span className="text-fade absolute left-1 top-[50%] z-20 -translate-y-[50%]">
+            <span className="text-fade pointer-events-none absolute left-1 top-[50%] z-20 -translate-y-[50%]">
               {leftIcon}
             </span>
           ) : null}
