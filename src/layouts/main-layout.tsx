@@ -95,7 +95,8 @@ export const MainLayout = () => {
   // the tab says which backend it is on, so several tabs can be told apart
   useEffect(() => {
     const base = document.title.replace(/^\[[^\]]*\]\s*/, "");
-    document.title = `[${ENVIRONMENT.label}] ${base}`;
+    // the live admin keeps its plain title; every other environment is named in it
+    document.title = ENVIRONMENT.kind === "LIVE" ? base : `[${ENVIRONMENT.label}] ${base}`;
   }, []);
 
   useIdleTimer({
