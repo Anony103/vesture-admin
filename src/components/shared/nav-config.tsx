@@ -11,6 +11,7 @@ import {
   Landmark,
   LayoutDashboard,
   Layers,
+  Network,
   PiggyBank,
   Percent,
   Receipt,
@@ -83,6 +84,7 @@ export const useNavGroups = (): NavGroup[] => {
         { id: "17", title: "Webhook Log", path: "/webhookLogs", icon: Webhook },
         { id: "11", title: "Audit Log", path: "/auditLog", icon: ScrollText },
         { id: "9", title: "Data Refresh", path: "/employeeInfo", icon: DatabaseZap },
+        { id: "22", title: "Organisations", path: "/organisations", icon: Network },
         ...(stagingFunding.enabled
           ? [{ id: "18", title: "Test Funding", path: "/stagingFunding", icon: FlaskConical }]
           : []),

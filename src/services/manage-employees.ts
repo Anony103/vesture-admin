@@ -69,4 +69,34 @@ export class EmployeeInfosService extends GeneralAdminService {
   return response?.data;
 }
 
+
+  /**
+   * Every staff record for an export: the whole date range when one is chosen, otherwise every page of the list (or of the search),
+   * fetched a thousand at a time.
+   */
+  async getAllForExport(options?: { searchTerm?: string; dateRange?: { startDate: string; endDate: string } }) {
+    const { searchTerm, dateRange } = options || {};
+    const headers = { Authorization: `Bearer ${this._token}` };
+
+    if (dateRange?.startDate && dateRange?.endDate) {
+      const response = await axios.get(
+        `${baseUrl}api/admin/staff-data/search/date-range?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`,
+        { headers }
+      );
+      return (response?.data?.data ?? []) as Record<string, unknown>[];
+    }
+
+    const size = 1000;
+    const rows: Record<string, unknown>[] = [];
+    for (let page = 1; ; page++) {
+      const api = searchTerm
+        ? `${baseUrl}api/admin/staff-data/search/?keyword=${encodeURIComponent(searchTerm)}&page=${page}&size=${size}`
+        : `${baseUrl}api/admin/staff-data/all?page=${page}&size=${size}`;
+      const response = await axios.get(api, { headers });
+      const body = response?.data?.data;
+      rows.push(...(body?.content ?? []));
+      if (page >= (body?.totalPages ?? 1)) break;
+    }
+    return rows;
+  }
 }

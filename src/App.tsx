@@ -26,6 +26,7 @@ import AuditLogs from "./pages/auditLogs";
 import WebhookLogs from "./pages/webhookLogs";
 import AutoSave from "./pages/autoSave";
 import DepositFees from "./pages/depositFees";
+import Organisations from "./pages/organisations";
 import WithdrawalPayouts from "./pages/withdrawalPayouts";
 import StagingFunding from "./pages/stagingFunding";
 import Settings from "./pages/settings";
@@ -191,6 +192,10 @@ function App() {
         {
           path: "/depositFees",
           element: <DepositFees />,
+        },
+        {
+          path: "/organisations",
+          element: <Organisations />,
         },
         {
           path: "/withdrawalPayouts",
