@@ -167,7 +167,7 @@ const Customers = () => {
               onSelect: () => handleToggleModal(MODAL_TYPE.DEACTIVATE_CUSTOMER, row?.original),
             },
             {
-              label: "View Savings",
+              label: "View Investments",
               hidden: !(row?.original.status === "ACTIVE" || row?.original.status === null),
               separated: true,
               onSelect: () => navigate(`/savings/${row?.original.id}`),

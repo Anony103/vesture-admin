@@ -1,6 +1,7 @@
 import { baseUrl } from "@/constants";
 
 import axios from "axios";
+import type { UploadResponse } from "@/types/upload-result";
 import { GeneralAdminService } from "./general-admin-service";
 
 export class CreditEntryService extends GeneralAdminService {
@@ -37,13 +38,7 @@ export class CreditEntryService extends GeneralAdminService {
   //   return response;
   // }
   async createBulkCreditEntry(data: FormData) {
-    const response = await axios.post<{
-      message: string;
-      result: string;
-      status: string;
-      code: number;
-      // data : any
-    }>(`${baseUrl}api/savings/admin/credit-entry/upload`, data, {
+    const response = await axios.post<UploadResponse>(`${baseUrl}api/savings/admin/credit-entry/upload`, data, {
       headers: {
         Authorization: `Bearer ${this._token}`,
         "Content-Type": "multipart/form-data",

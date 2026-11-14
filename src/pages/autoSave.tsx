@@ -202,7 +202,7 @@ const AutoSave = () => {
                   <Row label="Plan status" value={plan.planStatus} />
                   <Row label="Saved so far" value={naira(plan.saved)} />
                   {plan.target != null && <Row label="Target" value={naira(plan.target)} />}
-                  <Row label="Debits taken by auto-save" value={`${plan.debitsTaken} · ${naira(plan.totalDebited)}`} />
+                  <Row label="Debits taken by auto-invest" value={`${plan.debitsTaken} · ${naira(plan.totalDebited)}`} />
                   {plan.awaitingInitialUntil && <Row label="First deposit due by" value={when(plan.awaitingInitialUntil)} />}
                 </div>
                 <section>

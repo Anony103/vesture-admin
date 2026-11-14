@@ -1,6 +1,6 @@
 import { ReactElement, useState } from "react";
 import { Container } from "../components/shared/container";
-import { Clock, Eye, EyeOff, LockKeyhole, Package, PlugZap, Smartphone, Wallet, type LucideIcon } from "lucide-react";
+import { Clock, Eye, EyeOff, LockKeyhole, Package, Percent, PlugZap, Smartphone, Wallet, type LucideIcon } from "lucide-react";
 import Button from "../components/shared/button";
 import { Input } from "@/components/ui/input";
 import useUpdatePassword from "@/hooks/use-update-password";
@@ -12,14 +12,17 @@ import useProductAvailability from "@/hooks/use-product-availability";
 import ProductAvailabilityPanel from "@/components/product-availability-panel";
 import useDepositFunding from "@/hooks/use-deposit-funding";
 import DepositFundingPanel from "@/components/deposit-funding-panel";
+import useNetPayLimit from "@/hooks/use-net-pay-limit";
+import NetPayLimitPanel from "@/components/net-pay-limit-panel";
 
 const SECTION_ICONS: Record<string, LucideIcon> = {
   Security: LockKeyhole,
-  "Auto Save": Clock,
+  "Auto Invest": Clock,
   Providers: PlugZap,
   "App Access": Smartphone,
   Products: Package,
   "Deposit Funding": Wallet,
+  "Net-Pay Limit": Percent,
 };
 
 /** 1 -> "1am", 12 -> "12pm", 23 -> "11pm" */
@@ -36,6 +39,7 @@ function Settings(): ReactElement {
   const appAccess = useAppAccess();
   const productAvailability = useProductAvailability();
   const depositFunding = useDepositFunding();
+  const netPayLimit = useNetPayLimit();
   const {
     register,
     handleSubmit,
@@ -52,11 +56,12 @@ function Settings(): ReactElement {
   // only the sections this admin may use are listed
   const sections = [
     "Security",
-    "Auto Save",
+    "Auto Invest",
     ...(providerSettings.allowed ? ["Providers"] : []),
     ...(appAccess.allowed ? ["App Access"] : []),
     ...(productAvailability.allowed ? ["Products"] : []),
     ...(depositFunding.allowed ? ["Deposit Funding"] : []),
+    ...(netPayLimit.allowed ? ["Net-Pay Limit"] : []),
   ];
 
   const eye = (
@@ -169,10 +174,11 @@ function Settings(): ReactElement {
             {settingOptions === "App Access" ? <AppAccessPanel /> : null}
             {settingOptions === "Products" ? <ProductAvailabilityPanel /> : null}
             {settingOptions === "Deposit Funding" ? <DepositFundingPanel /> : null}
-            {settingOptions === "Auto Save" ? (
+            {settingOptions === "Net-Pay Limit" ? <NetPayLimitPanel /> : null}
+            {settingOptions === "Auto Invest" ? (
               <div className="max-w-2xl">
-                <h2 className="font-display text-lg font-semibold">Auto-save debit time</h2>
-                <p className="mt-1 mb-6 text-sm text-fg2">Choose the hour of the day when auto-save debits run.</p>
+                <h2 className="font-display text-lg font-semibold">Auto-invest debit time</h2>
+                <p className="mt-1 mb-6 text-sm text-fg2">Choose the hour of the day when auto-invest debits run.</p>
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-end justify-between">

@@ -1,6 +1,7 @@
 import { baseUrl } from "@/constants";
 
 import axios from "axios";
+import type { UploadResponse } from "@/types/upload-result";
 import { GeneralAdminService } from "./general-admin-service";
 
 export class ManageAssetService extends GeneralAdminService {
@@ -63,13 +64,7 @@ export class ManageAssetService extends GeneralAdminService {
     return response;
   }
   async createBulkAssets(data: FormData) {
-    const response = await axios.post<{
-      message: string;
-      result: string;
-      status: string;
-      code: number;
-      // data : any
-    }>(`${baseUrl}api/asset/admin/bulk-upload`, data, {
+    const response = await axios.post<UploadResponse>(`${baseUrl}api/asset/admin/bulk-upload`, data, {
       headers: {
         Authorization: `Bearer ${this._token}`,
         "Content-Type": "multipart/form-data",

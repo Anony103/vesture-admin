@@ -4,6 +4,7 @@ import { Container } from "../components/shared/container";
 import CustomFileUpload from "@/components/shared/CustomFileUpload";
 // import useCreditEntry from "@/hooks/use-credit-entry";
 import useEmployeeInfo from "@/hooks/use-employee-info";
+import { UploadResultDialog } from "@/components/shared/upload-result-dialog";
 
 const CreateEmployeeInformation = () => {
   //   const navigate = useNavigate();
@@ -13,6 +14,8 @@ const CreateEmployeeInformation = () => {
     isLoading,
     file,
     handleFileChange,
+    uploadResult,
+    clearUploadResult,
   } = useEmployeeInfo();
 
   return (
@@ -74,6 +77,7 @@ const CreateEmployeeInformation = () => {
           </div>
         </div>
       </div>
+      <UploadResultDialog result={uploadResult} onClose={clearUploadResult} subject="Staff data" />
     </Container>
   );
 };

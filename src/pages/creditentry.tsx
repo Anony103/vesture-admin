@@ -1,3 +1,4 @@
+import { productLabel } from "@/utils/productLabel";
 import { Container } from "../components/shared/container";
 import { DataTable } from "../components/shared/data-table";
 import { ColumnDef } from "@tanstack/react-table";
@@ -56,13 +57,11 @@ const CreditEntry = () => {
     },
     {
       accessorKey: "savingsType",
-      header: "Savings Type",
+      header: "Investment Type",
       cell: ({ getValue }) => {
         const value = getValue() as string;
         return (
-          <span className="capitalize">
-            {value?.replace("_", " ").toLowerCase()}
-          </span>
+          <span>{productLabel(value)}</span>
         );
       },
     },

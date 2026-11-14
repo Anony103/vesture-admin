@@ -1,3 +1,4 @@
+import { productLabel } from "@/utils/productLabel";
 import { useState } from "react";
 import { Container } from "../components/shared/container";
 import { DataTable } from "../components/shared/data-table";
@@ -65,7 +66,7 @@ const investmentColumns: ColumnDef<Investment>[] = [
     header: () => <span>Type</span>,
     cell: ({ getValue }) => {
       const value = (getValue() as string) ?? "";
-      return <span className="inline-block capitalize">{value}</span>;
+      return <span className="inline-block">{productLabel(value)}</span>;
     },
   },
   {

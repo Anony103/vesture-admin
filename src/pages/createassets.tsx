@@ -11,6 +11,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import useMangeAssets from "@/hooks/use-manage-assests";
+import { UploadResultDialog } from "@/components/shared/upload-result-dialog";
 import CustomFileUpload from "@/components/shared/CustomFileUpload";
 import useMangeAssetsCategories from "@/hooks/use-manage-categories";
 // import { Controller } from 'react-hook-form';
@@ -38,6 +39,8 @@ const Createassets = () => {
     // selectedCategory
     preview,
     setPreview,
+    uploadResult,
+    clearUploadResult,
     // editMode,
   } = useMangeAssets();
   const {
@@ -375,6 +378,7 @@ const Createassets = () => {
           )}
         </div>
       </div>
+      <UploadResultDialog result={uploadResult} onClose={clearUploadResult} subject="Assets" />
     </Container>
   );
 };

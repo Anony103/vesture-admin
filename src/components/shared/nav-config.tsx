@@ -9,6 +9,7 @@ import {
   Gem,
   HandCoins,
   Landmark,
+  ListChecks,
   LayoutDashboard,
   Layers,
   Network,
@@ -54,6 +55,7 @@ export const useNavGroups = (): NavGroup[] => {
       items: [
         { id: "2", title: "Customers", path: "/customers", icon: Users },
         { id: "16", title: "KYC", path: "/kyc", icon: BadgeCheck },
+        { id: "9", title: "Public Staff Upload", path: "/employeeInfo", icon: DatabaseZap },
         { id: "3", title: "Manage Admins", path: "/manageAdmins", icon: ShieldCheck },
       ],
     },
@@ -73,9 +75,10 @@ export const useNavGroups = (): NavGroup[] => {
         { id: "10", title: "Transaction History", path: "/transactions", icon: Receipt },
         { id: "14", title: "LMS Transfers", path: "/lmsTransfers", icon: ArrowLeftRight },
         { id: "7", title: "Public Sector Credit Entry", path: "/creditEntry", icon: Building2 },
+        { id: "23", title: "Salary Invest", path: "/payrollPlans", icon: ListChecks },
         { id: "21", title: "Withdrawal Payouts", path: "/withdrawalPayouts", icon: HandCoins },
         { id: "20", title: "Deposit Fees", path: "/depositFees", icon: BadgePercent },
-        { id: "19", title: "Auto-save", path: "/autoSave", icon: PiggyBank },
+        { id: "19", title: "Auto-invest", path: "/autoSave", icon: PiggyBank },
       ],
     },
     {
@@ -83,7 +86,6 @@ export const useNavGroups = (): NavGroup[] => {
       items: [
         { id: "17", title: "Webhook Log", path: "/webhookLogs", icon: Webhook },
         { id: "11", title: "Audit Log", path: "/auditLog", icon: ScrollText },
-        { id: "9", title: "Data Refresh", path: "/employeeInfo", icon: DatabaseZap },
         { id: "22", title: "Organisations", path: "/organisations", icon: Network },
         ...(stagingFunding.enabled
           ? [{ id: "18", title: "Test Funding", path: "/stagingFunding", icon: FlaskConical }]
