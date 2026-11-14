@@ -14,6 +14,8 @@ import { createAssetSchema } from "@/schemas";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { useAppContext } from "@/context/AppContext";
+import { exportToExcel } from "@/utils/exportAsExcel";
+import { EmployeeRecord } from "@/types/table-type";
 
 const MODAL_TYPE = {
   CREATE_ADMIN: "CREATE_ADMIN",
@@ -197,6 +199,69 @@ const useEmployeeInfo = () => {
     },
   });
   console.log(file);
+
+  const [exporting, setExporting] = useState(false);
+  /** The sheet stores dates as Excel serial numbers (44563); show them as dates. */
+  const asDate = (value: string | undefined) => {
+    if (!value || !/^\d{4,6}(\.0+)?$/.test(value.trim())) return value ?? "";
+    const serial = parseFloat(value);
+    return new Date(Math.round((serial - 25569) * 86400 * 1000)).toISOString().slice(0, 10);
+  };
+
+  /** Everything the table could show for the chosen dates (or search), not just the page on screen. */
+  const exportStaffToExcel = async () => {
+    if ((startDate && !endDate) || (!startDate && endDate)) {
+      toast.error("Choose both dates, or clear them to export everything");
+      return;
+    }
+    setExporting(true);
+    try {
+      const rows = (await employeeInfoService.getAllForExport({
+        searchTerm,
+        dateRange: { startDate, endDate },
+      })) as unknown as EmployeeRecord[];
+      if (!rows.length) {
+        toast.error("There is no staff data to export");
+        return;
+      }
+      exportToExcel<EmployeeRecord>({
+        data: rows,
+        fileName: `staff-data-${new Date().toISOString().slice(0, 10)}.xlsx`,
+        sheetName: "Staff data",
+        columns: [
+          { header: "S/N", key: (_row, index) => index + 1 },
+          { header: "Full Name", key: "fullName" },
+          { header: "IPPIS No", key: "ippisNumber" },
+          { header: "Staff ID", key: "staffId" },
+          { header: "Organization", key: "employerOrganization" },
+          { header: "Employment Status", key: "employmentStatus" },
+          { header: "Assignment Status", key: "assignmentStatus" },
+          { header: "Hire Date", key: (row) => asDate(row.hireDate) },
+          { header: "Birth Date", key: (row) => asDate(row.birthDate) },
+          { header: "Job Title", key: "jobTitle" },
+          { header: "Command", key: "command" },
+          { header: "Phone Number", key: "phoneNumber" },
+          { header: "Bank", key: "bankName" },
+          { header: "Account No", key: "accountNumber" },
+          { header: "Staff Category", key: "staffCategory" },
+          { header: "Employee Type", key: "employeeType" },
+          { header: "Net Pay", key: "netPay" },
+          { header: "Period", key: (row) => asDate(row.period) },
+          { header: "Uploaded On", key: (row) => (row.uploadedOn ? new Date(row.uploadedOn).toLocaleString() : "") },
+        ],
+      });
+      toast.success(`Exported ${rows.length} staff records`);
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message || "Could not export the staff data");
+      } else {
+        toast.error("Could not export the staff data");
+      }
+    } finally {
+      setExporting(false);
+    }
+  };
+
   useEffect(() => {
     setOnSearch((term: string) => {
       setSearchTerm(term);
@@ -246,7 +311,9 @@ const useEmployeeInfo = () => {
     setTotalPages,
     currentPage,
     setPageSize,
-    pageSize
+    pageSize,
+    exportStaffToExcel,
+    exporting,
   };
 };
 

@@ -25,7 +25,9 @@ const EmployeeInformation = () => {
     handleEndDateChange,
     handleStartDateChange,
     setPageSize,
-    pageSize
+    pageSize,
+    exportStaffToExcel,
+    exporting,
   } = useEmployeeInfo();
 
   const EmployeeColumns: ColumnDef<EmployeeRecord>[] = [
@@ -196,11 +198,12 @@ const EmployeeInformation = () => {
               )}
             </div>
             <button
-              // onClick={exportSavingsToExcel}
-              // disabled={allSavingsLoading}
-              className="text-xs flex bg-[#7C2EBF] py-3 px-4 text-white rounded-md justify-end"
+              type="button"
+              onClick={exportStaffToExcel}
+              disabled={exporting}
+              className="text-xs flex bg-[#7C2EBF] py-3 px-4 text-white rounded-md justify-end disabled:opacity-60"
             >
-              Export As Excel
+              {exporting ? "Exporting…" : "Export As Excel"}
             </button>
           </div>
 
