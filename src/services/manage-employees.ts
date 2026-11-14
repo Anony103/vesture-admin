@@ -1,6 +1,7 @@
 import { baseUrl } from "@/constants";
 
 import axios from "axios";
+import type { UploadResponse } from "@/types/upload-result";
 import { GeneralAdminService } from "./general-admin-service";
 
 export class EmployeeInfosService extends GeneralAdminService {
@@ -11,13 +12,7 @@ export class EmployeeInfosService extends GeneralAdminService {
 
   
   async createEmloyeeInfos(data: FormData) {
-    const response = await axios.post<{
-      message: string;
-      result: string;
-      status: string;
-      code: number;
-      // data : any
-    }>(`${baseUrl}api/admin/staff-data/upload`, data, {
+    const response = await axios.post<UploadResponse>(`${baseUrl}api/admin/staff-data/upload`, data, {
       headers: {
         Authorization: `Bearer ${this._token}`,
       },

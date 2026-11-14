@@ -3,6 +3,7 @@ import Button from "../components/shared/button";
 import { Container } from "../components/shared/container";
 import CustomFileUpload from "@/components/shared/CustomFileUpload";
 import useCreditEntry from "@/hooks/use-credit-entry";
+import { UploadResultDialog } from "@/components/shared/upload-result-dialog";
 
 const CreateCredit = () => {
   //   const navigate = useNavigate();
@@ -12,6 +13,8 @@ const CreateCredit = () => {
     isLoading,
     file,
     handleFileChange,
+    uploadResult,
+    clearUploadResult,
   } = useCreditEntry();
 
   return (
@@ -52,6 +55,21 @@ const CreateCredit = () => {
                 <span className="text-[#434343] text-sm flex gap-1">Click <p className="text-[#7C2EBF] cursor-pointer hover:underline">here to download</p> a sample of the acceptable spreadsheet</span>
               </div>
             </section> */}
+          <div className="mb-4 rounded-md border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700 space-y-1">
+            <p>
+              Columns: <span className="font-semibold">Name, Unique Id (BVN), Amount, Investment Type, Period</span>. Investment Type is SMALLVEST, TARGET_LOCK, SMART_LOCK
+              or BUY_NOW_PAY_LATER (the older names SAVE_SMALL_SMALL and TARGET_SAVINGS are accepted too).
+            </p>
+            <p>
+              <span className="font-semibold">Period</span> (for example 2026-11) is the payroll month. A plan is credited once per period, so uploading the
+              same file again changes nothing. Leave it empty to use the current month.
+            </p>
+            <p>
+              A credit goes to the customer&apos;s oldest open plan of that type. It is refused if it would take a Target Lock or Smart Lock past its amount,
+              or a purchase past what is owed. A plan is activated at the bank once it holds ₦50,000 (a purchase starts once its initial payment is in).
+              Use <span className="font-semibold">Salary Invest</span> to see who to deduct and download the expected amounts.
+            </p>
+          </div>
           <CustomFileUpload
             label="Credit Entry"
             description="Upload your spreadsheet file here"
@@ -73,6 +91,7 @@ const CreateCredit = () => {
           </div>
         </div>
       </div>
+      <UploadResultDialog result={uploadResult} onClose={clearUploadResult} subject="Credit entries" />
     </Container>
   );
 };

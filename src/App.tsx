@@ -27,6 +27,7 @@ import WebhookLogs from "./pages/webhookLogs";
 import AutoSave from "./pages/autoSave";
 import DepositFees from "./pages/depositFees";
 import Organisations from "./pages/organisations";
+import PayrollPlans from "./pages/payrollPlans";
 import WithdrawalPayouts from "./pages/withdrawalPayouts";
 import StagingFunding from "./pages/stagingFunding";
 import Settings from "./pages/settings";
@@ -196,6 +197,10 @@ function App() {
         {
           path: "/organisations",
           element: <Organisations />,
+        },
+        {
+          path: "/payrollPlans",
+          element: <PayrollPlans />,
         },
         {
           path: "/withdrawalPayouts",

@@ -14,6 +14,7 @@ import { createAssetSchema } from "@/schemas";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { useAppContext } from "@/context/AppContext";
+import type { UploadResult } from "@/types/upload-result";
 import { exportToExcel } from "@/utils/exportAsExcel";
 import { EmployeeRecord } from "@/types/table-type";
 
@@ -29,6 +30,8 @@ const useEmployeeInfo = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [typeToCreate, setTypeToCreate] = useState<string>("single");
+  const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
+  const clearUploadResult = () => setUploadResult(null);
 
   const handleToggleModal = (modalState: string, data: User | null) => {
     if (modalState?.length === 0) {
@@ -142,7 +145,9 @@ const useEmployeeInfo = () => {
       const response = await employeeInfoService.createEmloyeeInfos(formData);
       console.log(response);
       if (response.data?.code === 200) {
-        toast.success(response.data.message);
+        // the counts and the failed rows are shown in the result dialog, which stays until the admin closes it
+        if (response.data.data) setUploadResult({ ...response.data.data, fileName: file?.name });
+        else toast.success(response.data.message);
         handleFileRemove();
         setOpen(false);
       }
@@ -228,26 +233,25 @@ const useEmployeeInfo = () => {
         data: rows,
         fileName: `staff-data-${new Date().toISOString().slice(0, 10)}.xlsx`,
         sheetName: "Staff data",
+        // The columns of the upload template, in its order and with its headings, so the file can be edited and uploaded again as it is.
         columns: [
-          { header: "S/N", key: (_row, index) => index + 1 },
-          { header: "Full Name", key: "fullName" },
-          { header: "IPPIS No", key: "ippisNumber" },
-          { header: "Staff ID", key: "staffId" },
-          { header: "Organization", key: "employerOrganization" },
-          { header: "Employment Status", key: "employmentStatus" },
-          { header: "Assignment Status", key: "assignmentStatus" },
-          { header: "Hire Date", key: (row) => asDate(row.hireDate) },
-          { header: "Birth Date", key: (row) => asDate(row.birthDate) },
-          { header: "Job Title", key: "jobTitle" },
-          { header: "Command", key: "command" },
-          { header: "Phone Number", key: "phoneNumber" },
-          { header: "Bank", key: "bankName" },
-          { header: "Account No", key: "accountNumber" },
-          { header: "Staff Category", key: "staffCategory" },
-          { header: "Employee Type", key: "employeeType" },
-          { header: "Net Pay", key: "netPay" },
-          { header: "Period", key: (row) => asDate(row.period) },
-          { header: "Uploaded On", key: (row) => (row.uploadedOn ? new Date(row.uploadedOn).toLocaleString() : "") },
+          { header: "ippisNumber", key: "ippisNumber" },
+          { header: "staffId", key: "staffId" },
+          { header: "fullName", key: "fullName" },
+          { header: "employerOrganization", key: "employerOrganization" },
+          { header: "employmentStatus", key: "employmentStatus" },
+          { header: "assignmentStatus", key: "assignmentStatus" },
+          { header: "hireDate", key: (row) => asDate(row.hireDate) },
+          { header: "birthDate", key: (row) => asDate(row.birthDate) },
+          { header: "jobTitle", key: "jobTitle" },
+          { header: "command", key: "command" },
+          { header: "phoneNumber", key: "phoneNumber" },
+          { header: "bankName", key: "bankName" },
+          { header: "accountNumber", key: "accountNumber" },
+          { header: "staffCategory", key: "staffCategory" },
+          { header: "employeeType", key: "employeeType" },
+          { header: "netPay", key: "netPay" },
+          { header: "period", key: (row) => asDate(row.period) },
         ],
       });
       toast.success(`Exported ${rows.length} staff records`);
@@ -314,6 +318,8 @@ const useEmployeeInfo = () => {
     pageSize,
     exportStaffToExcel,
     exporting,
+    uploadResult,
+    clearUploadResult,
   };
 };
 

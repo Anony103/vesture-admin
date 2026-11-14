@@ -6,6 +6,7 @@ import * as z from "zod";
 // import { toast } from "react-toastify";
 import { ManageAssetService } from "@/services/manage-assets-service";
 import { SESSION_STORAGE_KEY } from "@/constants";
+import type { UploadResult } from "@/types/upload-result";
 import { useQuery } from "@tanstack/react-query";
 
 import { SubmitHandler } from "react-hook-form";
@@ -45,6 +46,8 @@ const useMangeAssets = (id?: string | undefined) => {
   const [modalState, setModalState] = useState<string>("");
   const [selectedAsset, setSelectedAsset] = useState<AssetType | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
+  const clearUploadResult = () => setUploadResult(null);
   const [typeToCreate, setTypeToCreate] = useState<string>("single");
   const [selectedCategory, setSelectedCategory] =
     useState<AssetCategory | null>(null);
@@ -216,20 +219,24 @@ const useMangeAssets = (id?: string | undefined) => {
   };
 
   const handleFileUpload = async () => {
+    if (!file) {
+      toast.error("Please select a file to upload");
+      return;
+    }
     setIsLoading(true);
     try {
       // Create FormData for bulk upload
       const formData = new FormData();
 
-      // append the file if present
-
-      formData.append("file", file || ""); // 👈 key should match backend expectation
+      formData.append("file", file); // 👈 key should match backend expectation
 
       // POST request
       const response = await manageAssets.createBulkAssets(formData);
       console.log(response);
       if (response.data?.code === 200) {
-        toast.success(response.data.message);
+        // the counts and the failed rows are shown in the result dialog, which stays until the admin closes it
+        if (response.data.data) setUploadResult({ ...response.data.data, fileName: file?.name });
+        else toast.success(response.data.message);
         handleFileRemove();
         setOpen(false);
       }
@@ -398,6 +405,8 @@ const useMangeAssets = (id?: string | undefined) => {
     file,
     handleFileRemove,
     handleFileUpload,
+    uploadResult,
+    clearUploadResult,
     setSelectedCategory,
     selectedCategory,
     preview,
