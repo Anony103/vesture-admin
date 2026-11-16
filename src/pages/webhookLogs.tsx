@@ -1,7 +1,9 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Container } from "../components/shared/container";
 import { DataTable } from "../components/shared/data-table";
+import { useState } from "react";
 import { Tabs } from "@/components/shared/tabs";
+import { AuditView } from "@/components/webhook/audit-view";
 import Button from "../components/shared/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import useWebhookLogs from "@/hooks/use-webhook-logs";
@@ -61,24 +63,10 @@ const Chip = ({ outcome }: { outcome: string }) => (
   </span>
 );
 
-const HASH_TEXT: Record<string, string> = {
-  OK: "Matched",
-  MISSING_HEADER: "No header sent",
-  MISMATCH: "Did not match",
-  SERVER_HASH_UNSET: "Not set on our server",
-  NOT_APPLICABLE: "-",
-};
-
 const SOURCE_SHORT: Record<string, string> = {
   WEBHOOK: "Webhook",
   CATCH_UP: "Catch-up job",
   STAGING_TEST: "Staging test",
-};
-
-const SOURCE_LONG: Record<string, string> = {
-  WEBHOOK: "Flutterwave called our webhook",
-  CATCH_UP: "Catch-up job (found by asking Flutterwave)",
-  STAGING_TEST: "Staging test funding (a super admin simulated this transfer; no real money moved)",
 };
 
 const when = (value: string | null | undefined) =>
@@ -86,13 +74,6 @@ const when = (value: string | null | undefined) =>
 
 const money = (amount: number | null, currency: string | null) =>
   amount == null ? "-" : `${currency === "NGN" || !currency ? "₦" : `${currency} `}${Number(amount).toLocaleString("en-NG")}`;
-
-const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
-  <div className="flex flex-col gap-1 border-b pb-2">
-    <span className="text-[11px] uppercase tracking-wide text-gray-400">{label}</span>
-    <span className="text-sm text-gray-800 break-words">{value ?? "-"}</span>
-  </div>
-);
 
 const pretty = (raw: string | null | undefined) => {
   if (!raw) return "";
@@ -103,8 +84,27 @@ const pretty = (raw: string | null | undefined) => {
   }
 };
 
+type DetailView = "audit" | "raw";
+const VIEW_KEY = "webhook-log-detail-view";
+
 const WebhookLogs = () => {
   const w = useWebhookLogs();
+  // the audit view is what opens; the choice made last is remembered in this browser (it just starts at the audit view if storage is blocked)
+  const [view, setView] = useState<DetailView>(() => {
+    try {
+      return window.localStorage.getItem(VIEW_KEY) === "raw" ? "raw" : "audit";
+    } catch {
+      return "audit";
+    }
+  });
+  const changeView = (next: DetailView) => {
+    setView(next);
+    try {
+      window.localStorage.setItem(VIEW_KEY, next);
+    } catch {
+      // not remembered: harmless
+    }
+  };
   const detail = w.detail;
 
   const columns: ColumnDef<WebhookLogItem>[] = [
@@ -240,40 +240,38 @@ const WebhookLogs = () => {
                   <span className="text-[11px] uppercase tracking-wide text-gray-400 block mb-1">Why</span>
                   {detail.reason ?? "-"}
                 </div>
-                <div className="grid md:grid-cols-2 gap-x-6 gap-y-3">
-                  <Row label="Received" value={when(detail.createdOn)} />
-                  <Row label="Source" value={SOURCE_LONG[detail.source] ?? detail.source} />
-                  <Row label="App" value={APP_LONG[detail.app] ?? detail.app} />
-                  <Row label="Event" value={detail.event} />
-                  <Row label="Amount" value={money(detail.amount, detail.currency)} />
-                  <Row label="Flutterwave status" value={detail.providerStatus} />
-                  <Row label="Payment type" value={detail.paymentType} />
-                  <Row label="Customer email (masked)" value={detail.customerEmail} />
-                  <Row label="Secret hash" value={HASH_TEXT[detail.hashResult] ?? detail.hashResult} />
-                  <Row label="Flutterwave ref (flw_ref)" value={detail.flwRef} />
-                  <Row label="Transaction ref (tx_ref)" value={detail.txRef} />
-                  <Row label="Flutterwave transaction id" value={detail.providerTransactionId} />
-                  <Row label="We answered" value={detail.httpStatus == null ? "-" : `HTTP ${detail.httpStatus}`} />
-                </div>
-                <section>
-                  <h3 className="text-sm font-semibold mb-2">Raw body as received</h3>
-                  {detail.rawBody ? (
-                    <pre className="max-h-80 overflow-auto rounded-md bg-gray-900 p-3 text-[11px] leading-relaxed text-gray-100">
-                      {pretty(detail.rawBody)}
-                    </pre>
-                  ) : (
-                    <p className="text-xs text-gray-500">
-                      {detail.source === "CATCH_UP"
-                        ? "None: this transfer was read from Flutterwave's list, not sent to us."
-                        : "Not kept."}
-                    </p>
-                  )}
-                  {detail.hashResult !== "OK" && detail.hashResult !== "NOT_APPLICABLE" && (
-                    <p className="mt-1 text-[11px] text-gray-500">
-                      The secret hash did not pass, so only the first 2,000 characters of the body are kept.
-                    </p>
-                  )}
-                </section>
+                <Tabs
+                  label="Webhook call view"
+                  tabs={[
+                    { value: "audit", label: "Audit view" },
+                    { value: "raw", label: "Raw body" },
+                  ]}
+                  value={view}
+                  onChange={(v) => changeView(v as DetailView)}
+                />
+                {view === "audit" ? (
+                  <AuditView detail={detail} />
+                ) : (
+                  <section>
+                    <h3 className="text-sm font-semibold mb-2">Raw body as received</h3>
+                    {detail.rawBody ? (
+                      <pre className="max-h-96 overflow-auto rounded-md bg-gray-900 p-3 text-[11px] leading-relaxed text-gray-100">
+                        {pretty(detail.rawBody)}
+                      </pre>
+                    ) : (
+                      <p className="text-xs text-gray-500">
+                        {detail.source === "CATCH_UP"
+                          ? "None: this transfer was read from Flutterwave's list, not sent to us."
+                          : "Not kept."}
+                      </p>
+                    )}
+                    {detail.hashResult !== "OK" && detail.hashResult !== "NOT_APPLICABLE" && (
+                      <p className="mt-1 text-[11px] text-gray-500">
+                        The secret hash did not pass, so only the first 2,000 characters of the body are kept.
+                      </p>
+                    )}
+                  </section>
+                )}
               </div>
             )}
           </DialogContent>
