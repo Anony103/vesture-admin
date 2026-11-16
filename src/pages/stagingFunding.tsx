@@ -144,6 +144,13 @@ const StagingFunding = () => {
                 className={`${inputClass} md:w-64`}
               />
             </label>
+            <label className="flex items-center gap-2 text-xs text-gray-700 md:pb-2">
+              <input type="checkbox" checked={f.simulateFee} onChange={(e) => f.setSimulateFee(e.target.checked)} />
+              <span>
+                Simulate Flutterwave fee
+                {status.feePercent != null ? ` (${status.feePercent}% of what is sent, taken from the credit like the web)` : ""}
+              </span>
+            </label>
             <div className={f.canFund ? "" : "opacity-50 pointer-events-none"}>
               <Button name="Fund" color="purple" type="submit" loading={f.funding} />
             </div>
@@ -166,7 +173,10 @@ const StagingFunding = () => {
                 label="Credited to"
                 value={f.result.creditedTo === "PLAN" ? "The plan" : f.result.creditedTo === "WALLET" ? "The wallet" : "-"}
               />
-              <Row label="Amount" value={formatNaira(f.result.amount)} />
+              <Row label="Amount sent" value={formatNaira(f.result.amount)} />
+              <Row label="Flutterwave fee" value={formatNaira(f.result.fee)} />
+              <Row label="Fee taken from the credit" value={formatNaira(f.result.feeTakenFromCredit)} />
+              <Row label="Credited" value={formatNaira(f.result.creditedAmount)} />
               <Row label="Wallet balance now" value={formatNaira(f.result.newWalletBalance)} />
               <Row label="Reference (flw_ref)" value={f.result.flwRef} />
             </div>
