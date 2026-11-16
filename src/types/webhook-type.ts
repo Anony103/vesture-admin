@@ -24,6 +24,14 @@ export type WebhookLogItem = {
   outcome: WebhookOutcome;
   reason: string | null;
   httpStatus: number | null;
+  /** For a credited call: where the money went. Null on calls logged before this was recorded, and on calls that credited nothing. */
+  creditedTo?: "WALLET" | "PLAN" | null;
+  /** The plan's name when it went to a plan. */
+  creditedPlan?: string | null;
+  /** What the wallet or plan received: the amount sent less the fee taken. */
+  creditedAmount?: number | null;
+  /** The part of Flutterwave's fee taken from the customer's credit. */
+  feeTakenFromCredit?: number | null;
   /** Only on the single-call detail. */
   rawBody?: string | null;
 };
