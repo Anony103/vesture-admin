@@ -24,7 +24,12 @@ export const useStagingFundingStatus = () => {
     refetchOnWindowFocus: false,
     enabled: !!token,
   });
-  return { enabled: data?.enabled === true, maxAmount: data?.maxAmount ?? null, isLoading };
+  return {
+    enabled: data?.enabled === true,
+    maxAmount: data?.maxAmount ?? null,
+    feePercent: data?.feePercent ?? null,
+    isLoading,
+  };
 };
 
 const useStagingFunding = () => {
@@ -34,6 +39,8 @@ const useStagingFunding = () => {
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
   const [senderName, setSenderName] = useState("");
+  // on by default: a real transfer has Flutterwave's fee, and that is what is worth testing
+  const [simulateFee, setSimulateFee] = useState(true);
   const [customer, setCustomer] = useState<StagingCustomer | null>(null);
   const [lookupError, setLookupError] = useState<string | null>(null);
   const [fundError, setFundError] = useState<string | null>(null);
@@ -58,6 +65,7 @@ const useStagingFunding = () => {
           email: (customer as StagingCustomer).email,
           amount: Number(amount),
           senderName: senderName.trim() || undefined,
+          simulateFee,
         })
       )?.data,
     onSuccess: (done) => {
@@ -95,6 +103,8 @@ const useStagingFunding = () => {
     setAmount,
     senderName,
     setSenderName,
+    simulateFee,
+    setSimulateFee,
     customer,
     findCustomer,
     finding: lookup.isPending,
