@@ -24,6 +24,8 @@ import CreditEntry from "./pages/creditentry";
 import Transactions from "./pages/transactions";
 import AuditLogs from "./pages/auditLogs";
 import WebhookLogs from "./pages/webhookLogs";
+import Waitlist from "./pages/waitlist";
+import FraudAlerts from "./pages/fraudAlerts";
 import AutoSave from "./pages/autoSave";
 import DepositFees from "./pages/depositFees";
 import Organisations from "./pages/organisations";
@@ -185,6 +187,14 @@ function App() {
         {
           path: "/webhookLogs",
           element: <WebhookLogs />,
+        },
+        {
+          path: "/waitlist",
+          element: <Waitlist />,
+        },
+        {
+          path: "/fraudAlerts",
+          element: <FraudAlerts />,
         },
         {
           path: "/autoSave",

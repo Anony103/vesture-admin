@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { SESSION_STORAGE_KEY } from "@/constants";
-import { GET_APP_ACCESS } from "@/constants/query-keys";
+import { GET_APP_ACCESS, GET_WEB_TESTERS } from "@/constants/query-keys";
 import { AppAccessService } from "@/services/app-access-service";
 import { AppAccessPayload } from "@/types/app-access-type";
 
@@ -34,7 +34,26 @@ const useAppAccess = () => {
     onError: (error) => toast.error(messageOf(error, "Could not save")),
   });
 
-  return { access: query.data, allowed: query.isSuccess, isLoading: query.isLoading, save };
+  // who may keep signing in to the web while Waitlist mode is on
+  const testersQuery = useQuery({
+    queryKey: [GET_WEB_TESTERS],
+    queryFn: async () => (await service.getTesters())?.data,
+    retry: false,
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
+    enabled: !!token && query.isSuccess,
+  });
+
+  const saveTesters = useMutation({
+    mutationFn: async (testers: string[]) => (await service.saveTesters(testers))?.data,
+    onSuccess: (updated) => {
+      queryClient.setQueryData([GET_WEB_TESTERS], updated);
+      toast.success("Testers saved");
+    },
+    onError: (error) => toast.error(messageOf(error, "Could not save the testers")),
+  });
+
+  return { access: query.data, allowed: query.isSuccess, isLoading: query.isLoading, save, testers: testersQuery.data, saveTesters };
 };
 
 export default useAppAccess;
