@@ -10,8 +10,6 @@ const INTEREST_LABELS: Record<string, string> = {
   TARGET_LOCK: "Target Lock",
   SMART_LOCK: "Smart Lock",
   BNPL: "Buy Now Pay Later",
-  SALARY_INVEST: "Salary investing",
-  MOBILE_APP: "Mobile app",
   OTHER: "Something else",
 };
 
