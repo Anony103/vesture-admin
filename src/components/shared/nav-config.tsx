@@ -3,10 +3,12 @@ import {
   ArrowLeftRight,
   BadgeCheck,
   BadgePercent,
+  ClipboardList,
   Building2,
   DatabaseZap,
   FlaskConical,
   Gem,
+  ShieldAlert,
   HandCoins,
   Landmark,
   ListChecks,
@@ -57,6 +59,7 @@ export const useNavGroups = (): NavGroup[] => {
         { id: "16", title: "KYC", path: "/kyc", icon: BadgeCheck },
         { id: "9", title: "Public Staff Upload", path: "/employeeInfo", icon: DatabaseZap },
         { id: "3", title: "Manage Admins", path: "/manageAdmins", icon: ShieldCheck },
+        { id: "24", title: "Waitlist", path: "/waitlist", icon: ClipboardList },
       ],
     },
     {
@@ -84,6 +87,7 @@ export const useNavGroups = (): NavGroup[] => {
     {
       label: "Monitoring",
       items: [
+        { id: "25", title: "Fraud Alerts", path: "/fraudAlerts", icon: ShieldAlert },
         { id: "17", title: "Webhook Log", path: "/webhookLogs", icon: Webhook },
         { id: "11", title: "Audit Log", path: "/auditLog", icon: ScrollText },
         { id: "22", title: "Organisations", path: "/organisations", icon: Network },
