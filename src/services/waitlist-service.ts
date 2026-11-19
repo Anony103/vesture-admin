@@ -1,7 +1,7 @@
 import axios from "axios";
 import { baseUrl } from "@/constants";
 import { GeneralAdminService } from "./general-admin-service";
-import { WaitlistApiResponse, WaitlistEntry, WaitlistList } from "@/types/waitlist-type";
+import { InviteResult, WaitlistApiResponse, WaitlistEntry, WaitlistList } from "@/types/waitlist-type";
 
 /** The people who joined the web waitlist. */
 export class WaitlistService extends GeneralAdminService {
@@ -20,6 +20,18 @@ export class WaitlistService extends GeneralAdminService {
     const response = await axios.get<WaitlistApiResponse<WaitlistList>>(`${baseUrl}api/admin/waitlist?${params.toString()}`, {
       headers: this.headers,
     });
+    return response?.data;
+  }
+
+  /** Lets this person into the web while the waitlist is on, and emails them their link. Super admins only. */
+  async invite(id: string) {
+    const response = await axios.post<WaitlistApiResponse<InviteResult>>(`${baseUrl}api/admin/waitlist/${encodeURIComponent(id)}/invite`, {}, { headers: this.headers });
+    return response?.data;
+  }
+
+  /** Takes the invite back: off the tester list, and their link stops working. */
+  async withdrawInvite(id: string) {
+    const response = await axios.delete<WaitlistApiResponse<null>>(`${baseUrl}api/admin/waitlist/${encodeURIComponent(id)}/invite`, { headers: this.headers });
     return response?.data;
   }
 

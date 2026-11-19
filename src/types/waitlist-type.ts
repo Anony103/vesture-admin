@@ -1,13 +1,24 @@
 export type WaitlistEntry = {
   id: string;
+  /** As they wrote it; null for people who joined before the page asked. */
+  fullName: string | null;
   email: string;
   /** International form, e.g. +2348031234567. */
   phone: string;
   /** Product codes the person ticked (see WaitlistService.INTERESTS on the server). */
   interests: string[];
   note: string | null;
+  /** When they ticked the box agreeing to launch updates; null when the page they used did not ask. */
+  consentAt: string | null;
+  /** On the tester list, so they may sign in (and, with the emailed link, create an account) while the waitlist is on. */
+  invited: boolean;
   source: string | null;
   createdOn: string;
+};
+
+export type InviteResult = {
+  /** Whether the email with their link went out; the person is invited either way. */
+  emailSent: boolean;
 };
 
 export type WaitlistList = {
