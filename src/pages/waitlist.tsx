@@ -3,6 +3,7 @@ import { Container } from "../components/shared/container";
 import { DataTable } from "../components/shared/data-table";
 import Button from "../components/shared/button";
 import useWaitlist from "@/hooks/use-waitlist";
+import useAppAccess from "@/hooks/use-app-access";
 import { WaitlistEntry } from "@/types/waitlist-type";
 
 const INTEREST_LABELS: Record<string, string> = {
@@ -27,8 +28,10 @@ const cell = (value: string | null | undefined) => {
 
 const toCsv = (rows: WaitlistEntry[]) =>
   [
-    ["Joined", "Email", "Phone", "Wants to see", "Note"].join(","),
-    ...rows.map((r) => [cell(r.createdOn), cell(r.email), cell(r.phone), cell(interestText(r.interests)), cell(r.note)].join(",")),
+    ["Joined", "Name", "Email", "Phone", "Wants to see", "Note", "Agreed to updates", "Invited"].join(","),
+    ...rows.map((r) =>
+      [cell(r.createdOn), cell(r.fullName), cell(r.email), cell(r.phone), cell(interestText(r.interests)), cell(r.note), cell(r.consentAt ? when(r.consentAt) : ""), cell(r.invited ? "Yes" : "")].join(","),
+    ),
   ].join("\n");
 
 const download = (rows: WaitlistEntry[]) => {
@@ -43,9 +46,12 @@ const download = (rows: WaitlistEntry[]) => {
 
 const Waitlist = () => {
   const w = useWaitlist();
+  // only a super admin may decide who is let in (the server enforces it too)
+  const { allowed: canInvite } = useAppAccess();
 
   const columns: ColumnDef<WaitlistEntry>[] = [
     { header: "Joined", accessorKey: "createdOn", cell: ({ row }) => <span className="text-xs whitespace-nowrap">{when(row.original.createdOn)}</span> },
+    { header: "Name", accessorKey: "fullName", cell: ({ row }) => <span className="text-xs">{row.original.fullName ?? "-"}</span> },
     { header: "Email", accessorKey: "email", cell: ({ row }) => <span className="text-xs">{row.original.email}</span> },
     { header: "Phone", accessorKey: "phone", cell: ({ row }) => <span className="text-xs whitespace-nowrap">{row.original.phone}</span> },
     {
@@ -54,6 +60,11 @@ const Waitlist = () => {
       cell: ({ row }) => (
         <span className="block max-w-[260px] text-xs text-gray-700">{row.original.interests.length ? interestText(row.original.interests) : "-"}</span>
       ),
+    },
+    {
+      header: "Agreed to updates",
+      accessorKey: "consentAt",
+      cell: ({ row }) => <span className="text-xs whitespace-nowrap">{row.original.consentAt ? when(row.original.consentAt) : "-"}</span>,
     },
     {
       header: "Note",
@@ -65,6 +76,44 @@ const Waitlist = () => {
       ),
     },
   ];
+
+  if (canInvite) {
+    columns.push({
+      header: "Invite",
+      id: "invite",
+      cell: ({ row }) => {
+        const entry = row.original;
+        const busy = w.busyId === entry.id;
+        return (
+          <span className="flex items-center gap-2 whitespace-nowrap text-xs">
+            {entry.invited && <span className="rounded-full bg-green-100 px-2 py-0.5 font-medium text-green-700">Invited</span>}
+            <button
+              type="button"
+              disabled={busy}
+              className="font-medium text-[#7C2EBF] hover:underline disabled:opacity-50"
+              onClick={() => w.invite(entry.id)}
+            >
+              {busy ? "Working..." : entry.invited ? "Send again" : "Invite"}
+            </button>
+            {entry.invited && (
+              <button
+                type="button"
+                disabled={busy}
+                className="text-gray-500 hover:text-red-600 hover:underline disabled:opacity-50"
+                onClick={() => {
+                  if (window.confirm(`Withdraw the invite for ${entry.fullName ?? entry.email}? They will lose web access and their link will stop working.`)) {
+                    w.withdrawInvite(entry.id);
+                  }
+                }}
+              >
+                Withdraw
+              </button>
+            )}
+          </span>
+        );
+      },
+    });
+  }
 
   const downloadAll = async () => {
     const rows = await w.fetchAll();
@@ -83,7 +132,7 @@ const Waitlist = () => {
             <input
               value={w.searchInput}
               onChange={(e) => w.setSearchInput(e.target.value)}
-              placeholder="Search email, phone or note"
+              placeholder="Search name, email, phone or note"
               className="border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-md px-3 py-2 text-sm w-full md:w-96 focus:outline-none focus:ring-2 focus:ring-[#7C2EBF]"
             />
             <Button name="Refresh" color="lightpurple" onClick={() => w.refetchList()} />
