@@ -43,4 +43,9 @@ export class OrganisationService extends GeneralAdminService {
     const response = await axios.put<Envelope<Organisation>>(`${baseUrl}api/admin/organisations/${id}`, input, { headers: this.headers });
     return response?.data;
   }
+
+  async remove(id: string) {
+    const response = await axios.delete<Envelope<null>>(`${baseUrl}api/admin/organisations/${id}`, { headers: this.headers });
+    return response?.data;
+  }
 }
