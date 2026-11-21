@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { Container } from "../components/shared/container";
 import { Panel } from "../components/shared/panel";
+import { ConfirmDialog } from "../components/shared/confirm-dialog";
 import { SESSION_STORAGE_KEY } from "@/constants";
 import { GET_ORGANISATIONS } from "@/constants/query-keys";
 import { Organisation, OrganisationInput, OrganisationService } from "@/services/organisation-service";
@@ -56,6 +57,24 @@ const Organisations = () => {
       client.invalidateQueries({ queryKey: [GET_ORGANISATIONS] });
     },
     onError: (error) => toast.error(problemOf(error)),
+  });
+
+  /** the organisation the admin is being asked to confirm deleting */
+  const [deleting, setDeleting] = useState<Organisation | null>(null);
+
+  const remove = useMutation({
+    mutationFn: async (o: Organisation) => service.remove(o.id),
+    onSuccess: (response, o) => {
+      toast.success(response?.message ?? "Organisation deleted");
+      if (editing?.id === o.id) reset();
+      setDeleting(null);
+      client.invalidateQueries({ queryKey: [GET_ORGANISATIONS] });
+    },
+    // a refusal says how many customers carry it and to hide it instead
+    onError: (error) => {
+      toast.error(problemOf(error));
+      setDeleting(null);
+    },
   });
 
   const submit = (event: React.FormEvent) => {
@@ -117,6 +136,14 @@ const Organisations = () => {
                           </button>{" "}
                           <button type="button" className="v-btn v-btn-ghost v-btn-sm" disabled={toggle.isPending} onClick={() => toggle.mutate(o)}>
                             {o.active ? "Hide" : "Show"}
+                          </button>{" "}
+                          <button
+                            type="button"
+                            className="v-btn v-btn-ghost v-btn-sm text-danger"
+                            disabled={remove.isPending}
+                            onClick={() => setDeleting(o)}
+                          >
+                            Delete
                           </button>
                         </td>
                       </tr>
@@ -135,7 +162,7 @@ const Organisations = () => {
           )}
         </Panel>
 
-        <Panel title={editing ? `Edit ${editing.name}` : "Add an organisation"} subtitle="Hiding one removes it from sign-up; customers who already have it keep it.">
+        <Panel title={editing ? `Edit ${editing.name}` : "Add an organisation"} subtitle="Hiding one removes it from sign-up; customers who already have it keep it. One that no customer has signed up under can be deleted.">
           <form className="space-y-3" onSubmit={submit}>
             <label className="block text-xs text-fg3">
               Name
@@ -176,6 +203,18 @@ const Organisations = () => {
           </form>
         </Panel>
       </div>
+      <ConfirmDialog
+        open={!!deleting}
+        danger
+        title={`Delete ${deleting?.name ?? "organisation"}?`}
+        confirmLabel="Delete organisation"
+        busy={remove.isPending}
+        onCancel={() => setDeleting(null)}
+        onConfirm={() => deleting && remove.mutate(deleting)}
+      >
+        <p>It disappears from sign-up and from this list. This cannot be undone.</p>
+        <p>If customers have already signed up under it, it will not be deleted. Hide it instead so they keep their record.</p>
+      </ConfirmDialog>
     </Container>
   );
 };
